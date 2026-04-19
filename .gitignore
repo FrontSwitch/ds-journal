@@ -1,0 +1,75 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Tauri build output
+src-tauri/target/
+
+# SQLite + vault sidecar (live in ~/Library, not here, but just in case)
+*.db
+*.db-wal
+*.db-shm
+*.keys
+
+# Personal import data — copy import-map.example.json → import-map.json and fill in your names
+scripts/import-map.json
+
+# Environment / secrets
+.env
+.env.*
+
+# Windows cruft
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# Xcode / iOS / macOS artifacts
+**/xcshareddata/IDEWorkspaceChecks.plist
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+build/
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+Pods/
+*.resolved
+
+# Simply Plural export files (personal message history)
+output/
+export.json
+

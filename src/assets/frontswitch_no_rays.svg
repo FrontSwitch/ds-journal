@@ -1,0 +1,36 @@
+<svg width="100%" viewBox="0 0 680 460" xmlns="http://www.w3.org/2000/svg"><defs><mask id="imagine-text-gaps-ot18nw" maskUnits="userSpaceOnUse"><rect x="0" y="0" width="680" height="460" fill="white"/><rect x="320.95831298828125" y="157.43588256835938" width="40.08333206176758" height="29.128204345703125" fill="black" rx="2"/><rect x="316.9278869628906" y="265.4358825683594" width="48.144229888916016" height="29.128204345703125" fill="black" rx="2"/><rect x="265.9559020996094" y="371.1282043457031" width="148.088134765625" height="33.743587493896484" fill="black" rx="2"/><rect x="260.1986999511719" y="406.5640869140625" width="159.60255432128906" height="18.871793746948242" fill="black" rx="2"/></mask></defs>
+  
+
+  <!-- Outer faceplate -->
+  <path stroke-width="2.8" d="M238,88 Q239,84 244,83 L430,83 Q436,83 437,88 L438,335 Q438,341 432,342 L242,343 Q236,343 235,337 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:2.8px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Inner faceplate inset line -->
+  <path stroke-width="1.5" d="M248,96 Q249,93 252,93 L422,93 Q426,93 426,97 L427,332 Q427,335 423,336 L251,336 Q247,336 247,332 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Rocker housing recess -->
+  <path stroke-width="1.8" d="M284,118 Q284,114 288,114 L393,114 Q397,114 397,118 L398,330 Q398,334 394,334 L284,334 Q280,334 280,330 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:1.8px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Rocker upper half (ON) -->
+  <path stroke-width="2" fill="var(--color-background-primary)" d="M286,117 L396,117 L396,218 L286,222 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:2px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Rocker lower half (OFF) -->
+  <path stroke-width="2" fill="var(--color-background-secondary)" d="M286,222 L396,218 L396,332 L286,332 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:2px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Subtle hatch lines on lower rocker -->
+  <line stroke-width="0.8" opacity="0.3" x1="310" y1="260" x2="322" y2="248" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:0.8px;stroke-linecap:round;stroke-linejoin:round;opacity:0.3;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <line stroke-width="0.8" opacity="0.3" x1="320" y1="268" x2="338" y2="250" mask="url(#imagine-text-gaps-ot18nw)" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:0.8px;stroke-linecap:round;stroke-linejoin:round;opacity:0.3;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <line stroke-width="0.8" opacity="0.3" x1="330" y1="275" x2="350" y2="255" mask="url(#imagine-text-gaps-ot18nw)" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:0.8px;stroke-linecap:round;stroke-linejoin:round;opacity:0.3;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- ON label -->
+  <text x="341" y="172" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-size="20" font-weight="500" fill="var(--color-text-primary)" style="fill:rgb(20, 20, 19);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, sans-serif;font-size:20px;font-weight:500;text-anchor:middle;dominant-baseline:central">ON</text>
+
+  <!-- OFF label -->
+  <text x="341" y="280" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-size="20" font-weight="400" fill="var(--color-text-secondary)" style="fill:rgb(61, 61, 58);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, sans-serif;font-size:20px;font-weight:400;text-anchor:middle;dominant-baseline:central">OFF</text>
+
+  <!-- Wordmark -->
+  <text x="340" y="388" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-size="24" font-weight="500" fill="var(--color-text-primary)" style="fill:rgb(20, 20, 19);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, sans-serif;font-size:24px;font-weight:500;text-anchor:middle;dominant-baseline:central">FrontSwitch</text>
+
+  <!-- Tagline -->
+  <text x="340" y="416" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-size="12" font-weight="400" fill="var(--color-text-tertiary)" style="fill:rgb(115, 114, 108);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, sans-serif;font-size:12px;font-weight:400;text-anchor:middle;dominant-baseline:central">dissociative system journal</text>
+
+</svg>

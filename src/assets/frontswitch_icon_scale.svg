@@ -1,0 +1,11 @@
+<svg width="100%" viewBox="0 0 680 333" xmlns="http://www.w3.org/2000/svg">
+  
+  <!-- Option 1: Just the switch at 100x100 -->
+  <g transform="translate(120, 60) scale(0.44)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+    <path stroke-width="12" d="M238,68 Q239,64 244,63 L430,63 Q436,63 437,68 L438,315 Q438,321 432,322 L242,323 Q236,323 235,317 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:12px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <path stroke-width="4" d="M284,94 Q284,90 288,90 L393,90 Q397,90 397,94 L398,272 Q398,276 394,276 L284,276 Q280,276 280,272 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:4px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <path stroke-width="4" fill="var(--color-background-primary)" d="M286,93 L396,93 L396,210 L286,214 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:4px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <path stroke-width="4" fill="var(--color-background-secondary)" d="M286,214 L396,210 L396,274 L286,274 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:4px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  </g>
+
+</svg>

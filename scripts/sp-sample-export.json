@@ -1,0 +1,476 @@
+{
+  "members": [
+    {
+      "_id": "mem_ren",
+      "uid": "testuser",
+      "name": "Ren",
+      "desc": "The curious one. Loves research and long walks.",
+      "pronouns": "they/them",
+      "color": "a8d8ea",
+      "avatarUrl": "https://example.com/avatars/ren.png",
+      "avatarUuid": "uuid-ren",
+      "pkId": "abcde",
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "preventsFrontNotifs": false,
+      "info": { "role": "Researcher", "age": "late 20s" },
+      "lastOperationTime": 1711200000000
+    },
+    {
+      "_id": "mem_sol",
+      "uid": "testuser",
+      "name": "Sol",
+      "desc": "Warm and social. Handles most outside interactions.",
+      "pronouns": "she/her",
+      "color": "f9c74f",
+      "avatarUrl": null,
+      "avatarUuid": null,
+      "pkId": "fghij",
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "preventsFrontNotifs": false,
+      "info": {},
+      "lastOperationTime": 1711200000000
+    },
+    {
+      "_id": "mem_ash",
+      "uid": "testuser",
+      "name": "Ash",
+      "desc": "Protector. Quiet. Doesn't front often.",
+      "pronouns": "he/him",
+      "color": "6d6875",
+      "avatarUrl": null,
+      "avatarUuid": null,
+      "pkId": "klmno",
+      "private": true,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "preventsFrontNotifs": true,
+      "info": { "role": "Protector" },
+      "lastOperationTime": 1711200000000
+    },
+    {
+      "_id": "mem_pip",
+      "uid": "testuser",
+      "name": "Pip",
+      "desc": "Little one. Likes drawing and stuffed animals.",
+      "pronouns": "they/them",
+      "color": "ffb7c5",
+      "avatarUrl": null,
+      "avatarUuid": null,
+      "pkId": "pqrst",
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "preventsFrontNotifs": false,
+      "info": { "age": "young" },
+      "lastOperationTime": 1711200000000
+    },
+    {
+      "_id": "mem_nova",
+      "uid": "testuser",
+      "name": "Nova",
+      "desc": "New to the front. Still figuring things out.",
+      "pronouns": "any",
+      "color": "",
+      "avatarUrl": null,
+      "avatarUuid": null,
+      "pkId": null,
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "preventsFrontNotifs": false,
+      "info": {},
+      "lastOperationTime": 1711200000000
+    }
+  ],
+
+  "groups": [
+    {
+      "_id": "grp_day",
+      "uid": "testuser",
+      "name": "Daily Fronters",
+      "desc": "Who usually handles the day-to-day.",
+      "color": "90be6d",
+      "emoji": "☀️",
+      "members": ["mem_ren", "mem_sol"],
+      "parent": null,
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1711200000000
+    },
+    {
+      "_id": "grp_kids",
+      "uid": "testuser",
+      "name": "Littles",
+      "desc": "The younger members of the system.",
+      "color": "ffb7c5",
+      "emoji": "🌸",
+      "members": ["mem_pip"],
+      "parent": null,
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1711200000000
+    }
+  ],
+
+  "customFront": [
+    {
+      "_id": "cf_blend",
+      "uid": "testuser",
+      "name": "Blended",
+      "desc": "When multiple are out at once and it's hard to tell who.",
+      "color": "b5838d",
+      "avatarUrl": null,
+      "avatarUuid": null,
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1711200000000
+    }
+  ],
+
+  "chatCategory": [
+    {
+      "_id": "cat_daily",
+      "uid": "testuser",
+      "name": "Daily Life",
+      "desc": "Everyday stuff",
+      "lastOperationTime": 1711200000000
+    },
+    {
+      "_id": "cat_system",
+      "uid": "testuser",
+      "name": "System",
+      "desc": "Internal system things",
+      "lastOperationTime": 1711200000000
+    }
+  ],
+
+  "chatChannel": [
+    {
+      "_id": "ch_general",
+      "uid": "testuser",
+      "name": "general",
+      "desc": "Whatever's on your mind",
+      "category": "cat_daily",
+      "lastOperationTime": 1711200000000
+    },
+    {
+      "_id": "ch_health",
+      "uid": "testuser",
+      "name": "health",
+      "desc": "Medical stuff, meds, appointments",
+      "category": "cat_daily",
+      "lastOperationTime": 1711200000000
+    },
+    {
+      "_id": "ch_frontlog",
+      "uid": "testuser",
+      "name": "front log",
+      "desc": "Auto-created from front history",
+      "category": "cat_system",
+      "lastOperationTime": 1711200000000
+    },
+    {
+      "_id": "ch_notes",
+      "uid": "testuser",
+      "name": "notes",
+      "desc": "Auto-created from SP notes",
+      "category": "cat_system",
+      "lastOperationTime": 1711200000000
+    }
+  ],
+
+  "chatMessage": [
+    {
+      "_id": "msg_001",
+      "uid": "testuser",
+      "message": "Good morning everyone! Sol is out today.",
+      "channel": "ch_general",
+      "writer": "mem_sol",
+      "timestamp": 1711234567000,
+      "reply": null,
+      "iv": "irrelevant",
+      "lastOperationTime": 1711234567000
+    },
+    {
+      "_id": "msg_002",
+      "uid": "testuser",
+      "message": "Had a therapy appointment. It went okay, talked about the switching a lot.",
+      "channel": "ch_health",
+      "writer": "mem_ren",
+      "timestamp": 1711245678000,
+      "reply": null,
+      "iv": "irrelevant",
+      "lastOperationTime": 1711245678000
+    },
+    {
+      "_id": "msg_003",
+      "uid": "testuser",
+      "message": "Reminder to take the evening meds!",
+      "channel": "ch_health",
+      "writer": null,
+      "timestamp": 1711256789000,
+      "reply": null,
+      "iv": "irrelevant",
+      "lastOperationTime": 1711256789000
+    },
+    {
+      "_id": "msg_004",
+      "uid": "testuser",
+      "message": "We went to the park. Pip really liked the ducks.",
+      "channel": "ch_general",
+      "writer": "mem_sol",
+      "timestamp": 1711267890000,
+      "reply": null,
+      "iv": "irrelevant",
+      "lastOperationTime": 1711267890000
+    },
+    {
+      "_id": "msg_005",
+      "uid": "testuser",
+      "message": "DUCKS!! 🦆🦆",
+      "channel": "ch_general",
+      "writer": "mem_pip",
+      "timestamp": 1711267950000,
+      "reply": "msg_004",
+      "iv": "irrelevant",
+      "lastOperationTime": 1711267950000
+    },
+    {
+      "_id": "msg_006",
+      "uid": "testuser",
+      "message": "Ash here briefly. Something triggered earlier. Back now, it's okay.",
+      "channel": "ch_general",
+      "writer": "mem_ash",
+      "timestamp": 1711278901000,
+      "reply": null,
+      "iv": "irrelevant",
+      "lastOperationTime": 1711278901000
+    },
+    {
+      "_id": "msg_007",
+      "uid": "testuser",
+      "message": "New one here. Nova. Not sure what to say yet.",
+      "channel": "ch_general",
+      "writer": "mem_nova",
+      "timestamp": 1711290012000,
+      "reply": null,
+      "iv": "irrelevant",
+      "lastOperationTime": 1711290012000
+    },
+    {
+      "_id": "msg_008",
+      "uid": "testuser",
+      "message": "Welcome Nova 💙",
+      "channel": "ch_general",
+      "writer": "mem_sol",
+      "timestamp": 1711290100000,
+      "reply": "msg_007",
+      "iv": "irrelevant",
+      "lastOperationTime": 1711290100000
+    },
+    {
+      "_id": "msg_009",
+      "uid": "testuser",
+      "message": "Ren researched a lot about DID today. Found some helpful stuff.",
+      "channel": "ch_general",
+      "writer": "mem_ren",
+      "timestamp": 1711320000000,
+      "reply": null,
+      "iv": "irrelevant",
+      "lastOperationTime": 1711320000000
+    },
+    {
+      "_id": "msg_010",
+      "uid": "testuser",
+      "message": "Blending a lot today. Hard to tell who's who.",
+      "channel": "ch_general",
+      "writer": null,
+      "timestamp": 1711356000000,
+      "reply": null,
+      "iv": "irrelevant",
+      "lastOperationTime": 1711356000000
+    }
+  ],
+
+  "frontHistory": [
+    {
+      "_id": "fh_001",
+      "uid": "testuser",
+      "startTime": 1711198800000,
+      "endTime": 1711234567000,
+      "member": "mem_sol",
+      "customFront": null,
+      "custom": false,
+      "live": false,
+      "customStatus": "morning shift",
+      "lastOperationTime": 1711234567000
+    },
+    {
+      "_id": "fh_002",
+      "uid": "testuser",
+      "startTime": 1711234567000,
+      "endTime": 1711256789000,
+      "member": "mem_ren",
+      "customFront": null,
+      "custom": false,
+      "live": false,
+      "customStatus": "",
+      "lastOperationTime": 1711256789000
+    },
+    {
+      "_id": "fh_003",
+      "uid": "testuser",
+      "startTime": 1711256789000,
+      "endTime": 1711278901000,
+      "member": null,
+      "customFront": "cf_blend",
+      "custom": true,
+      "live": false,
+      "customStatus": "hard to tell who",
+      "lastOperationTime": 1711278901000
+    },
+    {
+      "_id": "fh_004",
+      "uid": "testuser",
+      "startTime": 1711278901000,
+      "endTime": null,
+      "member": "mem_ash",
+      "customFront": null,
+      "custom": false,
+      "live": true,
+      "customStatus": "keeping watch",
+      "lastOperationTime": 1711278901000
+    }
+  ],
+
+  "notes": [
+    {
+      "_id": "note_001",
+      "uid": "testuser",
+      "title": "Therapy notes — March 23",
+      "note": "Talked about the switching patterns. Therapist suggested keeping a front log. Felt heard for once.",
+      "color": "a8d8ea",
+      "date": 1711245678000,
+      "member": "mem_ren",
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1711245678000
+    },
+    {
+      "_id": "note_002",
+      "uid": "testuser",
+      "title": "Pip's rules",
+      "note": "1. No scary movies after 8pm\n2. Stuffed animals stay on the bed\n3. Always say hi to Pip in the morning",
+      "color": "ffb7c5",
+      "date": 1711290012000,
+      "member": "mem_pip",
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1711290012000
+    },
+    {
+      "_id": "note_003",
+      "uid": "testuser",
+      "title": "System intro",
+      "note": "We are a DID system. Currently known members: Ren, Sol, Ash, Pip, Nova. Sol and Ren handle most of the day. Ash is the protector.",
+      "color": "",
+      "date": 1711200000000,
+      "member": null,
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1711200000000
+    }
+  ],
+
+  "boardMessage": [
+    {
+      "_id": "bm_001",
+      "uid": "testuser",
+      "title": "Reminder for Ash",
+      "message": "You don't have to be on guard all the time. We're safe right now.",
+      "writer": "mem_sol",
+      "recipient": "mem_ash",
+      "timestamp": 1711267890000,
+      "read": true,
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1711267890000
+    },
+    {
+      "_id": "bm_002",
+      "uid": "testuser",
+      "title": "For Pip",
+      "message": "There are snacks in the kitchen 🍪",
+      "writer": "mem_ren",
+      "recipient": "mem_pip",
+      "timestamp": 1711290012000,
+      "read": false,
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1711290012000
+    }
+  ],
+
+  "polls": [
+    {
+      "_id": "poll_001",
+      "uid": "testuser",
+      "title": "Should we get a pet?",
+      "desc": "A cat or a fish? Thoughts?",
+      "allowAbstain": true,
+      "allowVeto": false,
+      "custom": false,
+      "votes": [
+        { "member": "mem_sol", "vote": "yes", "comment": "Cat please!" },
+        { "member": "mem_pip", "vote": "yes", "comment": "CAT CAT CAT" },
+        { "member": "mem_ren", "vote": "abstain", "comment": "Need to research first" },
+        { "member": "mem_ash", "vote": "no", "comment": "Too much responsibility right now" }
+      ],
+      "lastOperationTime": 1711320000000
+    }
+  ],
+
+  "customField": [
+    {
+      "_id": "cf_field_001",
+      "uid": "testuser",
+      "name": "Role",
+      "order": 0,
+      "private": false,
+      "preventTrusted": false,
+      "type": 0,
+      "supportMarkdown": false,
+      "buckets": [],
+      "lastOperationTime": 1711200000000
+    },
+    {
+      "_id": "cf_field_002",
+      "uid": "testuser",
+      "name": "Age",
+      "order": 1,
+      "private": false,
+      "preventTrusted": false,
+      "type": 0,
+      "supportMarkdown": false,
+      "buckets": [],
+      "lastOperationTime": 1711200000000
+    }
+  ],
+
+  "user": [
+    {
+      "_id": "user_doc",
+      "uid": "testuser",
+      "username": "oursystem",
+      "desc": "We are a DID system. This is our journal.",
+      "color": "90be6d",
+      "isAsystem": true,
+      "supportDescMarkdown": false,
+      "avatarUuid": null,
+      "avatarUrl": null,
+      "lastOperationTime": 1711200000000
+    }
+  ]
+}

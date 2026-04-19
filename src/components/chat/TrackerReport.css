@@ -1,0 +1,226 @@
+.tracker-report-overlay {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-panel);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tracker-report {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  padding: 12px 16px;
+  gap: 10px;
+}
+
+.tracker-report-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.tracker-report-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tracker-report-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.tracker-report-periods {
+  display: flex;
+  gap: 2px;
+}
+
+.report-period-btn {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background: var(--bg-hover);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+.report-period-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.report-period-btn:hover:not(.active) {
+  color: var(--text);
+  background: var(--bg-active, var(--bg-hover));
+}
+
+.report-avatar-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.report-print-btn {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-hover);
+  color: var(--text-muted);
+}
+
+.report-print-btn:hover { color: var(--text); }
+
+.report-close-btn {
+  font-size: 14px;
+  color: var(--text-muted);
+  background: none;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.report-close-btn:hover { color: var(--text); background: var(--bg-hover); }
+
+/* Stats bar */
+.tracker-report-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+}
+
+/* Table */
+.tracker-report-table-wrap {
+  flex: 1;
+  overflow: auto;
+}
+
+.tracker-report-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tracker-report-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  background: var(--bg-panel);
+}
+
+.tracker-report-table td {
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.tracker-report-table tbody tr:hover td {
+  background: var(--bg-hover);
+}
+
+.report-date-cell {
+  white-space: nowrap;
+  color: var(--text-muted) !important;
+  font-size: 12px !important;
+}
+
+.report-avatar-cell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.report-avatar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.report-summary-row td {
+  border-top: 2px solid var(--border);
+  border-bottom: none;
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.tracker-report-empty {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding: 16px 0;
+}
+
+/* Print styles */
+.print-only { display: none; }
+
+.tracker-report-print-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+@media print {
+  /* Use visibility so children can override — display:none on ancestors blocks children entirely */
+  body * { visibility: hidden; }
+
+  .tracker-report-printable,
+  .tracker-report-printable * { visibility: visible; }
+
+  .tracker-report-printable {
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    padding: 16px;
+    overflow: visible;
+  }
+
+  .no-print { display: none !important; }
+  .print-only { display: block !important; }
+
+  .tracker-report-table-wrap { overflow: visible; }
+
+  .tracker-report-table th {
+    background: #f0f0f0;
+    color: #333;
+    position: static;
+  }
+
+  .tracker-report-table td,
+  .tracker-report-table th { color: #000; }
+
+  .report-date-cell { color: #555 !important; }
+}

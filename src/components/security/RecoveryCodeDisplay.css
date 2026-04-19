@@ -1,0 +1,65 @@
+.recovery-display {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recovery-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.recovery-body {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.recovery-code-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.recovery-code {
+  flex: 1;
+  font-family: ui-monospace, 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  color: var(--fg);
+  user-select: all;
+}
+
+.recovery-copy-btn {
+  padding: 4px 10px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.recovery-copy-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.recovery-ack-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  cursor: pointer;
+  user-select: none;
+}

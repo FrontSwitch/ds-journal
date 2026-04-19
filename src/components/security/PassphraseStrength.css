@@ -1,0 +1,41 @@
+.pass-strength {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pass-strength-bar {
+  display: flex;
+  gap: 3px;
+  height: 4px;
+}
+
+.pass-strength-segment {
+  flex: 1;
+  border-radius: 2px;
+  background: var(--bg-active);
+  transition: background 0.2s;
+}
+
+.pass-strength-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.pass-strength-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.pass-strength-time {
+  font-size: 0.72rem;
+  color: var(--fg-muted);
+}
+
+.pass-strength-hint {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  line-height: 1.4;
+}

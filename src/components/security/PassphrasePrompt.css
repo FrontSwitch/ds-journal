@@ -1,0 +1,136 @@
+.passphrase-screen {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  z-index: 9999;
+}
+
+.passphrase-box {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 320px;
+  padding: 32px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.passphrase-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--fg);
+  text-align: center;
+}
+
+.passphrase-subtitle {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  text-align: center;
+}
+
+.passphrase-input {
+  padding: 8px 10px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--fg);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.passphrase-input:focus {
+  border-color: var(--accent);
+}
+
+.passphrase-error {
+  font-size: 0.8rem;
+  color: var(--red, #f38ba8);
+  text-align: center;
+}
+
+.passphrase-remember {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  cursor: pointer;
+  user-select: none;
+}
+
+.passphrase-btn {
+  padding: 8px;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.passphrase-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.passphrase-forgot {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  cursor: pointer;
+  text-align: center;
+  text-decoration: underline;
+  font-family: inherit;
+}
+
+.passphrase-reset-box {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border: 1px solid var(--red, #f38ba8);
+  border-radius: 4px;
+}
+
+.passphrase-reset-warning {
+  font-size: 0.78rem;
+  color: var(--red, #f38ba8);
+  line-height: 1.4;
+}
+
+.passphrase-reset-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.passphrase-reset-cancel {
+  padding: 4px 10px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.passphrase-reset-confirm {
+  padding: 4px 10px;
+  background: var(--red, #f38ba8);
+  border: none;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  color: var(--bg);
+  cursor: pointer;
+  font-family: inherit;
+}

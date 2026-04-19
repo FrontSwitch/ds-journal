@@ -1,0 +1,15 @@
+{
+  "_readme": "Copy this file to import-map.json and fill in your own names. null = skip that avatar/channel.",
+
+  "avatars": {
+    "SP Display Name":   "DSJ avatar name",
+    "Another SP Name":   "another avatar name",
+    "Skip This One":     null
+  },
+
+  "channels": {
+    "SP Channel Name":   "DSJ channel name",
+    "Another Channel":   "another channel",
+    "Also This One":     "another channel"
+  }
+}

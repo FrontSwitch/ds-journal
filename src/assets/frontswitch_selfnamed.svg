@@ -1,0 +1,25 @@
+<svg width="100%" viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg">
+  
+
+  <!-- Outer faceplate -->
+  <path stroke-width="5.5" d="M238,68 Q239,64 244,63 L430,63 Q436,63 437,68 L438,315 Q438,321 432,322 L242,323 Q236,323 235,317 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:5.5px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Inner faceplate inset line -->
+  <path stroke-width="1.5" d="M248,76 Q249,73 252,73 L422,73 Q426,73 426,77 L427,312 Q427,315 423,316 L251,316 Q247,316 247,312 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:1.5px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Rocker housing recess -->
+  <path stroke-width="1.8" d="M284,94 Q284,90 288,90 L393,90 Q397,90 397,94 L398,272 Q398,276 394,276 L284,276 Q280,276 280,272 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:1.8px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Rocker upper half (FRONT) — ON position, takes ~60% of rocker -->
+  <path stroke-width="2" fill="var(--color-background-primary)" d="M286,93 L396,93 L396,210 L286,214 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:2px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Rocker lower half — recessed, no label -->
+  <path stroke-width="2" fill="var(--color-background-secondary)" d="M286,214 L396,210 L396,274 L286,274 Z" style="fill:none;stroke:rgb(20, 20, 19);color:rgb(0, 0, 0);stroke-width:2px;stroke-linecap:round;stroke-linejoin:round;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- FRONT label in upper rocker -->
+  <text x="341" y="154" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-size="22" font-weight="500" fill="var(--color-text-primary)" style="fill:rgb(20, 20, 19);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, sans-serif;font-size:22px;font-weight:500;text-anchor:middle;dominant-baseline:central">FRONT</text>
+
+  <!-- SWITCH label etched below rocker on faceplate -->
+  <text x="341" y="298" text-anchor="middle" dominant-baseline="central" font-family="var(--font-sans)" font-size="15" font-weight="400" letter-spacing="4" fill="var(--color-text-secondary)" style="fill:rgb(61, 61, 58);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, sans-serif;font-size:15px;font-weight:400;text-anchor:middle;dominant-baseline:central">SWITCH</text>
+
+</svg>

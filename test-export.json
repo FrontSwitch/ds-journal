@@ -1,0 +1,486 @@
+{
+  "members": [
+    {
+      "_id": "mem_1",
+      "uid": "anon",
+      "name": "avatar1",
+      "desc": "",
+      "pronouns": "",
+      "color": "ffffff",
+      "avatarUrl": null,
+      "avatarUuid": null,
+      "pkId": null,
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "preventsFrontNotifs": false,
+      "info": {},
+      "lastOperationTime": 1577836801000
+    },
+    {
+      "_id": "mem_2",
+      "uid": "anon",
+      "name": "avatar2",
+      "desc": "",
+      "pronouns": "",
+      "color": "ffffff",
+      "avatarUrl": null,
+      "avatarUuid": null,
+      "pkId": null,
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "preventsFrontNotifs": false,
+      "info": {},
+      "lastOperationTime": 1577836801000
+    },
+    {
+      "_id": "mem_3",
+      "uid": "anon",
+      "name": "avatar3",
+      "desc": "",
+      "pronouns": "",
+      "color": "ffffff",
+      "avatarUrl": null,
+      "avatarUuid": null,
+      "pkId": null,
+      "private": true,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "preventsFrontNotifs": true,
+      "info": {},
+      "lastOperationTime": 1577836801000
+    },
+    {
+      "_id": "mem_4",
+      "uid": "anon",
+      "name": "avatar4",
+      "desc": "",
+      "pronouns": "",
+      "color": "ffffff",
+      "avatarUrl": null,
+      "avatarUuid": null,
+      "pkId": null,
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "preventsFrontNotifs": false,
+      "info": {},
+      "lastOperationTime": 1577836801000
+    },
+    {
+      "_id": "mem_5",
+      "uid": "anon",
+      "name": "avatar5",
+      "desc": "",
+      "pronouns": "",
+      "color": "ffffff",
+      "avatarUrl": null,
+      "avatarUuid": null,
+      "pkId": null,
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "preventsFrontNotifs": false,
+      "info": {},
+      "lastOperationTime": 1577836801000
+    }
+  ],
+  "groups": [
+    {
+      "_id": "grp_1",
+      "uid": "anon",
+      "name": "group1",
+      "desc": "",
+      "color": "ffffff",
+      "emoji": "",
+      "members": [
+        "mem_1",
+        "mem_2"
+      ],
+      "parent": null,
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1577836801000
+    },
+    {
+      "_id": "grp_2",
+      "uid": "anon",
+      "name": "group2",
+      "desc": "",
+      "color": "ffffff",
+      "emoji": "",
+      "members": [
+        "mem_4"
+      ],
+      "parent": null,
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1577836801000
+    }
+  ],
+  "customFront": [
+    {
+      "_id": "cf_1",
+      "uid": "anon",
+      "name": "customfront1",
+      "desc": "",
+      "color": "ffffff",
+      "avatarUrl": null,
+      "avatarUuid": null,
+      "private": false,
+      "preventTrusted": false,
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1577836801000
+    }
+  ],
+  "chatCategory": [
+    {
+      "_id": "cat_1",
+      "uid": "anon",
+      "name": "folder1",
+      "desc": "",
+      "lastOperationTime": 1577836801000
+    },
+    {
+      "_id": "cat_2",
+      "uid": "anon",
+      "name": "folder2",
+      "desc": "",
+      "lastOperationTime": 1577836801000
+    }
+  ],
+  "chatChannel": [
+    {
+      "_id": "ch_1",
+      "uid": "anon",
+      "name": "channel1",
+      "desc": "",
+      "category": "cat_1",
+      "lastOperationTime": 1577836801000
+    },
+    {
+      "_id": "ch_2",
+      "uid": "anon",
+      "name": "channel2",
+      "desc": "",
+      "category": "cat_1",
+      "lastOperationTime": 1577836801000
+    },
+    {
+      "_id": "ch_3",
+      "uid": "anon",
+      "name": "channel3",
+      "desc": "",
+      "category": "cat_2",
+      "lastOperationTime": 1577836801000
+    },
+    {
+      "_id": "ch_4",
+      "uid": "anon",
+      "name": "channel4",
+      "desc": "",
+      "category": "cat_2",
+      "lastOperationTime": 1577836801000
+    }
+  ],
+  "chatMessage": [
+    {
+      "_id": "msg_1",
+      "uid": "anon",
+      "message": "[message 1]",
+      "channel": "ch_1",
+      "writer": "mem_2",
+      "timestamp": 1577836802000,
+      "reply": null,
+      "iv": "",
+      "lastOperationTime": 1577836802000
+    },
+    {
+      "_id": "msg_2",
+      "uid": "anon",
+      "message": "[message 2]",
+      "channel": "ch_2",
+      "writer": "mem_1",
+      "timestamp": 1577836803000,
+      "reply": null,
+      "iv": "",
+      "lastOperationTime": 1577836803000
+    },
+    {
+      "_id": "msg_3",
+      "uid": "anon",
+      "message": "[message 3]",
+      "channel": "ch_2",
+      "writer": null,
+      "timestamp": 1577836804000,
+      "reply": null,
+      "iv": "",
+      "lastOperationTime": 1577836804000
+    },
+    {
+      "_id": "msg_4",
+      "uid": "anon",
+      "message": "[message 4]",
+      "channel": "ch_1",
+      "writer": "mem_2",
+      "timestamp": 1577836805000,
+      "reply": null,
+      "iv": "",
+      "lastOperationTime": 1577836805000
+    },
+    {
+      "_id": "msg_5",
+      "uid": "anon",
+      "message": "[message 5]",
+      "channel": "ch_1",
+      "writer": "mem_4",
+      "timestamp": 1577836806000,
+      "reply": "msg_4",
+      "iv": "",
+      "lastOperationTime": 1577836806000
+    },
+    {
+      "_id": "msg_6",
+      "uid": "anon",
+      "message": "[message 6]",
+      "channel": "ch_1",
+      "writer": "mem_3",
+      "timestamp": 1577836807000,
+      "reply": null,
+      "iv": "",
+      "lastOperationTime": 1577836807000
+    },
+    {
+      "_id": "msg_7",
+      "uid": "anon",
+      "message": "[message 7]",
+      "channel": "ch_1",
+      "writer": "mem_5",
+      "timestamp": 1577836808000,
+      "reply": null,
+      "iv": "",
+      "lastOperationTime": 1577836808000
+    },
+    {
+      "_id": "msg_8",
+      "uid": "anon",
+      "message": "[message 8]",
+      "channel": "ch_1",
+      "writer": "mem_2",
+      "timestamp": 1577836809000,
+      "reply": "msg_7",
+      "iv": "",
+      "lastOperationTime": 1577836809000
+    },
+    {
+      "_id": "msg_9",
+      "uid": "anon",
+      "message": "[message 9]",
+      "channel": "ch_1",
+      "writer": "mem_1",
+      "timestamp": 1577836810000,
+      "reply": null,
+      "iv": "",
+      "lastOperationTime": 1577836810000
+    },
+    {
+      "_id": "msg_10",
+      "uid": "anon",
+      "message": "[message 10]",
+      "channel": "ch_1",
+      "writer": null,
+      "timestamp": 1577836811000,
+      "reply": null,
+      "iv": "",
+      "lastOperationTime": 1577836811000
+    }
+  ],
+  "frontHistory": [
+    {
+      "_id": "fh_1",
+      "uid": "anon",
+      "startTime": 1577836800000,
+      "endTime": 1577836802000,
+      "member": "mem_2",
+      "customFront": null,
+      "custom": false,
+      "live": false,
+      "customStatus": "",
+      "lastOperationTime": 1577836802000
+    },
+    {
+      "_id": "fh_2",
+      "uid": "anon",
+      "startTime": 1577836802000,
+      "endTime": 1577836804000,
+      "member": "mem_1",
+      "customFront": null,
+      "custom": false,
+      "live": false,
+      "customStatus": "",
+      "lastOperationTime": 1577836804000
+    },
+    {
+      "_id": "fh_3",
+      "uid": "anon",
+      "startTime": 1577836804000,
+      "endTime": 1577836807000,
+      "member": null,
+      "customFront": "cf_1",
+      "custom": true,
+      "live": false,
+      "customStatus": "",
+      "lastOperationTime": 1577836807000
+    },
+    {
+      "_id": "fh_4",
+      "uid": "anon",
+      "startTime": 1577836807000,
+      "endTime": null,
+      "member": "mem_3",
+      "customFront": null,
+      "custom": false,
+      "live": true,
+      "customStatus": "",
+      "lastOperationTime": 1577836807000
+    }
+  ],
+  "notes": [
+    {
+      "_id": "note_1",
+      "uid": "anon",
+      "title": "[note 1]",
+      "note": "[note text]",
+      "color": "ffffff",
+      "date": 1577836803000,
+      "member": "mem_1",
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1577836803000
+    },
+    {
+      "_id": "note_2",
+      "uid": "anon",
+      "title": "[note 2]",
+      "note": "[note text]",
+      "color": "ffffff",
+      "date": 1577836808000,
+      "member": "mem_4",
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1577836808000
+    },
+    {
+      "_id": "note_3",
+      "uid": "anon",
+      "title": "[note 3]",
+      "note": "[note text]",
+      "color": "ffffff",
+      "date": 1577836801000,
+      "member": null,
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1577836801000
+    }
+  ],
+  "boardMessage": [
+    {
+      "_id": "bm_1",
+      "uid": "anon",
+      "title": "[board 1]",
+      "message": "[board text]",
+      "writer": "mem_2",
+      "recipient": "mem_3",
+      "timestamp": 1577836805000,
+      "read": true,
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1577836805000
+    },
+    {
+      "_id": "bm_2",
+      "uid": "anon",
+      "title": "[board 2]",
+      "message": "[board text]",
+      "writer": "mem_1",
+      "recipient": "mem_4",
+      "timestamp": 1577836808000,
+      "read": false,
+      "supportDescMarkdown": false,
+      "lastOperationTime": 1577836808000
+    }
+  ],
+  "polls": [
+    {
+      "_id": "poll_1",
+      "uid": "anon",
+      "title": "[poll 1]",
+      "desc": "",
+      "allowAbstain": true,
+      "allowVeto": false,
+      "custom": false,
+      "votes": [
+        {
+          "member": "mem_2",
+          "vote": "yes",
+          "comment": ""
+        },
+        {
+          "member": "mem_4",
+          "vote": "yes",
+          "comment": ""
+        },
+        {
+          "member": "mem_1",
+          "vote": "abstain",
+          "comment": ""
+        },
+        {
+          "member": "mem_3",
+          "vote": "no",
+          "comment": ""
+        }
+      ],
+      "lastOperationTime": 1577836810000
+    }
+  ],
+  "customField": [
+    {
+      "_id": "field_1",
+      "uid": "anon",
+      "name": "field1",
+      "order": 0,
+      "private": false,
+      "preventTrusted": false,
+      "type": 0,
+      "supportMarkdown": false,
+      "buckets": [],
+      "lastOperationTime": 1577836801000
+    },
+    {
+      "_id": "field_2",
+      "uid": "anon",
+      "name": "field2",
+      "order": 1,
+      "private": false,
+      "preventTrusted": false,
+      "type": 0,
+      "supportMarkdown": false,
+      "buckets": [],
+      "lastOperationTime": 1577836801000
+    }
+  ],
+  "user": [
+    {
+      "_id": "user_1",
+      "uid": "anon",
+      "username": "anon",
+      "desc": "",
+      "color": "ffffff",
+      "isAsystem": true,
+      "supportDescMarkdown": false,
+      "avatarUuid": null,
+      "avatarUrl": null,
+      "lastOperationTime": 1577836801000
+    }
+  ]
+}

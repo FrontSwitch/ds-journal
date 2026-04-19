@@ -1,0 +1,218 @@
+.front-log-report {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.front-log-report-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.front-log-report-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.front-log-report-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 2px 6px;
+}
+
+.front-log-report-close:hover { color: var(--text); }
+
+/* ── Period tabs ─────────────────────────────────────────────────────────── */
+
+.front-log-period-bar {
+  display: flex;
+  gap: 2px;
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.front-log-period-tab {
+  padding: 3px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.front-log-period-tab:hover  { background: var(--bg-hover); color: var(--text); }
+.front-log-period-tab.active { background: var(--bg-active); color: var(--text); }
+
+/* ── Custom range ────────────────────────────────────────────────────────── */
+
+.front-log-custom-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.front-log-custom-range input[type="date"] {
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 3px 8px;
+  font-size: 13px;
+}
+
+/* ── Chart wrap ──────────────────────────────────────────────────────────── */
+
+.front-log-chart-wrap {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 16px;
+  position: relative;
+}
+
+.front-log-empty {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── Chart grid layout ───────────────────────────────────────────────────── */
+
+.front-log-chart {
+  display: grid;
+  grid-template-columns: 120px 1fr 56px;
+  position: relative;
+}
+
+/* ── Name column ─────────────────────────────────────────────────────────── */
+
+.flc-names {
+  display: flex;
+  flex-direction: column;
+}
+
+.flc-name-cell {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text);
+  padding-right: 10px;
+  overflow: hidden;
+}
+
+.flc-name-text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.flc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.flc-axis-spacer {
+  height: 28px;
+}
+
+/* ── Middle: svg + axis ──────────────────────────────────────────────────── */
+
+.flc-middle {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.flc-svg-wrap {
+  flex: 1;
+}
+
+.flc-svg-wrap svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+/* X axis */
+.flc-axis {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.flc-tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: var(--text-muted);
+  top: 6px;
+  white-space: nowrap;
+}
+
+/* ── Duration column ─────────────────────────────────────────────────────── */
+
+.flc-durations {
+  display: flex;
+  flex-direction: column;
+}
+
+.flc-dur-cell {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding-left: 8px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ── Tooltip ─────────────────────────────────────────────────────────────── */
+
+.flc-tooltip {
+  position: fixed;
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 5px 10px;
+  font-size: 12px;
+  color: var(--text);
+  pointer-events: none;
+  z-index: 1000;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* ── Open-session pulse ──────────────────────────────────────────────────── */
+
+@keyframes flc-pulse {
+  0%, 100% { opacity: 0.9; }
+  50%       { opacity: 0.2; }
+}
+
+.flc-pulse {
+  animation: flc-pulse 2s ease-in-out infinite;
+}
