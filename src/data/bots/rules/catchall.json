@@ -1,0 +1,12 @@
+{
+  "name": "catchall",
+  "rules": [
+    {
+      "name": "catchall",
+      "pattern": ".*",
+      "responses": ["Keep going.", "Say more.", "And then?", "What else?", "I'm listening.", "Go on."],
+      "priority": 0,
+      "tags": []
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+[
+  {
+    "name": "journal",
+    "displayName": "Journal",
+    "delaySeconds": 3,
+    "ruleSets": ["dissociation", "eliza", "emotional", "activity", "social", "routine", "catchall"]
+  },
+  {
+    "name": "reading",
+    "displayName": "Librarian",
+    "delaySeconds": 3,
+    "ruleSets": ["reading", "social", "routine", "catchall"]
+  }
+
+]

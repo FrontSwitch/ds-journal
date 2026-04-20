@@ -1,0 +1,75 @@
+{
+  "name": "reading",
+  "rules": [
+    {
+      "name": "reading-page-progress",
+      "pattern": "page\\s+(\\d+)(?:\\s+of\\s+(\\d+))?",
+      "responses": ["That's about $2% through?", "How was the transition to page $1?", "Making steady progress."],
+      "priority": 30,
+      "tags": ["reading", "progress"]
+    },
+    {
+      "name": "reading-stuck-slump",
+      "pattern": "\\b(stuck|slogging|dry|slow|drag|heavy|boring)\\b",
+      "responses": ["Is it the prose or the subject matter?", "Maybe put it down for a bit?", "Is this a 'push through' book or a 'dnf' book?"],
+      "priority": 25,
+      "tags": ["reading", "friction"]
+    },
+    {
+      "name": "reading-physical-state",
+      "pattern": "\\b(eyes|tired|couch|chair|posture|light|glasses)\\b",
+      "responses": ["Are you comfortable where you're sitting?", "Don't strain the eyes.", "Is the environment helping the focus?"],
+      "priority": 20,
+      "tags": ["reading", "body"]
+    },
+    {
+      "name": "reading-fiction-elements",
+      "pattern": "\\b(character|protagonist|plot|twist|ending|chapter|scene)\\b",
+      "responses": ["Do you trust the narrator right now?", "Was that $1 earned or did it feel forced?", "What's the stakes for the $1?"],
+      "priority": 22,
+      "tags": ["reading", "fiction"]
+    },
+    {
+      "name": "reading-non-fiction-logic",
+      "pattern": "\\b(theory|argument|concept|framework|data|thesis)\\b",
+      "responses": ["Does the $1 hold up to what you already know?", "How would you apply that $1 to the studio?", "Is the author being clear?"],
+      "priority": 22,
+      "tags": ["reading", "non-fiction"]
+    },
+    {
+      "name": "reading-author-voice",
+      "pattern": "\\b(author|writing style|prose|voice|tone)\\b",
+      "responses": ["Does the $1 feel authentic?", "Are they trying too hard with the $1?", "How does the $1 compare to other things you've read?"],
+      "priority": 18,
+      "tags": ["reading", "meta"]
+    },
+    {
+      "name": "reading-discovery",
+      "pattern": "\\b(found|discovered|realized|learned|noted)\\b",
+      "responses": ["Is that a $1 worth highlighting?", "How does that $1 change the context of the book?", "Does that $1 link back to anything in the FTS?"],
+      "priority": 20,
+      "tags": ["reading", "learning"]
+    },
+    {
+      "name": "reading-distraction",
+      "pattern": "\\b(distracted|phone|noise|interrupted|stopped)\\b",
+      "responses": ["Focus is a resource. Hard to keep today?", "What pulled you out of the flow?", "Can you get back in, or is the session over?"],
+      "priority": 25,
+      "tags": ["reading", "focus"]
+    },
+    {
+      "name": "reading-re-reading",
+      "pattern": "\\b(again|reread|back|return|revisit)\\b",
+      "responses": ["What are you seeing this time that you missed before?", "Does the $1 feel different now?", "Why did the system need to return to this?"],
+      "priority": 24,
+      "tags": ["reading", "revisit"]
+    },
+    {
+      "name": "reading-start-new",
+      "pattern": "\\b(started|starting|beginning|new book|first page)\\b",
+      "responses": ["What's the first impression?", "High hopes for this one?", "What made you pick this up today?"],
+      "priority": 28,
+      "tags": ["reading", "new"]
+    }
+  ]
+}

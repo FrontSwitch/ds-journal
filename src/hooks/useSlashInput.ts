@@ -25,6 +25,8 @@ export const SLASH_COMMANDS: SlashCommand[] = [
   { name: 'settings', usage: '/settings [page]',          desc: 'Open settings' },
   { name: 'seed',     usage: '/seed [count]',             desc: 'Seed DB with test avatars + messages (default 200)' },
   { name: 'debug',    usage: '/debug',                    desc: 'Toggle debug panel' },
+  { name: 'bot',      usage: '/bot <name> | off | hide | show', desc: 'Enable/disable journaling bot' },
+  { name: 'write',    usage: '/write <n> minutes | <n> words | stop', desc: 'Start/stop a timed writing session' },
 ]
 
 // Settings subpage aliases

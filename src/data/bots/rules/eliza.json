@@ -1,0 +1,33 @@
+{
+  "name": "eliza",
+  "rules": [
+    {
+      "name": "again",
+      "pattern": "I (.+) again\\b",
+      "responses": ["Does the 'again' part make it heavier?", "What's different this time?", "How many times now?"],
+      "priority": 25,
+      "tags": []
+    },
+    {
+      "name": "i-feel",
+      "pattern": "I feel (.+)",
+      "responses": ["Why {1}?", "How long has {1} been there?", "Is {1} new or familiar?", "What does {1} feel like in your body?"],
+      "priority": 15,
+      "tags": ["emotional"]
+    },
+    {
+      "name": "i-cant",
+      "pattern": "I can't (.+)",
+      "responses": ["What's in the way of {1}?", "What would need to be different?", "What have you tried?"],
+      "priority": 7,
+      "tags": ["frustration"]
+    },
+    {
+      "name": "i-want",
+      "pattern": "I (want|need|wish) (.+)",
+      "responses": ["What would {2} change?", "What's between you and that?", "What would be enough?"],
+      "priority": 6,
+      "tags": []
+    }
+  ]
+}

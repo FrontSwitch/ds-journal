@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useMemo } from 'react'
+import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
 import { useMobile } from '../../hooks/useMobile'
 import { useMessages } from '../../hooks/useMessages'
 import { useAvatars } from '../../hooks/useAvatars'
@@ -32,6 +32,7 @@ import EmojiAutocomplete from './EmojiAutocomplete'
 import { useSlashInput, SETTINGS_PAGES } from '../../hooks/useSlashInput'
 import { TAROT_DECK } from '../../data/tarot'
 import { useEmojiInput } from '../../hooks/useEmojiInput'
+import { matchBot, getBotConfig, listBotNames, type ResolvedBotConfig, type BotMessage } from '../../lib/botEngine'
 import './ChatPanel.css'
 
 interface Props {
@@ -80,6 +81,23 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
   const [channelViewMode, setChannelViewMode] = useState<string | null>(null)
   const [folderViewMode, setFolderViewMode] = useState<string | null>(null)
   const [trackerRecords, setTrackerRecords] = useState<Map<number, TrackerRecord>>(new Map())
+  const [botConfig, setBotConfig] = useState<ResolvedBotConfig | null>(null)
+  const [botMessage, setBotMessage] = useState<BotMessage | null>(null)
+  const [botHidden, setBotHidden] = useState(false)
+  const [botRecentTags, setBotRecentTags] = useState<string[]>([])
+  const botTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  interface WriteSession {
+    goalType: 'time' | 'words'
+    goalValue: number
+    startTime: number
+    wordCount: number
+    channelId: number
+  }
+  const [writeSession, setWriteSession] = useState<WriteSession | null>(null)
+  const [writeTick, setWriteTick] = useState(0)
+  const writeSessionRef = useRef<WriteSession | null>(null)
+  const writeTickRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const bottomRef = useRef<HTMLDivElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
   const dateInputRef = useRef<HTMLInputElement>(null)
@@ -182,6 +200,18 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
   }, [channelId])
 
   useEffect(() => {
+    setBotMessage(null)
+    if (botTimerRef.current) { clearTimeout(botTimerRef.current); botTimerRef.current = null }
+  }, [channelId])
+
+  useEffect(() => {
+    return () => {
+      if (writeTickRef.current) clearInterval(writeTickRef.current)
+      if (botTimerRef.current) clearTimeout(botTimerRef.current)
+    }
+  }, [])
+
+  useEffect(() => {
     if (!channelId || channelId === ALL_MESSAGES_ID || channelId === SCRATCH_ID || channelId === ALBUM_ID) {
       setChannelViewMode(null); setFolderViewMode(null); return
     }
@@ -198,6 +228,29 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [searchResults])
+
+  function fmtElapsed(ms: number): string {
+    const totalSec = Math.floor(ms / 1000)
+    const m = Math.floor(totalSec / 60)
+    const s = totalSec % 60
+    return `${m}:${String(s).padStart(2, '0')}`
+  }
+
+  const endWriteSession = useCallback(async (session: WriteSession, avatarId: number | null, avatarName: string | null, avatarColor: string | null) => {
+    if (writeTickRef.current) { clearInterval(writeTickRef.current); writeTickRef.current = null }
+    writeSessionRef.current = null
+    setWriteSession(null)
+    setWriteTick(0)
+    const elapsedMin = Math.max(1, Math.round((Date.now() - session.startTime) / 60000))
+    const summary = t('chat.writeSummary', { words: String(session.wordCount), minutes: String(elapsedMin) })
+    if (session.channelId === SCRATCH_ID || session.channelId === ALL_MESSAGES_ID) {
+      addScratchMessage({ avatarId, avatarName, avatarColor, text: summary, createdAt: Date.now() })
+    } else {
+      await sendMessage(session.channelId, avatarId, summary, null)
+      reload()
+    }
+    setAutoScroll(true)
+  }, [reload, addScratchMessage])
 
   function drawTarot(args: string): string | null {
     const count = args.trim() ? parseInt(args.trim()) : 1
@@ -430,6 +483,69 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         setShowDebug(true)
         setText('')
         break
+      case 'write': {
+        const arg = args.trim().toLowerCase()
+        if (arg === 'stop') {
+          const session = writeSessionRef.current
+          if (!session) { setCmdError(t('chat.writeNoSession')); return }
+          await endWriteSession(session, selectedAvatarId, selectedAvatar?.name ?? null, selectedAvatar?.color ?? null)
+          setText('')
+          break
+        }
+        const mMin = arg.match(/^(\d+)\s*min(utes?)?$/)
+        const mWords = arg.match(/^(\d+)\s*words?$/)
+        if (!mMin && !mWords) { setCmdError(t('chat.writeUsage')); return }
+        const goalType = mMin ? 'time' : 'words'
+        const goalValue = parseInt(mMin ? mMin[1] : mWords![1])
+        if (goalValue < 1 || goalValue > 999) { setCmdError(t('chat.writeUsage')); return }
+        // End any existing session
+        if (writeSessionRef.current) await endWriteSession(writeSessionRef.current, selectedAvatarId, selectedAvatar?.name ?? null, selectedAvatar?.color ?? null)
+        // Send intent message
+        const intentMsg = goalType === 'time'
+          ? t('chat.writeGoalMinutes', { n: String(goalValue) })
+          : t('chat.writeGoalWords', { n: String(goalValue) })
+        if (channelId === SCRATCH_ID || channelId === ALL_MESSAGES_ID) {
+          addScratchMessage({ avatarId: selectedAvatarId, avatarName: selectedAvatar?.name ?? null, avatarColor: selectedAvatar?.color ?? null, text: intentMsg, createdAt: Date.now() })
+        } else if (channelId) {
+          await sendMessage(channelId, null, intentMsg, null)
+          reload()
+        }
+        setAutoScroll(true)
+        // Start session
+        const session: WriteSession = { goalType, goalValue, startTime: Date.now(), wordCount: 0, channelId: channelId! }
+        writeSessionRef.current = session
+        setWriteSession(session)
+        setWriteTick(0)
+        if (writeTickRef.current) clearInterval(writeTickRef.current)
+        writeTickRef.current = setInterval(() => setWriteTick(t => t + 1), 1000)
+        setText('')
+        break
+      }
+      case 'bot': {
+        const arg = args.trim().toLowerCase()
+        if (arg === 'off') {
+          setBotConfig(null)
+          if (botTimerRef.current) { clearTimeout(botTimerRef.current); botTimerRef.current = null }
+          setCmdError(t('chat.botOff'))
+          setText('')
+          break
+        }
+        if (arg === 'hide') { setBotHidden(true); setCmdError(t('chat.botHidden')); setText(''); break }
+        if (arg === 'show') { setBotHidden(false); setCmdError(t('chat.botShown')); setText(''); break }
+        const config = getBotConfig(arg)
+        if (!config) {
+          const names = listBotNames().join(', ')
+          setCmdError(t('chat.botNotFound', { name: arg }) + (names ? ` (available: ${names})` : ''))
+          return
+        }
+        setBotConfig(config)
+        setBotMessage(null)
+        setBotRecentTags([])
+        setBotHidden(false)
+        setCmdError(t('chat.botOn', { name: config.name }))
+        setText('')
+        break
+      }
       default:
         setCmdError(`Unknown command: /${cmd}`)
     }
@@ -442,26 +558,139 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
     if (p) { executeSlashCommand(p.name, p.args); return }
 
     if (isAllMessages || isScratch) {
+      const msgText = text.trim()
       addScratchMessage({
         avatarId: selectedAvatarId,
         avatarName: selectedAvatar?.name ?? null,
         avatarColor: selectedAvatar?.color ?? null,
-        text: text.trim(),
+        text: msgText,
         createdAt: Date.now(),
       })
       setText('')
       setAutoScroll(true)
+      if (writeSessionRef.current) {
+        const words = msgText.trim().split(/\s+/).filter(Boolean).length
+        const updated = { ...writeSessionRef.current, wordCount: writeSessionRef.current.wordCount + words }
+        writeSessionRef.current = updated
+        setWriteSession({ ...updated })
+        const reached = updated.goalType === 'words'
+          ? updated.wordCount >= updated.goalValue
+          : Date.now() - updated.startTime >= updated.goalValue * 60_000
+        if (reached) { await endWriteSession(updated, selectedAvatarId, selectedAvatar?.name ?? null, selectedAvatar?.color ?? null); return }
+      }
+      if (botConfig) {
+        setBotMessage(null)
+        if (botTimerRef.current) clearTimeout(botTimerRef.current)
+        const capturedConfig = botConfig
+        const capturedTags = botRecentTags
+        const capturedSession = writeSessionRef.current
+        botTimerRef.current = setTimeout(() => {
+          botTimerRef.current = null
+          let result = matchBot(msgText, capturedTags, capturedConfig.rules)
+          if (result && result.ruleName === 'catchall' && capturedSession) {
+            const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
+            const nudge = capturedSession.goalType === 'words'
+              ? t('chat.writeNudgeWords', { elapsed, words: String(capturedSession.wordCount), goal: String(capturedSession.goalValue) })
+              : t('chat.writeNudgeTime', { elapsed, words: String(capturedSession.wordCount), remaining: String(Math.max(0, capturedSession.goalValue - Math.floor((Date.now() - capturedSession.startTime) / 60000))) + ' min' })
+            result = { ...result, response: nudge, ruleName: 'write-nudge' }
+          }
+          if (result) {
+            setBotMessage({ id: Date.now(), text: result.response, ruleName: result.ruleName, addedTags: result.tags, contextTags: capturedTags, createdAt: Date.now() })
+            if (result.tags.length > 0) {
+              setBotRecentTags(prev => [...result.tags, ...prev].slice(0, 20))
+            }
+            setAutoScroll(true)
+          } else if (capturedSession) {
+            const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
+            const nudge = capturedSession.goalType === 'words'
+              ? t('chat.writeNudgeWords', { elapsed, words: String(capturedSession.wordCount), goal: String(capturedSession.goalValue) })
+              : t('chat.writeNudgeTime', { elapsed, words: String(capturedSession.wordCount), remaining: String(Math.max(0, capturedSession.goalValue - Math.floor((Date.now() - capturedSession.startTime) / 60000))) + ' min' })
+            setBotMessage({ id: Date.now(), text: nudge, ruleName: 'write-nudge', addedTags: [], contextTags: [], createdAt: Date.now() })
+            setAutoScroll(true)
+          }
+        }, capturedConfig.delaySeconds * 1000)
+      } else if (writeSessionRef.current) {
+        setBotMessage(null)
+        if (botTimerRef.current) clearTimeout(botTimerRef.current)
+        const capturedSession = writeSessionRef.current
+        botTimerRef.current = setTimeout(() => {
+          botTimerRef.current = null
+          const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
+          const nudge = capturedSession.goalType === 'words'
+            ? t('chat.writeNudgeWords', { elapsed, words: String(capturedSession.wordCount), goal: String(capturedSession.goalValue) })
+            : t('chat.writeNudgeTime', { elapsed, words: String(capturedSession.wordCount), remaining: String(Math.max(0, capturedSession.goalValue - Math.floor((Date.now() - capturedSession.startTime) / 60000))) + ' min' })
+          setBotMessage({ id: Date.now(), text: nudge, ruleName: 'write-nudge', addedTags: [], contextTags: [], createdAt: Date.now() })
+          setAutoScroll(true)
+        }, 8000)
+      }
       return
     }
 
     const isReply = replyTo !== null
-    await sendMessage(channelId, selectedAvatarId, text.trim(), replyTo?.id ?? null)
+    const msgText = text.trim()
+    await sendMessage(channelId, selectedAvatarId, msgText, replyTo?.id ?? null)
     if (selectedAvatarId !== null) await updateLastAvatar(channelId, selectedAvatarId)
     setText('')
     setReplyTo(null)
     if (!isReply) setAutoScroll(true)
-    reload()
     useAppStore.getState().requestNudgeCheck()
+    let goalReached = false
+    if (writeSessionRef.current) {
+      const words = msgText.trim().split(/\s+/).filter(Boolean).length
+      const updated = { ...writeSessionRef.current, wordCount: writeSessionRef.current.wordCount + words }
+      writeSessionRef.current = updated
+      setWriteSession({ ...updated })
+      goalReached = updated.goalType === 'words'
+        ? updated.wordCount >= updated.goalValue
+        : Date.now() - updated.startTime >= updated.goalValue * 60_000
+      if (goalReached) { await endWriteSession(updated, selectedAvatarId, selectedAvatar?.name ?? null, selectedAvatar?.color ?? null); return }
+    }
+    reload()
+    if (botConfig) {
+      setBotMessage(null)
+      if (botTimerRef.current) clearTimeout(botTimerRef.current)
+      const capturedConfig = botConfig
+      const capturedTags = botRecentTags
+      const capturedSession = writeSessionRef.current
+      botTimerRef.current = setTimeout(() => {
+        botTimerRef.current = null
+        let result = matchBot(msgText, capturedTags, capturedConfig.rules)
+        if (result && result.ruleName === 'catchall' && capturedSession) {
+          const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
+          const nudge = capturedSession.goalType === 'words'
+            ? t('chat.writeNudgeWords', { elapsed, words: String(capturedSession.wordCount), goal: String(capturedSession.goalValue) })
+            : t('chat.writeNudgeTime', { elapsed, words: String(capturedSession.wordCount), remaining: String(Math.max(0, capturedSession.goalValue - Math.floor((Date.now() - capturedSession.startTime) / 60000))) + ' min' })
+          result = { ...result, response: nudge, ruleName: 'write-nudge' }
+        }
+        if (result) {
+          setBotMessage({ id: Date.now(), text: result.response, ruleName: result.ruleName, addedTags: result.tags, contextTags: capturedTags, createdAt: Date.now() })
+          if (result.tags.length > 0) {
+            setBotRecentTags(prev => [...result.tags, ...prev].slice(0, 20))
+          }
+          setAutoScroll(true)
+        } else if (capturedSession) {
+          const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
+          const nudge = capturedSession.goalType === 'words'
+            ? t('chat.writeNudgeWords', { elapsed, words: String(capturedSession.wordCount), goal: String(capturedSession.goalValue) })
+            : t('chat.writeNudgeTime', { elapsed, words: String(capturedSession.wordCount), remaining: String(Math.max(0, capturedSession.goalValue - Math.floor((Date.now() - capturedSession.startTime) / 60000))) + ' min' })
+          setBotMessage({ id: Date.now(), text: nudge, ruleName: 'write-nudge', addedTags: [], contextTags: [], createdAt: Date.now() })
+          setAutoScroll(true)
+        }
+      }, capturedConfig.delaySeconds * 1000)
+    } else if (writeSessionRef.current) {
+      setBotMessage(null)
+      if (botTimerRef.current) clearTimeout(botTimerRef.current)
+      const capturedSession = writeSessionRef.current
+      botTimerRef.current = setTimeout(() => {
+        botTimerRef.current = null
+        const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
+        const nudge = capturedSession.goalType === 'words'
+          ? t('chat.writeNudgeWords', { elapsed, words: String(capturedSession.wordCount), goal: String(capturedSession.goalValue) })
+          : t('chat.writeNudgeTime', { elapsed, words: String(capturedSession.wordCount), remaining: String(Math.max(0, capturedSession.goalValue - Math.floor((Date.now() - capturedSession.startTime) / 60000))) + ' min' })
+        setBotMessage({ id: Date.now(), text: nudge, ruleName: 'write-nudge', addedTags: [], contextTags: [], createdAt: Date.now() })
+        setAutoScroll(true)
+      }, 8000)
+    }
   }
 
   async function handleEdit() {
@@ -698,9 +927,15 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         }}
       >
         {isScratch ? (
-          scratchMessages.length === 0
-            ? <p className="scratch-empty">{t('chat.scratchEmpty')}</p>
-            : scratchMessages.map(m => <ScratchMessageItem key={m.id} msg={m} use24HourClock={config.ui.use24HourClock} />)
+          <>
+            {scratchMessages.length === 0
+              ? <p className="scratch-empty">{t('chat.scratchEmpty')}</p>
+              : scratchMessages.map(m => <ScratchMessageItem key={m.id} msg={m} use24HourClock={config.ui.use24HourClock} />)
+            }
+            {(botConfig || writeSession) && !botHidden && botMessage && (
+              <BotMessageItem key={botMessage.id} msg={botMessage} displayName={botConfig?.displayName ?? '✍'} recentTags={botRecentTags} />
+            )}
+          </>
         ) : null}
 
         {!isScratch && canLoadMore && (
@@ -756,6 +991,9 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
               />
             )) : null
         }
+        {!isScratch && (botConfig || writeSession) && !botHidden && botMessage && (
+          <BotMessageItem key={botMessage.id} msg={botMessage} displayName={botConfig?.displayName ?? '✍'} recentTags={botRecentTags} />
+        )}
         <div ref={bottomRef} />
       </div>
 
@@ -790,6 +1028,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
                 const pos = e.target.selectionStart ?? 0
                 setText(v)
                 if (cmdError) setCmdError(null)
+                if (botTimerRef.current) { clearTimeout(botTimerRef.current); botTimerRef.current = null }
                 chatTag.onTextChange(v, pos)
                 chatMention.onTextChange(v, pos)
                 chatEmoji.onTextChange(v, pos)
@@ -816,6 +1055,14 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
             ) : (
               <span className="avatar-name-label muted">{t('chat.selectAvatarHint')}</span>
             )}
+            {writeSession && (() => {
+              const elapsed = fmtElapsed(Date.now() - writeSession.startTime)
+              void writeTick
+              const status = writeSession.goalType === 'words'
+                ? t('chat.writeStatusGoalWords', { elapsed, words: String(writeSession.wordCount), goal: String(writeSession.goalValue) })
+                : t('chat.writeStatusGoalTime', { elapsed, words: String(writeSession.wordCount), goal: String(writeSession.goalValue) })
+              return <span className="write-session-status">{status}</span>
+            })()}
             <div style={{ marginLeft: 'auto', display: 'flex', gap: 6, alignItems: 'center' }}>
               {avatarPanelMode === 'hidden' && (
                 <button className="avatars-btn" onClick={() => setAvatarPanelMode('small')}>{t('chat.avatars')}</button>
@@ -903,6 +1150,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
                 const pos = e.target.selectionStart ?? 0
                 setText(v)
                 if (cmdError) setCmdError(null)
+                if (botTimerRef.current) { clearTimeout(botTimerRef.current); botTimerRef.current = null }
                 chatTag.onTextChange(v, pos)
                 chatMention.onTextChange(v, pos)
                 chatEmoji.onTextChange(v, pos)
@@ -933,6 +1181,14 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
             {avatarPanelMode === 'hidden' && (
               <button className="avatars-btn" onClick={() => setAvatarPanelMode('small')}>{t('chat.avatars')}</button>
             )}
+            {writeSession && (() => {
+              const elapsed = fmtElapsed(Date.now() - writeSession.startTime)
+              void writeTick
+              const status = writeSession.goalType === 'words'
+                ? t('chat.writeStatusGoalWords', { elapsed, words: String(writeSession.wordCount), goal: String(writeSession.goalValue) })
+                : t('chat.writeStatusGoalTime', { elapsed, words: String(writeSession.wordCount), goal: String(writeSession.goalValue) })
+              return <span className="write-session-status">{status}</span>
+            })()}
           </div>
           {cmdError && <div className="cmd-error">{cmdError}</div>}
           <div className="input-row">
@@ -948,6 +1204,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
                 const pos = e.target.selectionStart ?? 0
                 setText(v)
                 if (cmdError) setCmdError(null)
+                if (botTimerRef.current) { clearTimeout(botTimerRef.current); botTimerRef.current = null }
                 chatTag.onTextChange(v, pos)
                 chatMention.onTextChange(v, pos)
                 chatEmoji.onTextChange(v, pos)
@@ -964,6 +1221,22 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         </div>
       )}
     </main>
+  )
+}
+
+// ── Bot message ───────────────────────────────────────────────────────────────
+
+function BotMessageItem({ msg, displayName, recentTags }: { msg: BotMessage; displayName: string; recentTags: string[] }) {
+  return (
+    <div className="bot-message-item">
+      <span className="bot-message-name">{displayName}:</span>
+      <span className="bot-message-text">{msg.text}</span>
+      <span className="bot-message-debug">
+        [{msg.ruleName}]
+        {msg.addedTags.length > 0 && <> +{msg.addedTags.join(' +')}</>}
+        {recentTags.length > 0 && <> · ctx: {recentTags.slice(0, 5).join(' ')}</>}
+      </span>
+    </div>
   )
 }
 

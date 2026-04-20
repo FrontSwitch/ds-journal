@@ -1,0 +1,19 @@
+{
+  "name": "dissociation",
+  "rules": [
+    {
+      "name": "dissociation-switch",
+      "pattern": "\\b(dissociat|switched|lost time|blacked out|blank|not here|zoned out)\\b",
+      "responses": ["What's the last thing you remember before that?", "Who came through?", "How long were you out?"],
+      "priority": 30,
+      "tags": ["dissociation"]
+    },
+    {
+      "name": "numb",
+      "pattern": "feel\\s+nothing|feeling\\s+numb|gone\\s+numb|\\bnumb\\b|can't\\s+feel",
+      "responses": ["How long?", "Is it protective or just there?", "What does the numbness feel like from the outside?"],
+      "priority": 14,
+      "tags": ["emotional", "dissociation"]
+    }
+  ]
+}

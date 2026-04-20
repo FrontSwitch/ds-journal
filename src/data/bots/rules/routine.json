@@ -1,0 +1,47 @@
+{
+  "name": "routine",
+  "rules": [
+    {
+      "name": "morning",
+      "pattern": "\\b(woke up|wake up|morning|got up|couldn't sleep|insomnia)\\b",
+      "responses": ["How'd you sleep?", "What was the night like?", "How does the day feel so far?"],
+      "priority": 10,
+      "tags": ["morning"]
+    },
+    {
+      "name": "nighttime",
+      "pattern": "\\b(tonight|bedtime|late|can't sleep|falling asleep|heading to bed)\\b",
+      "responses": ["How's the day wrapping up?", "What are you taking to bed with you?", "Anything unfinished?"],
+      "priority": 10,
+      "tags": ["nighttime"]
+    },
+    {
+      "name": "progress",
+      "pattern": "\\b(finished|completed|finally|managed to|got through|done with|succeeded)\\b",
+      "responses": ["How does that feel?", "What took the most out of you?", "What's next?"],
+      "priority": 10,
+      "tags": ["progress"]
+    },
+    {
+      "name": "uncertain",
+      "pattern": "\\b(don't know|not sure|unsure|confused|can't decide|unclear)\\b",
+      "responses": ["What would knowing look like?", "What does the uncertainty feel like?", "What would help clarify it?"],
+      "priority": 8,
+      "tags": []
+    },
+    {
+      "name": "frustration",
+      "pattern": "\\b(ugh|argh|sigh|whatever|forget it|nevermind)\\b",
+      "responses": ["Yeah.", "What happened?", "Say more."],
+      "priority": 8,
+      "tags": ["frustration"]
+    },
+    {
+      "name": "weather",
+      "pattern": "\\b(weather|hot|cold|raining|sunny|cloudy|humid|freezing)\\b",
+      "responses": ["Does the weather get to you?", "What do you do with a day like this?"],
+      "priority": 5,
+      "tags": []
+    }
+  ]
+}

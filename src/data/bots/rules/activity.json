@@ -1,0 +1,33 @@
+{
+  "name": "activity",
+  "rules": [
+    {
+      "name": "reading",
+      "pattern": "\\b(reading|read|book|novel|chapter|pages|author)\\b",
+      "responses": ["What are you reading?", "Good part?", "Where are you in it?", "What's pulling you in?"],
+      "priority": 18,
+      "tags": ["reading"]
+    },
+    {
+      "name": "writing",
+      "pattern": "\\b(writing|wrote|draft|word count|stuck|writer|scene)\\b",
+      "responses": ["Where are you stuck?", "What does the character want?", "What have you got so far?", "What part is giving you trouble?"],
+      "priority": 18,
+      "tags": ["writing"]
+    },
+    {
+      "name": "running",
+      "pattern": "\\b(running|ran|jogged|miles|gym|workout|exercise|went for a walk|morning walk|evening walk)\\b",
+      "responses": ["How did it feel?", "How far?", "Good run or rough one?"],
+      "priority": 16,
+      "tags": ["activity"]
+    },
+    {
+      "name": "gaming",
+      "pattern": "\\b(gaming|playing a game|video game|quest|respawn|boss fight|game over|leveled up)\\b",
+      "responses": ["What are you playing?", "Making progress?", "Fun or frustrating?"],
+      "priority": 15,
+      "tags": ["activity"]
+    }
+  ]
+}

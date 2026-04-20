@@ -103,6 +103,8 @@ src/
     en.json                   # all user-visible strings by component namespace
     index.ts                  # t(key, vars?) and tn(key, count, vars?) helpers; StringKey type
   lib/
+    botEngine.ts              # matchBot, getBotConfig, listBotNames; BotRule/BotConfig/BotMatch/BotMessage types;
+                              #   RULE_SET_REGISTRY (auto-loaded via import.meta.glob); BOT_FILES from bots.json
     nudge.ts                  # shouldShowNudge, snoozeNudge, dismissNudge — encryption nudge state
     syncUtils.ts              # pure sync helpers (unit-testable): extractConflictFields, payloadsConflict, lwwWinner
     tagUtils.ts               # getTagCursor, applyTagAccept, shouldSkip
@@ -137,6 +139,10 @@ src/
     emojis.ts                 # 106 emoji entries; EMOJI_CATEGORIES; SKIN_TONES; applySkinTone()
                               #   findEmojiSuggestions(prefix, skinTone, entries?); buildMergedEntries()
     tarot.ts                  # TAROT_DECK: string[] (78 cards)
+    bots/
+      bots.json               # array of BotConfigFile — single file drives the /bot registry
+      rules/*.json            # named rule sets (dissociation, eliza, emotional, activity, social,
+                              #   routine, catchall); loaded via import.meta.glob — drop a file to add a set
   hooks/
     useChannels.ts            # folders + channels + counts
     useAvatars.ts             # avatars, groups, fields, fieldValues
@@ -333,6 +339,27 @@ See `docs/ui-behavior.md` for full details on Sidebar, ChatPanel (slash commands
 ## Images / Album
 
 Images stored as local file paths in `message_images` (no bytes in DB). HEIC renders natively in Tauri/WebKit on macOS. See `docs/image-album.md` for full details.
+
+## Bot & Write session
+
+Both features are **ephemeral** — no DB schema changes, no persistence across restarts.
+
+### Journaling bot (`/bot`)
+- `/bot <name>` — enable; `/bot off` — disable; `/bot hide/show` — toggle display
+- Bot state lives in ChatPanel local state (`botConfig`, `botMessage`, `botRecentTags`)
+- `botMessage` holds the single most-recent response (replaced on each send, cleared on channel change)
+- Timer: `botTimerRef` (setTimeout) fires after `delaySeconds` of idle; reset by textarea onChange
+- `matchBot(text, recentTags, rules)` — sorts rules by `priority + 5` if any rule tag is in recentTags; first match wins; `{1}` `{2}` in responses = regex capture groups
+- Rule sets: drop a JSON file in `src/data/bots/rules/` → auto-registered by `import.meta.glob`; add a bot entry to `src/data/bots/bots.json` (array)
+- Debug display on bot message: `[ruleName] +addedTags · ctx: recentTags` (muted, right-aligned)
+
+### Writing session (`/write`)
+- `/write 5 minutes` or `/write 200 words` — start; `/write stop` — end manually
+- Session state: `writeSession` + `writeSessionRef` (ref used in callbacks to avoid stale closure)
+- `writeTickRef` — `setInterval` every 1s, increments `writeTick` to force status bar re-render
+- Word counting: happens on every `handleSend` (both regular channel and scratch paths)
+- Goal reached: `endWriteSession` is called BEFORE `reload()` so both the last user message and summary are committed before a single fetch — avoids race where summary appears before last message
+- Intent message (`✍ Writing goal: …`) and summary (`✍ Wrote N words in M minutes.`) use `addScratchMessage` for scratch/allMessages channels, `sendMessage` for regular channels; both use the currently selected avatar
 
 ## Known Gotchas
 

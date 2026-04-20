@@ -1,0 +1,6 @@
+{
+  "name": "bot-reading",
+  "displayName": "Librarian",
+  "delaySeconds": 3,
+  "ruleSets": ["reading", "catchall"]
+}
