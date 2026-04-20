@@ -360,6 +360,10 @@ Both features are **ephemeral** — no DB schema changes, no persistence across 
 - Word counting: happens on every `handleSend` (both regular channel and scratch paths)
 - Goal reached: `endWriteSession` is called BEFORE `reload()` so both the last user message and summary are committed before a single fetch — avoids race where summary appears before last message
 - Intent message (`✍ Writing goal: …`) and summary (`✍ Wrote N words in M minutes.`) use `addScratchMessage` for scratch/allMessages channels, `sendMessage` for regular channels; both use the currently selected avatar
+- Threading: in regular channels, all messages sent during a session are replies to the intent message (`parent_msg_id = intentMsgId`); summary is also a reply. Scratch/allMessages: no threading (`intentMsgId = null`).
+- `sendMessage` in `db/messages.ts` returns `Promise<number>` (the new row id) — used to capture `intentMsgId` at session start
+- Bot catchall fires write nudge text instead of its normal response when a write session is active (`result.ruleName === 'catchall' && capturedSession`)
+- `botMessage` is in the scroll effect deps so the nudge/bot message scrolls into view when it appears
 
 ## Known Gotchas
 

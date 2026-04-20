@@ -93,6 +93,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
     startTime: number
     wordCount: number
     channelId: number
+    intentMsgId: number | null
   }
   const [writeSession, setWriteSession] = useState<WriteSession | null>(null)
   const [writeTick, setWriteTick] = useState(0)
@@ -223,7 +224,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
 
   useEffect(() => {
     if (autoScroll) bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, autoScroll])
+  }, [messages, autoScroll, botMessage])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -246,7 +247,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
     if (session.channelId === SCRATCH_ID || session.channelId === ALL_MESSAGES_ID) {
       addScratchMessage({ avatarId, avatarName, avatarColor, text: summary, createdAt: Date.now() })
     } else {
-      await sendMessage(session.channelId, avatarId, summary, null)
+      await sendMessage(session.channelId, avatarId, summary, session.intentMsgId)
       reload()
     }
     setAutoScroll(true)
@@ -504,15 +505,16 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         const intentMsg = goalType === 'time'
           ? t('chat.writeGoalMinutes', { n: String(goalValue) })
           : t('chat.writeGoalWords', { n: String(goalValue) })
+        let intentMsgId: number | null = null
         if (channelId === SCRATCH_ID || channelId === ALL_MESSAGES_ID) {
           addScratchMessage({ avatarId: selectedAvatarId, avatarName: selectedAvatar?.name ?? null, avatarColor: selectedAvatar?.color ?? null, text: intentMsg, createdAt: Date.now() })
         } else if (channelId) {
-          await sendMessage(channelId, null, intentMsg, null)
+          intentMsgId = await sendMessage(channelId, null, intentMsg, null)
           reload()
         }
         setAutoScroll(true)
         // Start session
-        const session: WriteSession = { goalType, goalValue, startTime: Date.now(), wordCount: 0, channelId: channelId! }
+        const session: WriteSession = { goalType, goalValue, startTime: Date.now(), wordCount: 0, channelId: channelId!, intentMsgId }
         writeSessionRef.current = session
         setWriteSession(session)
         setWriteTick(0)
@@ -628,7 +630,8 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
 
     const isReply = replyTo !== null
     const msgText = text.trim()
-    await sendMessage(channelId, selectedAvatarId, msgText, replyTo?.id ?? null)
+    const parentId = replyTo?.id ?? writeSessionRef.current?.intentMsgId ?? null
+    await sendMessage(channelId, selectedAvatarId, msgText, parentId)
     if (selectedAvatarId !== null) await updateLastAvatar(channelId, selectedAvatarId)
     setText('')
     setReplyTo(null)

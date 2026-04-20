@@ -61,13 +61,14 @@ export function getAllMessagesByAvatar(avatarId: number, limit: number, deletedS
   return fetchMessages(SELECT_ALL, 'm.avatar_id = ?', [avatarId], limit, deletedSince)
 }
 
-export async function sendMessage(channelId: number, avatarId: number | null, text: string, parentMsgId?: number | null): Promise<void> {
+export async function sendMessage(channelId: number, avatarId: number | null, text: string, parentMsgId?: number | null): Promise<number> {
   const db = await getDb()
   const entityId = crypto.randomUUID()
-  await db.execute(
+  const result = await db.execute(
     'INSERT INTO messages (channel_id, avatar_id, text, parent_msg_id, entity_id) VALUES (?, ?, ?, ?, ?)',
     [channelId, avatarId, text, parentMsgId ?? null, entityId]
   )
+  const newId = Number(result.lastInsertId)
   if (avatarId !== null) {
     await db.execute(
       'INSERT OR IGNORE INTO channel_avatar_activity (channel_id, avatar_id) VALUES (?, ?)',
@@ -79,6 +80,7 @@ export async function sendMessage(channelId: number, avatarId: number | null, te
   const avatarEid = avatarId !== null ? await getEntityId('avatars', avatarId) : null
   const parentMsgEid = parentMsgId ? await getEntityId('messages', parentMsgId) : null
   await logCreate('messages', entityId, { _channel_eid: channelEid, _avatar_eid: avatarEid, text, _parent_msg_eid: parentMsgEid })
+  return newId
 }
 
 export async function searchMessages(query: string, channelId?: number, avatarId?: number, date?: string): Promise<MessageRow[]> {
