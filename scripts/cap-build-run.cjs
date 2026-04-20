@@ -10,7 +10,7 @@ const ROOT = path.join(__dirname, '..')
 const WORKSPACE = path.join(ROOT, 'ios/App/App.xcworkspace')
 const DERIVED_DATA = path.join(ROOT, 'ios/DerivedData/cap')
 const SIMULATOR_ID = 'C7DE5A02-A4BD-4F0D-B51F-8661BB546820'
-const BUNDLE_ID = 'io.github.frontswitch.dsj'
+const BUNDLE_ID = 'com.frontswitchstudio.dsj'
 const APP_PATH = `${DERIVED_DATA}/Build/Products/Debug-iphonesimulator/App.app`
 
 const run = (cmd, opts = {}) => {

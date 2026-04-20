@@ -8,7 +8,7 @@ const fs = require('fs')
 
 const DB_PATH = process.env.DSJ_DB ?? path.join(
   os.homedir(), 'Library', 'Application Support',
-  'io.github.frontswitch.dsj', 'test.db'
+  'com.frontswitchstudio.dsj', 'test.db'
 )
 
 const WAL  = DB_PATH + '-wal'

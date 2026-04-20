@@ -9,7 +9,7 @@
 // Flags:
 //   --file <path>    SP export JSON (required)
 //   --import         Actually write. Default is dry-run.
-//   --db <path>      Path to dsj.db (default: ~/Library/Application Support/io.github.frontswitch.dsj/dsj.db)
+//   --db <path>      Path to dsj.db (default: ~/Library/Application Support/com.frontswitchstudio.dsj/dsj.db)
 //   --skip-members   Don't import members as avatars
 //   --skip-groups    Don't import groups
 //   --skip-channels  Don't import chatCategories/chatChannels
@@ -51,7 +51,7 @@ if (!fs.existsSync(FILE_PATH)) {
 }
 
 const DB_PATH = flagVal('--db') ??
-  path.join(os.homedir(), 'Library', 'Application Support', 'io.github.frontswitch.dsj', 'dsj.db')
+  path.join(os.homedir(), 'Library', 'Application Support', 'com.frontswitchstudio.dsj', 'dsj.db')
 
 if (!fs.existsSync(DB_PATH)) {
   console.error(`Database not found: ${DB_PATH}`)

@@ -54,6 +54,9 @@ pub(crate) fn from_sql(v: Value) -> JsonValue {
 
 pub(crate) fn resolve_db_path<R: Runtime>(app: &AppHandle<R>, name: &str) -> String {
     if let Ok(custom) = std::env::var("DSJ_DB") {
+        if let Some(parent) = std::path::Path::new(&custom).parent() {
+            std::fs::create_dir_all(parent).ok();
+        }
         return custom;
     }
     let mut path = app.path().app_config_dir().expect("no app config dir");

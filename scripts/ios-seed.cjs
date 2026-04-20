@@ -8,7 +8,7 @@ const fs = require('fs')
 const path = require('path')
 const os = require('os')
 
-const APP_ID = 'io.github.frontswitch.dsj'
+const APP_ID = 'com.frontswitchstudio.dsj'
 const SRC_DIR = path.join(os.homedir(), 'Library', 'Application Support', APP_ID)
 const SRC = path.join(SRC_DIR, 'test.db')
 

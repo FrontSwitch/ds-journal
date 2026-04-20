@@ -49,6 +49,7 @@ jobs:
         run: |
           $dir = Split-Path (Get-Command openssl.exe).Path -Parent | Split-Path -Parent
           "OPENSSL_DIR=$dir" | Out-File -Append $env:GITHUB_ENV
+          "OPENSSL_LIB_DIR=$dir\lib\VC\x64\MD" | Out-File -Append $env:GITHUB_ENV
 
       - name: Install dependencies
         run: npm ci

@@ -35,7 +35,7 @@ npm install @capacitor/ios
 npm install @capacitor-community/sqlite
 npm install @capacitor/filesystem
 npm install @capacitor/browser
-npx cap init "DissociativeSystemJournal" "io.github.frontswitch.dsj" --web-dir dist
+npx cap init "DissociativeSystemJournal" "com.frontswitchstudio.dsj" --web-dir dist
 npx cap add ios
 ```
 
@@ -43,7 +43,7 @@ npx cap add ios
 ```typescript
 import { CapacitorConfig } from '@capacitor/cli'
 const config: CapacitorConfig = {
-  appId: 'io.github.frontswitch.dsj',
+  appId: 'com.frontswitchstudio.dsj',
   appName: 'DSJ',
   webDir: 'dist',
   plugins: {

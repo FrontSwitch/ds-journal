@@ -124,8 +124,8 @@ npm run sp:anonymize     # export.json → test-export.json
 
 ## Your data
 
-- **Database:** `~/Library/Application Support/io.github.frontswitch.dsj/dsj.db` (SQLite)
-- **Backups:** `~/Library/Application Support/io.github.frontswitch.dsj/backups/`
+- **Database:** `~/Library/Application Support/com.frontswitchstudio.dsj/dsj.db` (SQLite)
+- **Backups:** `~/Library/Application Support/com.frontswitchstudio.dsj/backups/`
 - **Export:** Settings → Backup & Export → Export to JSON
 
 The database is a standard SQLite file. You can open it with any SQLite browser. You don't need DSJ to read your own data.

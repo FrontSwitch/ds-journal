@@ -25,7 +25,7 @@ const MAP_FILE = path.join(__dirname, 'import-map.json')
 const dbFlagIndex = process.argv.indexOf('--db')
 const DB_PATH = dbFlagIndex !== -1
   ? process.argv[dbFlagIndex + 1]
-  : path.join(os.homedir(), 'Library', 'Application Support', 'io.github.frontswitch.dsj', 'dsj.db')
+  : path.join(os.homedir(), 'Library', 'Application Support', 'com.frontswitchstudio.dsj', 'dsj.db')
 
 // ── Load map ──────────────────────────────────────────────────────────────────
 

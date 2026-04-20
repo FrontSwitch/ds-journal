@@ -26,8 +26,8 @@ To open the database you need: the `.db` file + the `.keys` file + either your p
 ## File Locations (macOS)
 
 ```
-~/Library/Application Support/io.github.frontswitch.dsj/dsj.db    ← encrypted database
-~/Library/Application Support/io.github.frontswitch.dsj/dsj.keys  ← vault file
+~/Library/Application Support/com.frontswitchstudio.dsj/dsj.db    ← encrypted database
+~/Library/Application Support/com.frontswitchstudio.dsj/dsj.keys  ← vault file
 ```
 
 ---

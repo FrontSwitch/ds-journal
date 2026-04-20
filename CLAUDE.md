@@ -52,7 +52,7 @@ A local, private desktop journal for dissociative systems (DID/OSDD). Multiple a
 - **tauri-plugin-dialog** — native save/open dialogs
 - **tauri-plugin-opener** — `openUrl()` for external links
 - **React + TypeScript** — all UI; **Vite** — build tool; **Zustand** — global UI state
-- **SQLite/SQLCipher** — single `.db` file at `~/Library/Application Support/io.github.frontswitch.dsj/dsj.db`
+- **SQLite/SQLCipher** — single `.db` file at `~/Library/Application Support/com.frontswitchstudio.dsj/dsj.db`
 - **zxcvbn** (npm) — passphrase strength estimation in `PassphraseStrength` component
 
 ## Running
@@ -81,8 +81,8 @@ DSJ_DB=/path/to/custom.db npm run tauri dev
 
 If the app fails to start with "database is locked":
 ```bash
-rm ~/Library/Application\ Support/io.github.frontswitch.dsj/dsj.db-wal
-rm ~/Library/Application\ Support/io.github.frontswitch.dsj/dsj.db-shm
+rm ~/Library/Application\ Support/com.frontswitchstudio.dsj/dsj.db-wal
+rm ~/Library/Application\ Support/com.frontswitchstudio.dsj/dsj.db-shm
 ```
 
 On first launch with an empty DB, the app auto-seeds: a "general" channel, a "someone" avatar, and 5 tracker presets (Medications, Front Log, Mood, Sleep, Triggers).
@@ -172,7 +172,7 @@ src-tauri/
   src/sync_server.rs          # SyncShared; HKDF/HMAC/AES sync crypto; axum handlers (info/pair/sync);
                               #   sync_* Tauri commands; start_sync_server()
   capabilities/default.json   # sql/fs/dialog/opener/window/webview capabilities + scopes
-  tauri.conf.json             # identifier: io.github.frontswitch.dsj
+  tauri.conf.json             # identifier: com.frontswitchstudio.dsj
 ```
 
 ## localStorage keys

@@ -17,7 +17,7 @@ const TOTAL_MESSAGES = msgCountArg !== -1 ? parseInt(args[msgCountArg + 1], 10) 
 
 const DB_PATH = path.join(
   os.homedir(), 'Library', 'Application Support',
-  'io.github.frontswitch.dsj', 'test.db'
+  'com.frontswitchstudio.dsj', 'test.db'
 )
 
 for (const suffix of ['', '-wal', '-shm']) {
