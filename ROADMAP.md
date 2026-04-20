@@ -142,6 +142,14 @@ Peer-to-Peer sync. Sovereign Data Engine
 - [ ] windows version
 - [ ] Wider coverage of unit tests
 
+## 1.1  iOS
+
+- [ ] v1.5 iPhone/iPad and sync - encrypted end to end
+    - websocket? device discovery. mac as primary
+    - QR code to exchange password first time
+   - Still planned (Phase 3+): BLE wake, local notifications, mDNS   - auto-sync timer, conflict resolution UI.
+  - remove old event_log data
+
 ## Performance
 - [ ] scrolling listbox with 100s of messages(performance)
 - [ ] load test. 100, 1000, 10k, 100k messages.
@@ -168,11 +176,6 @@ Peer-to-Peer sync. Sovereign Data Engine
 - [ ] v1.3
     - embedded folders
     - embedded groups?
-- [ ] v1.5 Iphone and sync - encrypted end to end
-    - websocket? device discovery. mac as primary
-    - QR code to exchange password first time
-   - Still planned (Phase 3+): BLE wake, local notifications, mDNS   - auto-sync timer, conflict resolution UI.
-  - remove old event_log data
 
 - [ ] Better iPhone.
     backups

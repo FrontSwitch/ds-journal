@@ -24,6 +24,19 @@ DSJ is a personal journaling and tracking tool. It is not a clinical product, no
 nor professional support, and not designed for crisis intervention. 
 If you are in crisis, please reach out to a crisis line or mental health professional. 
 
+<table width="100%">
+  <tr>
+    <td width="33%"><img src="docs/images/dsj-main.png" alt="Main screen of DS-Journal"></td>
+    <td width="33%"><img src="docs/images/dsj-frontlog.png" alt="Front tracking report"></td>
+    <td width="33%"><img src="docs/images/dsj-trackers.png" alt="Sleep tracker example"></td>
+  </tr>
+  <tr>
+    <td align="center">Channels, chat, alters.</td>
+    <td align="center">Track alters</td>
+    <td align="center">Create custom trackers</td>
+  </tr>
+</table>
+
 ---
 
 ## Why
@@ -43,12 +56,15 @@ I believe in using tools. Claude Code happens to be a tool. Claude helps me ever
 
 Early Access. Used daily by the system that built it. Rough edges exist.
 
-| Version | Focus |
-|---------|-------|
-| v0.9 | First public release — this version ✓ |
-| v1.0 | Stability — one week of real use, bug fixes |
-| v1.1 | Reminders and Polls |
-| v1.5 | iOS support and Peer to Peer sync |
+| Version | Status | Focus |
+|---------|-------|----|
+| v0.9 | Now | First public release — this version ✓ |
+| v1.0 | Soon | Stability — a few weeks of real use, bug fixes |
+| v1.1 | I need it! | iOS support and Peer to Peer sync |
+| v1.2 | Planned | Reminders and Polls |
+
+Help out by reporting issues and requestion features!
+[open an issue](https://github.com/FrontSwitch/ds-journal/issues)
 
 ---
 
