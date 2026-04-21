@@ -2,11 +2,87 @@
   "name": "catchall",
   "rules": [
     {
-      "name": "catchall",
+      "name": "catchall_heavy",
       "pattern": ".*",
-      "responses": ["Keep going.", "Say more.", "And then?", "What else?", "I'm listening.", "Go on."],
+      "priority": 1,
+      "minSeriousness": 3.0,
+      "tags": ["emotional"],
+      "responses": [
+        "I hear how much that weighs.",
+        "That's a lot to carry.",
+        "I'm here with you in this."
+      ]
+    },
+    {
+      "name": "catchall_deep",
+      "pattern": ".*",
+      "priority": 1,
+      "minDepth": 3.0,
+      "responses": [
+        "What do you think is underneath that?",
+        "What does that mean to you?",
+        "Where does that feeling live in your body?"
+      ]
+    },
+    {
+      "name": "catchall_light",
+      "pattern": ".*",
+      "priority": 1,
+      "maxSeriousness": 1.5,
+      "maxDepth": 1.5,
+      "responses": [
+        "heh.",
+        "nice.",
+        "okay then."
+      ]
+    },
+    {
+      "name": "catchall_volatile",
+      "pattern": ".*",
+      "priority": 1,
+      "minVolatility": 1.0,
+      "responses": [
+        "A lot shifting right now.",
+        "Take a breath.",
+        "…"
+      ]
+    },
+    {
+      "name": "catchall_base",
+      "pattern": ".*",
       "priority": 0,
-      "tags": []
+      "chance": 0.8,
+      "responses": [
+        "mm.",
+        "I'm here.",
+        "take your time.",
+        "keep going.",
+        "…",
+        ""
+      ]
+    },
+    {
+      "name": "catchall_prompt",
+      "pattern": ".*",
+      "priority": 0,
+      "chance": 0.2,
+      "responses": [
+        "and then?",
+        "what else?",
+        "where does that go?"
+      ]
+    },
+    {
+      "name": "catchall_snark",
+      "pattern": ".*",
+      "priority": 0,
+      "chance": 0.01,
+      "tags": ["snark_ok"],
+      "responses": [
+        "riveting.",
+        "go on, I'm totally not judging.",
+        "bold strategy."
+      ]
     }
   ]
 }

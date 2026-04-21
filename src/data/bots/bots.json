@@ -1,15 +1,23 @@
-[
-  {
-    "name": "journal",
-    "displayName": "Journal",
-    "delaySeconds": 3,
-    "ruleSets": ["dissociation", "eliza", "emotional", "activity", "social", "routine", "catchall"]
+{
+  "tags": {
+    "emotional":    { "seriousness": 1.5, "depth":  0.5 },
+    "dissociation": { "seriousness": 2.0, "depth":  0.0 },
+    "physical":     { "seriousness": 0.5, "depth":  0.0 },
+    "social":       { "seriousness": 1.0, "depth":  0.5 },
+    "snark_ok":     { "seriousness":-1.0, "depth": -1.5 }
   },
-  {
-    "name": "reading",
-    "displayName": "Librarian",
-    "delaySeconds": 3,
-    "ruleSets": ["reading", "social", "routine", "catchall"]
-  }
-
-]
+  "bots": [
+    {
+      "name": "journal",
+      "displayName": "Journal",
+      "delaySeconds": 1,
+      "ruleSets": ["greetings", "eliza", "catchall"]
+    },
+    {
+      "name": "reading",
+      "displayName": "Librarian",
+      "delaySeconds": 1,
+      "ruleSets": ["greetings", "reading", "catchall"]
+    }
+  ]
+}

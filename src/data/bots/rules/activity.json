@@ -3,28 +3,28 @@
   "rules": [
     {
       "name": "reading",
-      "pattern": "\\b(reading|read|book|novel|chapter|pages|author)\\b",
+      "pattern": "I('m| am|'ve been| was) reading|\\b(just finished a book|reading a (book|novel)|picked up a book|put down the book)\\b",
       "responses": ["What are you reading?", "Good part?", "Where are you in it?", "What's pulling you in?"],
       "priority": 18,
       "tags": ["reading"]
     },
     {
       "name": "writing",
-      "pattern": "\\b(writing|wrote|draft|word count|stuck|writer|scene)\\b",
+      "pattern": "I('m| am|'ve been| was) writing|\\b(working on a (draft|chapter|scene)|word count|stuck on the (scene|chapter|draft))\\b",
       "responses": ["Where are you stuck?", "What does the character want?", "What have you got so far?", "What part is giving you trouble?"],
       "priority": 18,
       "tags": ["writing"]
     },
     {
       "name": "running",
-      "pattern": "\\b(running|ran|jogged|miles|gym|workout|exercise|went for a walk|morning walk|evening walk)\\b",
+      "pattern": "\\b(went for a (run|walk|jog)|I (ran|jogged) (today|this morning|this evening|yesterday)|morning (run|walk)|hit the gym|worked out|did a workout)\\b",
       "responses": ["How did it feel?", "How far?", "Good run or rough one?"],
       "priority": 16,
       "tags": ["activity"]
     },
     {
       "name": "gaming",
-      "pattern": "\\b(gaming|playing a game|video game|quest|respawn|boss fight|game over|leveled up)\\b",
+      "pattern": "\\b(video game|playing a game|boss fight|game over|leveled up|respawn|I('m| am) (playing|gaming))\\b",
       "responses": ["What are you playing?", "Making progress?", "Fun or frustrating?"],
       "priority": 15,
       "tags": ["activity"]

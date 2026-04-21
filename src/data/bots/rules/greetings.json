@@ -1,0 +1,56 @@
+{
+  "name": "greetings",
+  "rules": [
+    {
+      "name": "greeting_system",
+      "pattern": "^(hi|hello|entry|log), bot$",
+      "priority": 2,
+      "minSeriousness": 3.0,
+      "responses": [
+        "Connection established.",
+        "System ready.",
+        "Standing by for entry."
+      ]
+    },
+    {
+      "name": "greeting_soft",
+      "pattern": "^(hi|hey|hello)[.!?]?$",
+      "priority": 2,
+      "responses": [
+        "I'm here.",
+        "Hello.",
+        "It's good to see you."
+      ]
+    },
+    {
+      "name": "greeting_casual",
+      "pattern": "^(hi|hey|hello|yo)(,\\s?\\w+)?[.!?]?$",
+      "priority": 2,
+      "maxSeriousness": 1.5,
+      "responses": [
+        "hey.",
+        "hi!",
+        "yo."
+      ]
+    },
+    {
+      "name": "greeting_morning",
+      "pattern": "^(good\\s)?morning)(,\\s?\\w+)?[.!?]?$",
+      "priority": 2,
+      "tags": ["morning"],
+      "responses": [
+        "Good morning!",
+        "Morning. Welcome to today!"
+      ]
+    },
+    {
+      "name": "greeting_afternoon",
+      "pattern": "^(good\\s)?afternoon)(,\\s?\\w+)?[.!?]?$",
+      "priority": 2,
+      "responses": [
+        "Good afternoon!",
+        "Afternoon already?"
+      ]
+    }
+  ]
+}

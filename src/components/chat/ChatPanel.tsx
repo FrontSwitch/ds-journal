@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useMemo, useCallback } from 'react'
+import { useRef, useEffect, useState, useMemo, useCallback, MutableRefObject } from 'react'
 import { useMobile } from '../../hooks/useMobile'
 import { useMessages } from '../../hooks/useMessages'
 import { useAvatars } from '../../hooks/useAvatars'
@@ -32,7 +32,7 @@ import EmojiAutocomplete from './EmojiAutocomplete'
 import { useSlashInput, SETTINGS_PAGES } from '../../hooks/useSlashInput'
 import { TAROT_DECK } from '../../data/tarot'
 import { useEmojiInput } from '../../hooks/useEmojiInput'
-import { matchBot, getBotConfig, listBotNames, type ResolvedBotConfig, type BotMessage } from '../../lib/botEngine'
+import { matchBot, getBotConfig, listBotNames, distillTone, TONE_HISTORY_SIZE, type ResolvedBotConfig, type BotMessage, type ToneSnapshot } from '../../lib/botEngine'
 import './ChatPanel.css'
 
 interface Props {
@@ -52,6 +52,22 @@ function makeDepthStyle(colors: string[]) {
   }
 }
 
+
+function decayBotTags(
+  tags: string[],
+  lastMsgAtRef: MutableRefObject<number>,
+  setTags: (t: string[]) => void,
+): string[] {
+  const now = Date.now()
+  const elapsed = lastMsgAtRef.current > 0 ? now - lastMsgAtRef.current : 0
+  lastMsgAtRef.current = now
+  if (elapsed <= 2 * 60_000 || tags.length === 0) return tags
+  const decay = Math.floor((elapsed - 2 * 60_000) / (5 * 60_000))
+  if (decay <= 0) return tags
+  const decayed = tags.slice(0, Math.max(0, tags.length - decay))
+  setTags(decayed)
+  return decayed
+}
 
 export default function ChatPanel({ channelId, avatarFilter }: Props) {
   const isMobile = useMobile()
@@ -85,7 +101,9 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
   const [botMessage, setBotMessage] = useState<BotMessage | null>(null)
   const [botHidden, setBotHidden] = useState(false)
   const [botRecentTags, setBotRecentTags] = useState<string[]>([])
+  const [toneHistory, setToneHistory] = useState<ToneSnapshot[]>([])
   const botTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const botLastMsgAtRef = useRef<number>(0)
 
   interface WriteSession {
     goalType: 'time' | 'words'
@@ -543,6 +561,8 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         setBotConfig(config)
         setBotMessage(null)
         setBotRecentTags([])
+        setToneHistory([])
+        botLastMsgAtRef.current = 0
         setBotHidden(false)
         setCmdError(t('chat.botOn', { name: config.name }))
         setText('')
@@ -584,11 +604,13 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         setBotMessage(null)
         if (botTimerRef.current) clearTimeout(botTimerRef.current)
         const capturedConfig = botConfig
-        const capturedTags = botRecentTags
+        const capturedTags = decayBotTags(botRecentTags, botLastMsgAtRef, setBotRecentTags)
+        const capturedTone = distillTone(capturedTags, capturedConfig.tagTones, toneHistory)
+        setToneHistory(prev => [{ seriousness: capturedTone.seriousness, depth: capturedTone.depth }, ...prev].slice(0, TONE_HISTORY_SIZE))
         const capturedSession = writeSessionRef.current
         botTimerRef.current = setTimeout(() => {
           botTimerRef.current = null
-          let result = matchBot(msgText, capturedTags, capturedConfig.rules)
+          let result = matchBot(msgText, capturedTags, capturedConfig.rules, capturedTone)
           if (result && result.ruleName === 'catchall' && capturedSession) {
             const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
             const nudge = capturedSession.goalType === 'words'
@@ -597,7 +619,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
             result = { ...result, response: nudge, ruleName: 'write-nudge' }
           }
           if (result) {
-            setBotMessage({ id: Date.now(), text: result.response, ruleName: result.ruleName, addedTags: result.tags, contextTags: capturedTags, createdAt: Date.now() })
+            setBotMessage({ id: Date.now(), text: result.response, ruleName: result.ruleName, addedTags: result.tags, contextTags: capturedTags, tone: capturedTone, createdAt: Date.now() })
             if (result.tags.length > 0) {
               setBotRecentTags(prev => [...result.tags, ...prev].slice(0, 20))
             }
@@ -653,11 +675,13 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
       setBotMessage(null)
       if (botTimerRef.current) clearTimeout(botTimerRef.current)
       const capturedConfig = botConfig
-      const capturedTags = botRecentTags
+      const capturedTags = decayBotTags(botRecentTags, botLastMsgAtRef, setBotRecentTags)
+      const capturedTone = distillTone(capturedTags, capturedConfig.tagTones, toneHistory)
+      setToneHistory(prev => [{ seriousness: capturedTone.seriousness, depth: capturedTone.depth }, ...prev].slice(0, TONE_HISTORY_SIZE))
       const capturedSession = writeSessionRef.current
       botTimerRef.current = setTimeout(() => {
         botTimerRef.current = null
-        let result = matchBot(msgText, capturedTags, capturedConfig.rules)
+        let result = matchBot(msgText, capturedTags, capturedConfig.rules, capturedTone)
         if (result && result.ruleName === 'catchall' && capturedSession) {
           const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
           const nudge = capturedSession.goalType === 'words'
@@ -666,7 +690,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
           result = { ...result, response: nudge, ruleName: 'write-nudge' }
         }
         if (result) {
-          setBotMessage({ id: Date.now(), text: result.response, ruleName: result.ruleName, addedTags: result.tags, contextTags: capturedTags, createdAt: Date.now() })
+          setBotMessage({ id: Date.now(), text: result.response, ruleName: result.ruleName, addedTags: result.tags, contextTags: capturedTags, tone: capturedTone, createdAt: Date.now() })
           if (result.tags.length > 0) {
             setBotRecentTags(prev => [...result.tags, ...prev].slice(0, 20))
           }
@@ -1233,10 +1257,11 @@ function BotMessageItem({ msg, displayName, recentTags }: { msg: BotMessage; dis
   return (
     <div className="bot-message-item">
       <span className="bot-message-name">{displayName}:</span>
-      <span className="bot-message-text">{msg.text}</span>
+      {msg.text && <span className="bot-message-text">{msg.text}</span>}
       <span className="bot-message-debug">
         [{msg.ruleName}]
         {msg.addedTags.length > 0 && <> +{msg.addedTags.join(' +')}</>}
+        {msg.tone && <> · s:{msg.tone.seriousness.toFixed(1)} d:{msg.tone.depth.toFixed(1)} v:{msg.tone.volatility.toFixed(2)}</>}
         {recentTags.length > 0 && <> · ctx: {recentTags.slice(0, 5).join(' ')}</>}
       </span>
     </div>

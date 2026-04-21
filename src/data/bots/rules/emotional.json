@@ -3,49 +3,49 @@
   "rules": [
     {
       "name": "panic",
-      "pattern": "\\b(panic|panicking|panicked|anxious|anxiety|spiral|spiraling)\\b",
+      "pattern": "\\b(panicking|panic attack|feel panicked|feeling anxious|I('m| am| was) (anxious|spiraling)|in a spiral)\\b",
       "responses": ["What set it off?", "Are you somewhere safe right now?", "What helps when it gets like this?"],
       "priority": 22,
       "tags": ["emotional"]
     },
     {
       "name": "triggered",
-      "pattern": "\\b(triggered|trigger)\\b",
+      "pattern": "\\b(I (got|was|feel|felt|am) triggered|that triggered me|feel triggered)\\b",
       "responses": ["What was it?", "Did you see it coming?", "What did you do with it?"],
       "priority": 20,
       "tags": ["emotional"]
     },
     {
       "name": "tired",
-      "pattern": "I('m| am) (so |really |very )?(tired|exhausted|drained|wiped|spent)",
+      "pattern": "I('m| am| was| feel| felt) (so |really |very )?(tired|exhausted|drained|wiped|spent)",
       "responses": ["What kind of tired?", "Physically or mentally?", "What's been draining you?"],
       "priority": 14,
       "tags": ["physical", "emotional"]
     },
     {
       "name": "sad",
-      "pattern": "\\b(sad|crying|cried|tears|weeping|grief|grieving)\\b",
+      "pattern": "I('m| am| was| feel| felt) (so |really |very )?(sad|upset|heartbroken|down|in tears)|(I've been |I have been )(sad|crying|grieving)|\\bcried today\\b",
       "responses": ["What's there?", "Let it out.", "What's underneath it?"],
       "priority": 14,
       "tags": ["emotional"]
     },
     {
       "name": "angry",
-      "pattern": "\\b(angry|anger|mad|pissed|furious|resentful|rage)\\b",
+      "pattern": "I('m| am| was| feel| felt) (so |really )?(angry|mad|furious|pissed|full of rage)|(I've been |I have been )(angry|resentful)|\\bI raged\\b",
       "responses": ["Who or what?", "What would you say if you could?", "What's the anger protecting?"],
       "priority": 14,
       "tags": ["emotional"]
     },
     {
       "name": "overwhelmed",
-      "pattern": "\\b(overwhelmed|too much|can't cope|everything at once|all at once)\\b",
+      "pattern": "I('m| am| feel| felt| was) overwhelmed|\\b(too much at once|can't cope|everything at once|all at once)\\b",
       "responses": ["What's piling up?", "What's the biggest piece right now?", "Can you set one thing down?"],
       "priority": 14,
       "tags": ["emotional"]
     },
     {
       "name": "happy",
-      "pattern": "\\b(happy|good day|great day|better today|relieved|excited|grateful)\\b",
+      "pattern": "I('m| am| feel| felt| was) (so |really )?(happy|relieved|excited|grateful)|\\b(good day|great day|better today)\\b",
       "responses": ["What made it good?", "Keep going.", "What happened?"],
       "priority": 13,
       "tags": ["emotional"]

@@ -3,21 +3,21 @@
   "rules": [
     {
       "name": "conflict",
-      "pattern": "\\b(fight|argument|argued|conflict|confronted|yelled|shouted)\\b",
+      "pattern": "\\b(had a (fight|argument)|got into an argument|argued with|I (yelled|shouted)|confronted (them|him|her|someone))\\b",
       "responses": ["What was it about?", "What did you say?", "What did you hold back?"],
       "priority": 14,
       "tags": ["social"]
     },
     {
       "name": "guilt",
-      "pattern": "\\b(apologized|sorry|guilt|guilty|ashamed|shame)\\b",
+      "pattern": "I('m| am| feel| felt| was) (guilty|ashamed|full of shame)|\\b(I apologized|I said sorry|feel like I owe)\\b",
       "responses": ["Did it need saying?", "What are you carrying?", "What would be enough?"],
       "priority": 13,
       "tags": ["social", "emotional"]
     },
     {
       "name": "lonely",
-      "pattern": "feel\\s+alone|feeling\\s+lonely|so\\s+lonely|\\blonely\\b|\\bisolated\\b|sitting\\s+here\\s+alone|by\\s+myself\\s+again",
+      "pattern": "I feel (alone|lonely|isolated)|I('m| am) (so lonely|feeling lonely)|\\b(by myself again|no one to talk to|sitting here alone)\\b",
       "responses": ["Is the aloneness welcome or not?", "What's missing?", "What kind of connection would help?"],
       "priority": 13,
       "tags": ["social", "emotional"]

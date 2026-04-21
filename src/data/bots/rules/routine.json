@@ -3,42 +3,42 @@
   "rules": [
     {
       "name": "morning",
-      "pattern": "\\b(woke up|wake up|morning|got up|couldn't sleep|insomnia)\\b",
+      "pattern": "\\b(woke up|wake up|got up|this morning|couldn't sleep|can't sleep|insomnia)\\b",
       "responses": ["How'd you sleep?", "What was the night like?", "How does the day feel so far?"],
       "priority": 10,
       "tags": ["morning"]
     },
     {
       "name": "nighttime",
-      "pattern": "\\b(tonight|bedtime|late|can't sleep|falling asleep|heading to bed)\\b",
+      "pattern": "\\b(tonight|heading to bed|going to bed|bedtime|falling asleep|can't sleep|up late|awake at)\\b",
       "responses": ["How's the day wrapping up?", "What are you taking to bed with you?", "Anything unfinished?"],
       "priority": 10,
       "tags": ["nighttime"]
     },
     {
       "name": "progress",
-      "pattern": "\\b(finished|completed|finally|managed to|got through|done with|succeeded)\\b",
+      "pattern": "\\b(finally (finished|done|got through|managed)|I (finished|completed|managed to)|got through it|succeeded in)\\b",
       "responses": ["How does that feel?", "What took the most out of you?", "What's next?"],
       "priority": 10,
       "tags": ["progress"]
     },
     {
       "name": "uncertain",
-      "pattern": "\\b(don't know|not sure|unsure|confused|can't decide|unclear)\\b",
+      "pattern": "I (don't know|can't decide|don't know what to)|I('m| am) (not sure|unsure|confused about|unclear on)|\\b(lost on what)\\b",
       "responses": ["What would knowing look like?", "What does the uncertainty feel like?", "What would help clarify it?"],
       "priority": 8,
       "tags": []
     },
     {
       "name": "frustration",
-      "pattern": "\\b(ugh|argh|sigh|whatever|forget it|nevermind)\\b",
+      "pattern": "\\b(ugh|argh|forget it|nevermind|screw it)\\b",
       "responses": ["Yeah.", "What happened?", "Say more."],
       "priority": 8,
       "tags": ["frustration"]
     },
     {
       "name": "weather",
-      "pattern": "\\b(weather|hot|cold|raining|sunny|cloudy|humid|freezing)\\b",
+      "pattern": "\\b(the weather|weather today|it's (raining|sunny|cloudy|freezing|so hot|so cold|humid) (out|outside|today)|miserable (out|outside|weather))\\b",
       "responses": ["Does the weather get to you?", "What do you do with a day like this?"],
       "priority": 5,
       "tags": []
