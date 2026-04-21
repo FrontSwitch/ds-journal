@@ -113,6 +113,10 @@
   flex-direction: column;
 }
 
+.message-list.hidden {
+  display: none;
+}
+
 .load-more {
   align-self: center;
   margin: 8px 0 16px;
@@ -409,6 +413,11 @@
   color: var(--text-muted);
   border-radius: 4px;
   font-size: 11px;
+}
+
+.avatars-btn.page-draft-btn {
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
 .avatars-btn:hover {

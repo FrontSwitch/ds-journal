@@ -62,6 +62,7 @@ export interface MessageRow {
   avatar_image_data: string | null   // base64 from avatars.image_data
   tracker_record_id: number | null
   parent_msg_id: number | null
+  message_type: string
   // image attachment (from LEFT JOIN message_images)
   image_path: string | null
   image_caption: string | null

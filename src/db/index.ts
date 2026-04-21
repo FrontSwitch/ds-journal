@@ -135,7 +135,8 @@ async function runMigrations(db: NativeDb) {
       created_at        TEXT    NOT NULL DEFAULT (datetime('now')),
       tracker_record_id INTEGER REFERENCES tracker_records(id),
       parent_msg_id     INTEGER REFERENCES messages(id),
-      entity_id         TEXT    UNIQUE
+      entity_id         TEXT    UNIQUE,
+      message_type      TEXT    NOT NULL DEFAULT 'chat'
     )
   `)
 
@@ -438,6 +439,7 @@ async function runMigrations(db: NativeDb) {
     'ALTER TABLE channels ADD COLUMN sync_enabled INTEGER NOT NULL DEFAULT 1',
     'ALTER TABLE trackers ADD COLUMN sync_enabled INTEGER NOT NULL DEFAULT 1',
     'ALTER TABLE avatars ADD COLUMN image_data TEXT',
+    "ALTER TABLE messages ADD COLUMN message_type TEXT NOT NULL DEFAULT 'chat'",
   ]
   for (const sql of alterations) {
     try { await db.execute(sql) } catch { /* column already exists */ }

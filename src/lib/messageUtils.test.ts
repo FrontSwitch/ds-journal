@@ -19,6 +19,7 @@ function msg(id: number, parent_msg_id: number | null = null, created_at = '2025
     avatar_image_path: null,
     avatar_image_data: null,
     tracker_record_id: null,
+    message_type: 'chat',
     image_path: null, image_caption: null, image_location: null, image_people: null,
   }
 }

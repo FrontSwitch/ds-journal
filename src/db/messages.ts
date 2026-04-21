@@ -7,7 +7,7 @@ import { insertImage } from './images'
 // Single-channel SELECT: no channels join needed (channel is known, name never shown per-message)
 const SELECT_CHANNEL = `
   SELECT m.id, m.channel_id, '' as channel_name, m.text, m.original_text, m.deleted, m.created_at,
-         m.tracker_record_id, m.parent_msg_id,
+         m.tracker_record_id, m.parent_msg_id, m.message_type,
          a.id as avatar_id, a.name as avatar_name, a.color as avatar_color, a.image_path as avatar_image_path, a.image_data as avatar_image_data,
          mi.image_path, mi.caption as image_caption, mi.location as image_location, mi.people as image_people
   FROM messages m
@@ -17,7 +17,7 @@ const SELECT_CHANNEL = `
 // All-messages SELECT: needs channel name for display
 const SELECT_ALL = `
   SELECT m.id, m.channel_id, c.name as channel_name, m.text, m.original_text, m.deleted, m.created_at,
-         m.tracker_record_id, m.parent_msg_id,
+         m.tracker_record_id, m.parent_msg_id, m.message_type,
          a.id as avatar_id, a.name as avatar_name, a.color as avatar_color, a.image_path as avatar_image_path, a.image_data as avatar_image_data,
          mi.image_path, mi.caption as image_caption, mi.location as image_location, mi.people as image_people
   FROM messages m
@@ -61,12 +61,12 @@ export function getAllMessagesByAvatar(avatarId: number, limit: number, deletedS
   return fetchMessages(SELECT_ALL, 'm.avatar_id = ?', [avatarId], limit, deletedSince)
 }
 
-export async function sendMessage(channelId: number, avatarId: number | null, text: string, parentMsgId?: number | null): Promise<number> {
+export async function sendMessage(channelId: number, avatarId: number | null, text: string, parentMsgId?: number | null, messageType?: string): Promise<number> {
   const db = await getDb()
   const entityId = crypto.randomUUID()
   const result = await db.execute(
-    'INSERT INTO messages (channel_id, avatar_id, text, parent_msg_id, entity_id) VALUES (?, ?, ?, ?, ?)',
-    [channelId, avatarId, text, parentMsgId ?? null, entityId]
+    'INSERT INTO messages (channel_id, avatar_id, text, parent_msg_id, entity_id, message_type) VALUES (?, ?, ?, ?, ?, ?)',
+    [channelId, avatarId, text, parentMsgId ?? null, entityId, messageType ?? 'chat']
   )
   const newId = Number(result.lastInsertId)
   if (avatarId !== null) {

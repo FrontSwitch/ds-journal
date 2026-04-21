@@ -42,6 +42,7 @@ describe('getMessageDisplayText', () => {
       created_at: '2025-01-01 10:00:00', avatar_id: 1,
       avatar_name: 'Alex', avatar_color: '#89b4fa',
       avatar_image_path: null, avatar_image_data: null, tracker_record_id: null, parent_msg_id: null,
+      message_type: 'chat',
       image_path: null, image_caption: null, image_location: null, image_people: null,
       ...overrides,
     }

@@ -27,6 +27,7 @@ export const SLASH_COMMANDS: SlashCommand[] = [
   { name: 'debug',    usage: '/debug',                    desc: 'Toggle debug panel' },
   { name: 'bot',      usage: '/bot <name> | off | hide | show', desc: 'Enable/disable journaling bot' },
   { name: 'write',    usage: '/write <n> minutes | <n> words | stop', desc: 'Start/stop a timed writing session' },
+  { name: 'page',     usage: '/page',                               desc: 'Open page editor to write and publish an entry' },
 ]
 
 // Settings subpage aliases

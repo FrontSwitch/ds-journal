@@ -208,7 +208,8 @@ avatar_fields  id, name, field_type TEXT DEFAULT 'text', list_values TEXT,
                -- field_type: 'text' | 'integer' | 'intRange' | 'boolean' | 'list'
 avatar_field_values    avatar_id, field_id, value TEXT  (composite PK; CASCADE on both FKs)
 messages       id, channel_id, avatar_id, text, original_text, deleted, created_at,
-               tracker_record_id, parent_msg_id, entity_id
+               tracker_record_id, parent_msg_id, entity_id,
+               message_type TEXT DEFAULT 'chat'   -- 'chat' | 'page'
 message_images id, message_id (FK → messages CASCADE), image_path, caption, location, people,
                created_at, entity_id
 messages_fts   FTS5 virtual table — content='messages', tokenize='unicode61'; trigger-synced
@@ -346,12 +347,43 @@ Both features are **ephemeral** — no DB schema changes, no persistence across 
 
 ### Journaling bot (`/bot`)
 - `/bot <name>` — enable; `/bot off` — disable; `/bot hide/show` — toggle display
-- Bot state lives in ChatPanel local state (`botConfig`, `botMessage`, `botRecentTags`)
+- Bot state lives in ChatPanel local state: `botConfig`, `botMessage`, `botRecentTags`, `toneHistory`
 - `botMessage` holds the single most-recent response (replaced on each send, cleared on channel change)
 - Timer: `botTimerRef` (setTimeout) fires after `delaySeconds` of idle; reset by textarea onChange
-- `matchBot(text, recentTags, rules)` — sorts rules by `priority + 5` if any rule tag is in recentTags; first match wins; `{1}` `{2}` in responses = regex capture groups
-- Rule sets: drop a JSON file in `src/data/bots/rules/` → auto-registered by `import.meta.glob`; add a bot entry to `src/data/bots/bots.json` (array)
-- Debug display on bot message: `[ruleName] +addedTags · ctx: recentTags` (muted, right-aligned)
+- Tag decay: `botLastMsgAtRef` tracks last send time; if gap > 2 min, tags are trimmed at rate of 1 per 5 min from the oldest end
+- Empty response (`""`) — bot message renders with no text; useful for silent presence
+
+#### `matchBot(text, recentTags, rules, tone?)`
+- Input is split into sentences on `[.!?]` boundaries; every rule is tested against every sentence
+- All matching candidates collected across sentences; highest `priority + boost` wins for the response
+- Tags from **all** matching rules (all sentences) are merged into returned tags
+- Rule fields: `chance` (0–1 roll), `required` (OR: at least one tag in context), `excluded` (ANY: none in context), tone range filters
+
+#### Tone system (`src/lib/botEngine.ts`)
+- Two dimensions, 0–4, default 2: **seriousness** (light→heavy) and **depth** (playful→mirroring→reflective)
+- `distillTone(tags, tagMap, history)` — recency-weighted sum of tag deltas from neutral (weight = 1/(i+1)), clamped to [0,4]; volatility = avg Euclidean distance across last 5 snapshots
+- `ToneState { seriousness, depth, volatility }` — passed to `matchBot`; rules can gate on `minSeriousness`, `maxSeriousness`, `minDepth`, `maxDepth`, `minVolatility`, `maxVolatility`
+- Debug line on bot message: `[ruleName] +tags · s:X.X d:X.X v:X.XX · ctx: tags`
+
+#### `src/data/bots/bots.json`
+Top-level structure (not an array): `{ tags: Record<string, ToneDelta>, bots: BotConfigFile[] }`. `tags` is the shared tone-delta map for all bots. Drop a rule JSON in `src/data/bots/rules/` → auto-registered via `import.meta.glob`.
+
+#### Design note
+Content-matching rules (emotional keywords, activity words) were explored and abandoned — too many false positives in journal text, especially for plural systems using "we" or dropping pronouns. Structural patterns (`I feel`, `I can't`, `I (.+) again`) and catchall tone-gated responses are the reliable layer. The chat UI format also creates an expectation of a conversational partner that the bot can't satisfy; worth revisiting with a different visual treatment.
+
+### Page editor (`/page`)
+- `/page` or `[+ Page]` button opens a full-panel Tiptap WYSIWYG editor; chat history and input are hidden while it's open
+- `← Back` closes the editor and returns to chat; draft is preserved. `Discard draft` asks for confirmation (inline Yes/No) before clearing. `Publish` commits.
+- Draft saved to `localStorage` at key `dsj-page-draft-${channelId}`; restored on next open. Draft indicator: `[+ Page]` button shows `✎ Page` in accent color when a draft exists.
+- On open, if no avatar is selected, `openPageEditor()` falls back to the channel's `last_avatar_id`
+- Published pages call `sendMessage(..., 'page')` — stored as HTML in `messages.text` with `message_type = 'page'`
+- `isEmpty` is tracked as React state (updated in Tiptap's `onUpdate`) — **not** computed from `editor.getHTML()` at render time. Computing it at render time causes Publish to stay disabled after draft restore because `setContent` doesn't trigger a re-render.
+- In history, pages render as `<PageItem>` (expanded by default); header shows avatar icon (16px), name, title, date/time, ▾/▸ chevron. Click to collapse/expand. Collapse state is ephemeral (not persisted).
+- `extractPageTitle(html)` — parses the first heading or `<p>` text from the HTML, truncated to 100 chars. Called once per render in `PageItem`.
+- `@avatar` mention: Tiptap `Mention` extension, `char: '@'`, suggestion list positioned via `props.clientRect()` as `position: fixed`. Inserts a `.page-mention-chip` span. Arrow keys + Enter/Space to select.
+- `#tag` / `#channel` mention: custom `Extension` + raw `Suggestion` plugin (`@tiptap/suggestion`), `char: '#'`, `allow: () => true`. **Do not use `Mention.extend()` for this** — the inherited `allow` function checks `schema.nodes[this.name]` which fails for non-node extensions. Inserts plain text `#displayName `. Arrow keys + Enter/Space to select.
+- Both suggestion dropdowns: render closure tracks `selectedIndex` + `currentItems` + `currentCommand` as mutable closure vars (not React state) to handle keyboard events in `onKeyDown` without a forwarded ref.
+- Styles split: editor UI in `PageEditor.css`; `.page-item` card styles also in `PageEditor.css` (imported via `PageEditor.tsx`, bundled statically so available even when editor is closed)
 
 ### Writing session (`/write`)
 - `/write 5 minutes` or `/write 200 words` — start; `/write stop` — end manually

@@ -28,6 +28,7 @@ import TrackerReport from './TrackerReport'
 import FrontLogReport from '../front-log/FrontLogReport'
 import TagAutocomplete from './TagAutocomplete'
 import SlashAutocomplete from './SlashAutocomplete'
+import { PageEditor } from './PageEditor'
 import EmojiAutocomplete from './EmojiAutocomplete'
 import { useSlashInput, SETTINGS_PAGES } from '../../hooks/useSlashInput'
 import { TAROT_DECK } from '../../data/tarot'
@@ -113,6 +114,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
     channelId: number
     intentMsgId: number | null
   }
+  const [pageEditorOpen, setPageEditorOpen] = useState(false)
   const [writeSession, setWriteSession] = useState<WriteSession | null>(null)
   const [writeTick, setWriteTick] = useState(0)
   const writeSessionRef = useRef<WriteSession | null>(null)
@@ -318,6 +320,15 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
     const q = raw.replace(/^[@#]/, '').toLowerCase()
     return items.find(i => i.name.toLowerCase() === q)
       ?? items.find(i => i.name.toLowerCase().startsWith(q))
+  }
+
+  async function openPageEditor() {
+    if (selectedAvatarId === null) {
+      const channels = await getChannels()
+      const ch = channels.find(c => c.id === channelId)
+      if (ch?.last_avatar_id != null) setSelectedAvatar(ch.last_avatar_id)
+    }
+    setPageEditorOpen(true)
   }
 
   async function executeSlashCommand(cmd: string, args: string): Promise<void> {
@@ -565,6 +576,11 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         botLastMsgAtRef.current = 0
         setBotHidden(false)
         setCmdError(t('chat.botOn', { name: config.name }))
+        setText('')
+        break
+      }
+      case 'page': {
+        await openPageEditor()
         setText('')
         break
       }
@@ -943,8 +959,23 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         </div>
       )}
 
+      {pageEditorOpen && !isScratch && !isAllMessages && (
+        <PageEditor
+          channelId={channelId}
+          avatars={avatars}
+          selectedAvatar={selectedAvatar ?? null}
+          onPublish={async (html) => {
+            await sendMessage(channelId, selectedAvatarId, html, null, 'page')
+            setPageEditorOpen(false)
+            reload()
+          }}
+          onBack={() => setPageEditorOpen(false)}
+          onDiscard={() => setPageEditorOpen(false)}
+        />
+      )}
+
       <div
-        className={`message-list${isScratch ? ' log-view' : ''}${!isScratch && viewMode === 'compact' ? ' compact' : ''}${!isScratch && viewMode === 'log' ? ' log-view' : ''}`}
+        className={`message-list${isScratch ? ' log-view' : ''}${!isScratch && viewMode === 'compact' ? ' compact' : ''}${!isScratch && viewMode === 'log' ? ' log-view' : ''}${pageEditorOpen ? ' hidden' : ''}`}
         ref={listRef}
         onClick={() => { if (!showSearch && !showRecordForm) textareaRef.current?.focus() }}
         onScroll={e => {
@@ -995,28 +1026,30 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
                     onUndelete={() => handleUndelete(row.msg.id)}
                   />
             )
-          : !isScratch ? displayMessages.map(msg => (
-              <MessageItem
-                key={msg.id}
-                msg={msg}
-                depth={msg._depth}
-                depthStyle={depthStyle}
-                isAllMessages={isAllMessages}
-                editing={editing?.id === msg.id ? editing.text : null}
-                onEditStart={() => setEditing({ id: msg.id, text: msg.text })}
-                onEditChange={v => setEditing(e => e ? { ...e, text: v } : null)}
-                onEditSave={handleEdit}
-                onEditCancel={() => setEditing(null)}
-                onReply={!isAllMessages && msg._depth < maxDepth ? () => { setReplyTo(msg); textareaRef.current?.focus() } : undefined}
-                trackerRecord={msg.tracker_record_id != null ? trackerRecords.get(msg.tracker_record_id) : undefined}
-                avatars={avatars}
-                use24HourClock={config.ui.use24HourClock}
-                deleteWindowMinutes={deleteWindowMinutes}
-                editWindowMinutes={editWindowMinutes}
-                onDelete={() => handleDelete(msg.id)}
-                onUndelete={() => handleUndelete(msg.id)}
-              />
-            )) : null
+          : !isScratch ? displayMessages.map(msg =>
+              msg.message_type === 'page'
+                ? <PageItem key={msg.id} msg={msg} use24HourClock={config.ui.use24HourClock} />
+                : <MessageItem
+                    key={msg.id}
+                    msg={msg}
+                    depth={msg._depth}
+                    depthStyle={depthStyle}
+                    isAllMessages={isAllMessages}
+                    editing={editing?.id === msg.id ? editing.text : null}
+                    onEditStart={() => setEditing({ id: msg.id, text: msg.text })}
+                    onEditChange={v => setEditing(e => e ? { ...e, text: v } : null)}
+                    onEditSave={handleEdit}
+                    onEditCancel={() => setEditing(null)}
+                    onReply={!isAllMessages && msg._depth < maxDepth ? () => { setReplyTo(msg); textareaRef.current?.focus() } : undefined}
+                    trackerRecord={msg.tracker_record_id != null ? trackerRecords.get(msg.tracker_record_id) : undefined}
+                    avatars={avatars}
+                    use24HourClock={config.ui.use24HourClock}
+                    deleteWindowMinutes={deleteWindowMinutes}
+                    editWindowMinutes={editWindowMinutes}
+                    onDelete={() => handleDelete(msg.id)}
+                    onUndelete={() => handleUndelete(msg.id)}
+                  />
+            ) : null
         }
         {!isScratch && (botConfig || writeSession) && !botHidden && botMessage && (
           <BotMessageItem key={botMessage.id} msg={botMessage} displayName={botConfig?.displayName ?? '✍'} recentTags={botRecentTags} />
@@ -1071,7 +1104,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
           </div>
         </div>
       )}
-      {!isAllMessages && !isScratch && (
+      {!isAllMessages && !isScratch && !pageEditorOpen && (
         <div className="chat-input-area">
           <div className="avatar-indicator">
             {selectedAvatar ? (
@@ -1096,6 +1129,12 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
               )}
               <button className="avatars-btn" onClick={showSearch ? closeSearch : () => setShowSearch(true)}>
                 {showSearch ? t('chat.closeSearch') : t('chat.search')}
+              </button>
+              <button
+                className={`avatars-btn${localStorage.getItem(`dsj-page-draft-${channelId}`) ? ' page-draft-btn' : ''}`}
+                onClick={() => pageEditorOpen ? setPageEditorOpen(false) : openPageEditor()}
+              >
+                {localStorage.getItem(`dsj-page-draft-${channelId}`) ? '✎ Page' : '+ Page'}
               </button>
               {tracker && !showRecordForm && !showReport && (
                 <button className="avatars-btn" onClick={() => setShowRecordForm(true)}>
@@ -1497,6 +1536,45 @@ function MessageItem({ msg, depth, depthStyle, isAllMessages, editing, onEditSta
           <p className="message-text">{msg.text}</p>
         )}
       </div>
+    </div>
+  )
+}
+
+// ── Page item ─────────────────────────────────────────────────────────────────
+
+function extractPageTitle(html: string): string {
+  const tmp = document.createElement('div')
+  tmp.innerHTML = html
+  const first = tmp.querySelector('h1,h2,h3,h4,h5,h6,p')
+  const text = first?.textContent?.trim() ?? ''
+  return text.length > 100 ? text.slice(0, 100) + '…' : text
+}
+
+function PageItem({ msg, use24HourClock }: { msg: MessageRow; use24HourClock: boolean }) {
+  const [expanded, setExpanded] = useState(true)
+  const date = new Date(msg.created_at + 'Z')
+  const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: !use24HourClock })
+  const dateStr = date.toLocaleDateString()
+  const title = extractPageTitle(msg.text)
+  return (
+    <div className={`page-item${expanded ? ' page-item-expanded' : ''}`}>
+      <button className="page-item-header" onClick={() => setExpanded(v => !v)}>
+        {msg.avatar_image_data
+          ? <img src={`data:image/png;base64,${msg.avatar_image_data}`} className="page-item-avatar-img" alt={msg.avatar_name ?? ''} />
+          : msg.avatar_image_path
+          ? <img src={assetUrl(msg.avatar_image_path)!} className="page-item-avatar-img" alt={msg.avatar_name ?? ''} />
+          : <span className="page-item-avatar-dot" style={{ background: msg.avatar_color ?? 'var(--text-muted)' }} />
+        }
+        <span className="page-item-author" style={{ color: msg.avatar_color ?? 'var(--text-muted)' }}>
+          {msg.avatar_name ?? '—'}
+        </span>
+        {title && <span className="page-item-title">{title}</span>}
+        <span className="page-item-meta">{dateStr} {timeStr}</span>
+        <span className="page-item-chevron">{expanded ? '▾' : '▸'}</span>
+      </button>
+      {expanded && (
+        <div className="page-item-body" dangerouslySetInnerHTML={{ __html: msg.text }} />
+      )}
     </div>
   )
 }
