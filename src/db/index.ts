@@ -445,6 +445,51 @@ async function runMigrations(db: NativeDb) {
     try { await db.execute(sql) } catch { /* column already exists */ }
   }
 
+  // If messages.avatar_id was created NOT NULL (old schema), rebuild to make it nullable.
+  // SQLite can't ALTER COLUMN, so we rename → recreate → copy → drop.
+  try {
+    const cols = await db.select<{ name: string; notnull: number }[]>(`PRAGMA table_info(messages)`)
+    const avatarCol = cols.find(c => c.name === 'avatar_id')
+    if (avatarCol && avatarCol.notnull === 1) {
+      await db.execute(`PRAGMA foreign_keys = OFF`)
+      await db.execute(`
+        CREATE TABLE messages_rebuilt (
+          id                INTEGER PRIMARY KEY AUTOINCREMENT,
+          channel_id        INTEGER NOT NULL REFERENCES channels(id) ON DELETE CASCADE,
+          avatar_id         INTEGER REFERENCES avatars(id),
+          text              TEXT    NOT NULL,
+          original_text     TEXT,
+          deleted           INTEGER NOT NULL DEFAULT 0,
+          created_at        TEXT    NOT NULL DEFAULT (datetime('now')),
+          tracker_record_id INTEGER REFERENCES tracker_records(id),
+          parent_msg_id     INTEGER,
+          entity_id         TEXT    UNIQUE,
+          message_type      TEXT    NOT NULL DEFAULT 'chat'
+        )
+      `)
+      await db.execute(`
+        INSERT INTO messages_rebuilt (id, channel_id, avatar_id, text, original_text, deleted, created_at, tracker_record_id, parent_msg_id, entity_id, message_type)
+        SELECT id, channel_id, avatar_id, text, original_text, deleted, created_at, tracker_record_id, parent_msg_id, entity_id, message_type FROM messages
+      `)
+      await db.execute(`DROP TABLE messages`)
+      await db.execute(`ALTER TABLE messages_rebuilt RENAME TO messages`)
+      await db.execute(`CREATE INDEX IF NOT EXISTS idx_messages_channel ON messages(channel_id, deleted, created_at DESC)`)
+      await db.execute(`CREATE INDEX IF NOT EXISTS idx_messages_all ON messages(deleted, created_at DESC)`)
+      await db.execute(`CREATE INDEX IF NOT EXISTS idx_messages_avatar ON messages(avatar_id, deleted, created_at DESC)`)
+      await db.execute(`DROP TRIGGER IF EXISTS messages_fts_insert`)
+      await db.execute(`DROP TRIGGER IF EXISTS messages_fts_delete`)
+      await db.execute(`DROP TRIGGER IF EXISTS messages_fts_update`)
+      await db.execute(`CREATE TRIGGER messages_fts_insert AFTER INSERT ON messages BEGIN INSERT INTO messages_fts(rowid, text) VALUES (new.id, new.text); END`)
+      await db.execute(`CREATE TRIGGER messages_fts_delete AFTER DELETE ON messages BEGIN INSERT INTO messages_fts(messages_fts, rowid, text) VALUES('delete', old.id, old.text); END`)
+      await db.execute(`CREATE TRIGGER messages_fts_update AFTER UPDATE OF text ON messages BEGIN INSERT INTO messages_fts(messages_fts, rowid, text) VALUES('delete', old.id, old.text); INSERT INTO messages_fts(rowid, text) VALUES (new.id, new.text); END`)
+      await db.execute(`INSERT INTO messages_fts(messages_fts) VALUES('rebuild')`)
+      await db.execute(`PRAGMA foreign_keys = ON`)
+      console.log('[migration] messages.avatar_id made nullable')
+    }
+  } catch (e) {
+    console.warn('[migration] messages avatar_id nullable migration failed:', e)
+  }
+
   // Backfill entity_id for all existing rows that don't have one yet.
   // Uses SQLite's randomblob to generate UUID4-format identifiers.
   // Runs in a single UPDATE per table — only touches rows where entity_id IS NULL.

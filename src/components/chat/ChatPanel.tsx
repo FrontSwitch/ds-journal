@@ -522,8 +522,8 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
           setText('')
           break
         }
-        const mMin = arg.match(/^(\d+)\s*min(utes?)?$/)
-        const mWords = arg.match(/^(\d+)\s*words?$/)
+        const mMin = arg.match(/^(\d+)\s*(m|min(utes?)?)?$/)
+        const mWords = arg.match(/^(\d+)\s*w(ords?)?$/)
         if (!mMin && !mWords) { setCmdError(t('chat.writeUsage')); return }
         const goalType = mMin ? 'time' : 'words'
         const goalValue = parseInt(mMin ? mMin[1] : mWords![1])

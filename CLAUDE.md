@@ -100,6 +100,7 @@ On first launch with an empty DB, the app auto-seeds: a "general" channel, a "so
 ```
 src/
   App.tsx / App.css           # root layout, DB init, auto-backup, seed on empty DB, idle timer
+                              #   calls repairPageMessageSync() on startup (one-time sync fix)
   config.ts                   # AppConfig interface, ConfigLevel enum, REGISTRY (ConfigDef[])
   types/index.ts              # all TS interfaces; ALL_MESSAGES_ID=-1, SCRATCH_ID=-2, ALBUM_ID=-3
   store/
@@ -128,7 +129,7 @@ src/
     index.ts                  # DB singleton, migrations, DSJ_DB env var, timing instrumentation
     channels.ts               # folder + channel CRUD, counts, view modes; setChannelSyncEnabled
     avatars.ts                # avatar + group CRUD, avatar_fields CRUD; setAvatarImageData
-    messages.ts               # message queries, FTS search, sendImageMessage
+    messages.ts               # message queries, FTS search, sendImageMessage, repairPageMessageSync
     images.ts                 # insertImage, getAllImages
     tags.ts                   # tag CRUD, upsertTagsFromText, pruneOldTags
     backup.ts                 # runBackup (VACUUM INTO), checkAutoBackup, exportToJson
@@ -195,6 +196,7 @@ src-tauri/
                               #   sync_* Tauri commands; start_sync_server()
   capabilities/default.json   # sql/fs/dialog/opener/window/webview capabilities + scopes
   tauri.conf.json             # identifier: com.frontswitchstudio.dsj
+ios/App/App.xcodeproj/        # Capacitor Xcode project; TARGETED_DEVICE_FAMILY = "1,2" (iPhone + iPad)
 ```
 
 ## localStorage keys
@@ -349,7 +351,9 @@ Opt-in via Settings → Security. Vault design: random 256-bit master key encryp
 
 LAN sync via per-device event log, entity_id UUID4s, LWW conflict resolution, first-sync merge. Per-device sync policy (messageDays, autoBackup) stored in device_config table — not AppConfig. Transport: axum HTTP + AES-256-GCM + HMAC-SHA256. `syncNow()` works on both Tauri (via `invoke('sync_send_to_peer', ...)`) and Capacitor (via `sendToPeer()` in `native/syncCrypto.ts` using Web Crypto API). Pairing (`/dsj/pair`) uses plain fetch on both platforms. See `docs/sync.md` for full design, Rust server details, JS sync client API, and Tauri command reference.
 
-**Sync gotcha:** When iOS pairs by connecting to the desktop, `requester_device_id` must come from `getOrCreateDeviceId()`, not from the Tauri ServerInfo (which is null on Capacitor). Bug: sending `''` causes the desktop to store `peer_codes[''] = peer_code`; subsequent syncs fail with 401 because the real UUID isn't found.
+**Sync gotcha — device_id on Capacitor:** When iOS pairs by connecting to the desktop, `requester_device_id` must come from `getOrCreateDeviceId()`, not from the Tauri ServerInfo (which is null on Capacitor). Bug: sending `''` causes the desktop to store `peer_codes[''] = peer_code`; subsequent syncs fail with 401 because the real UUID isn't found.
+
+**Sync gotcha — logCreate payloads:** Always include every column that affects rendering in the `logCreate` payload. Do not rely on DB defaults — the receiving device inserts only what is in the payload. Example: `message_type` defaults to `'chat'` in the schema; if a `'page'` message omits it from `logCreate`, it syncs as `'chat'` on the peer. Pattern: if a column has a non-trivial default and affects display, always explicitly pass it.
 
 ## UI Behavior
 
@@ -358,6 +362,10 @@ See `docs/ui-behavior.md` for full details on Sidebar, ChatPanel (slash commands
 ## Images / Album
 
 Images stored as local file paths in `message_images` (no bytes in DB). HEIC renders natively in Tauri/WebKit on macOS. See `docs/image-album.md` for full details.
+
+**Canvas taint gotcha (WKWebView):** Drawing images from `tauri://` or `capacitor://` URLs into a `<canvas>` taints the canvas — `toDataURL()` throws a security error. Fix: `fetch(src)` the image as a blob, create an object URL with `URL.createObjectURL()`, draw that instead. Blob URLs are always same-origin. Always `URL.revokeObjectURL()` in `finally`.
+
+**iOS image tap gotcha:** `<img>` elements inside clickable `<div>` containers intercept taps on iOS WebView — the image becomes draggable/zoomable instead of passing the tap through. Fix: `draggable={false}` on the img element, plus CSS `pointer-events: none; -webkit-touch-callout: none; user-select: none` on the `.avatar-img` class.
 
 ## Bot & Write session
 
