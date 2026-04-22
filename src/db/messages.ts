@@ -79,7 +79,7 @@ export async function sendMessage(channelId: number, avatarId: number | null, te
   const channelEid = await getEntityId('channels', channelId)
   const avatarEid = avatarId !== null ? await getEntityId('avatars', avatarId) : null
   const parentMsgEid = parentMsgId ? await getEntityId('messages', parentMsgId) : null
-  await logCreate('messages', entityId, { _channel_eid: channelEid, _avatar_eid: avatarEid, text, _parent_msg_eid: parentMsgEid })
+  await logCreate('messages', entityId, { _channel_eid: channelEid, _avatar_eid: avatarEid, text, _parent_msg_eid: parentMsgEid, message_type: messageType ?? 'chat' })
   return newId
 }
 
@@ -146,6 +146,25 @@ export async function sendImageMessage(
   const channelEidImg = await getEntityId('channels', channelId)
   const avatarEidImg = avatarId !== null ? await getEntityId('avatars', avatarId) : null
   await logCreate('messages', entityId, { _channel_eid: channelEidImg, _avatar_eid: avatarEidImg, text, image_path: imagePath, caption, location, people })
+}
+
+/** One-time repair: emit logUpdate for any page messages whose create event predates the
+ *  message_type sync fix, so peers receive the correction on next sync. */
+export async function repairPageMessageSync(): Promise<void> {
+  const db = await getDb()
+  const rows = await db.select<{ id: number; entity_id: string }[]>(
+    `SELECT id, entity_id FROM messages WHERE message_type = 'page' AND entity_id IS NOT NULL`
+  )
+  for (const row of rows) {
+    // Check whether this entity already has a message_type update in the event log
+    const existing = await db.select<{ n: number }[]>(
+      `SELECT COUNT(*) as n FROM event_log WHERE entity_id = ? AND operation = 'update' AND payload LIKE '%message_type%'`,
+      [row.entity_id]
+    )
+    if (existing[0].n === 0) {
+      await logUpdate('messages', row.entity_id, { message_type: 'page' })
+    }
+  }
 }
 
 export async function editMessage(id: number, newText: string): Promise<void> {

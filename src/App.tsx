@@ -5,6 +5,7 @@ import { getDb, setDbKey } from './db/index'
 import { getChannels, createChannel } from './db/channels'
 import { getAvatars, createAvatar } from './db/avatars'
 import { checkAutoBackup } from './db/backup'
+import { repairPageMessageSync } from './db/messages'
 import { seedTrackerPresets } from './db/tracker-presets'
 import { seedFrontLog, getCurrentFront } from './db/front-log'
 import { initSyncCtx, handleSyncRequest, upsertSyncPeer, syncNow } from './db/sync'
@@ -98,6 +99,7 @@ export default function App() {
         await initSyncCtx()
         await seedTrackerPresets()
         await seedFrontLog()
+        repairPageMessageSync().catch(e => console.warn('[repair] page message sync:', e))
         const frontSessions = await getCurrentFront()
         useAppStore.getState().setCurrentFront(frontSessions)
         setReady(true)
