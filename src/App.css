@@ -184,9 +184,10 @@ input:focus, textarea:focus {
 
 /* ChatPanel fills remaining space so input stays at bottom */
 .app-layout.mobile .chat-panel {
-  flex: 1;
+  flex: 1 1 0;
   min-width: 0;
   min-height: 0;
+  height: 0;
 }
 
 /* Prevent iOS auto-zoom on input focus (triggers when font-size < 16px) */

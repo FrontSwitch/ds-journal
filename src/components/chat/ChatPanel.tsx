@@ -1006,6 +1006,8 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
           ? logRows.map((row, i) =>
               row.kind === 'sep'
                 ? <div key={`sep-${i}`} className="log-hour-sep"><span>{row.label}</span></div>
+                : row.msg.message_type === 'page'
+                ? <PageItem key={row.msg.id} msg={row.msg} use24HourClock={config.ui.use24HourClock} />
                 : <LogMessageItem
                     key={row.msg.id}
                     msg={row.msg}

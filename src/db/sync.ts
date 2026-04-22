@@ -51,8 +51,6 @@ export async function handleSyncRequest(
 
 /** Sync with all trusted peers. Returns totals for display. */
 export async function syncNow(): Promise<{ sent: number, received: number, peers: number, errors: string[] }> {
-  if (!isTauri()) return { sent: 0, received: 0, peers: 0, errors: [] }
-  const { invoke } = await import('@tauri-apps/api/core')
   const peers = await getSyncPeers()
   const trusted = peers.filter(p => p.trusted && p.peer_address && p.peer_code)
   const myDeviceId = getOrCreateDeviceId()
@@ -84,14 +82,28 @@ export async function syncNow(): Promise<{ sent: number, received: number, peers
         ? [...(await buildStructureSnapshot()), ...regularEvents]
         : regularEvents
 
-      const result = await invoke<{ events: SyncEvent[], server_time: number }>('sync_send_to_peer', {
-        peerAddress: peer.peer_address!,
-        peerCode: peer.peer_code!,
-        ourDeviceId: myDeviceId,
-        fromCounter: peer.last_seen_counter,
-        coldSync,
-        events: myEvents,
-      })
+      let result: { events: SyncEvent[], server_time: number }
+      if (isTauri()) {
+        const { invoke } = await import('@tauri-apps/api/core')
+        result = await invoke('sync_send_to_peer', {
+          peerAddress: peer.peer_address!,
+          peerCode: peer.peer_code!,
+          ourDeviceId: myDeviceId,
+          fromCounter: peer.last_seen_counter,
+          coldSync,
+          events: myEvents,
+        })
+      } else {
+        const { sendToPeer } = await import('../native/syncCrypto')
+        result = await sendToPeer(
+          peer.peer_address!,
+          peer.peer_code!,
+          myDeviceId,
+          peer.last_seen_counter,
+          coldSync,
+          myEvents,
+        )
+      }
       await applyRemoteEvents(result.events, peer.device_id)
       const realReceived = result.events.filter(e => e.device_counter !== -1)
       const theirMaxCounter = realReceived.length > 0
