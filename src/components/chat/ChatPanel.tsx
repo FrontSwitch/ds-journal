@@ -113,6 +113,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
     wordCount: number
     channelId: number
     intentMsgId: number | null
+    goalReached?: boolean
   }
   const [pageEditorOpen, setPageEditorOpen] = useState(false)
   const [writeSession, setWriteSession] = useState<WriteSession | null>(null)
@@ -972,10 +973,31 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
           onPublish={async (html) => {
             await sendMessage(channelId, selectedAvatarId, html, null, 'page')
             setPageEditorOpen(false)
+            if (writeSessionRef.current) {
+              await endWriteSession(writeSessionRef.current, selectedAvatarId, selectedAvatar?.name ?? null, selectedAvatar?.color ?? null)
+            }
             reload()
           }}
           onBack={() => setPageEditorOpen(false)}
           onDiscard={() => setPageEditorOpen(false)}
+          onWordCountChange={(count) => {
+            if (!writeSessionRef.current) return
+            const session = writeSessionRef.current
+            const goalReached = session.goalType === 'words' && count >= session.goalValue
+            const updated = { ...session, wordCount: count, goalReached: goalReached || session.goalReached }
+            writeSessionRef.current = updated
+            setWriteSession(updated)
+          }}
+          writeStatus={writeSession ? (() => {
+            void writeTick
+            const now = Date.now()
+            const elapsed = fmtElapsed(now - writeSession.startTime)
+            const timeGoalReached = writeSession.goalType === 'time' && (now - writeSession.startTime) >= writeSession.goalValue * 60_000
+            if (writeSession.goalReached || timeGoalReached) return t('chat.writeGoalReached') + ` · ${elapsed} · ${writeSession.wordCount} words`
+            return writeSession.goalType === 'words'
+              ? t('chat.writeStatusGoalWords', { elapsed, words: String(writeSession.wordCount), goal: String(writeSession.goalValue) })
+              : t('chat.writeStatusGoalTime', { elapsed, words: String(writeSession.wordCount), goal: String(writeSession.goalValue) })
+          })() : undefined}
         />
       )}
 

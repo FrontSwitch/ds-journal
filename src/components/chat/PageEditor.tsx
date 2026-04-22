@@ -18,6 +18,8 @@ interface Props {
   onPublish: (html: string) => void
   onBack: () => void
   onDiscard: () => void
+  onWordCountChange?: (count: number) => void
+  writeStatus?: string
 }
 
 function draftKey(channelId: number) {
@@ -248,10 +250,12 @@ function makeHashtagExtension() {
 
 // ── PageEditor ────────────────────────────────────────────────────────────────
 
-export function PageEditor({ channelId, avatars, selectedAvatar, onPublish, onBack, onDiscard }: Props) {
+export function PageEditor({ channelId, avatars, selectedAvatar, onPublish, onBack, onDiscard, onWordCountChange, writeStatus }: Props) {
   const rendererRef = useRef<ReactRenderer | null>(null)
   const [isEmpty, setIsEmpty] = useState(true)
   const [confirmingDiscard, setConfirmingDiscard] = useState(false)
+  const onWordCountChangeRef = useRef(onWordCountChange)
+  onWordCountChangeRef.current = onWordCountChange
 
   const editor = useEditor({
     extensions: [
@@ -274,6 +278,11 @@ export function PageEditor({ channelId, avatars, selectedAvatar, onPublish, onBa
       setIsEmpty(empty)
       if (empty) localStorage.removeItem(draftKey(channelId))
       else localStorage.setItem(draftKey(channelId), html)
+      if (onWordCountChangeRef.current) {
+        const text = editor.getText()
+        const count = text.trim() === '' ? 0 : text.trim().split(/\s+/).length
+        onWordCountChangeRef.current(count)
+      }
     },
   })
 
@@ -319,6 +328,7 @@ export function PageEditor({ channelId, avatars, selectedAvatar, onPublish, onBa
             {selectedAvatar?.name ?? 'anonymous'}
           </span>
         </div>
+        {writeStatus && <span className="page-editor-write-status">{writeStatus}</span>}
         <div style={{ flex: 1 }} />
         {!isEmpty && !confirmingDiscard && (
           <button className="page-editor-discard" onClick={() => setConfirmingDiscard(true)}>Discard draft</button>
