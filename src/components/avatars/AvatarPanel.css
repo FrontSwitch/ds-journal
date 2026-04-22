@@ -198,6 +198,9 @@
   border-radius: 50%;
   object-fit: cover;
   display: block;
+  pointer-events: none;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .avatar-img.placeholder {

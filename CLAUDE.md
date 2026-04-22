@@ -24,7 +24,7 @@ CLAUDE.md is loaded at the start of every session (every `/clear`). Every line h
 
 When updating this file: if a section can be summarized in one sentence with a `docs/` pointer, do that. If a gotcha only applies in one rare scenario, it lives in `docs/gotchas.md`. If something was added "just in case," remove it.
 
-A local, private desktop journal for dissociative systems (DID/OSDD). Multiple avatars (alters) post messages into channels, and can submit structured tracker records. Built with Tauri + React + TypeScript + SQLite.
+A local, private journal for dissociative systems (DID/OSDD). Multiple avatars (alters) post messages into channels, and can submit structured tracker records. Built with Tauri (desktop) + Capacitor (iOS) + React + TypeScript + SQLite.
 
 **Formerly:** syschat. Renamed 2026-03-22. GitHub handle: FrontSwitch.
 
@@ -42,6 +42,7 @@ A local, private desktop journal for dissociative systems (DID/OSDD). Multiple a
 ## Stack
 
 - **Tauri v2** — desktop shell, native window, file access
+- **Capacitor 8** — iOS wrapper around the same React frontend; uses `@capacitor-community/sqlite` for DB, `@capacitor/filesystem` for file ops. Build pipeline: `npm run build` → `cap sync ios` → `scripts/cap-fix-spm.cjs` → `pod install` → Xcode. Use `./build_ios.sh` to do all four steps. `isTauri()` / `isCapacitor()` in `src/native/platform.ts` distinguish runtimes.
 - **rusqlite** (`bundled-sqlcipher`) — SQLite/SQLCipher access via custom Tauri commands (`db_load`, `db_execute`, `db_select`). Single persistent connection stored in `DbState(Arc<Mutex<DbInner>>)`. PRAGMA state (e.g. `foreign_keys`) **persists** for the session.
 - **argon2, aes-gcm, rand, hex** (Rust crates) — vault-based key wrapping: Argon2id KDF + AES-256-GCM for master key vaults; also used for sync payload encryption
 - **keyring** — macOS Keychain integration for optional passphrase caching
@@ -59,6 +60,10 @@ A local, private desktop journal for dissociative systems (DID/OSDD). Multiple a
 
 ```bash
 cd ~/dev/tools/syschat   # folder name unchanged
+
+# Desktop
+./run.sh                 # dev server against prod DB (hot-reload)
+./run.sh release         # release build + launch
 npm run tauri dev        # ⚠ uses prod identifier — touches production data
 npm run dev:tauri        # dev build with isolated identifier (.dsj.dev) — safe for development
 npm run dev:test         # isolated test instance 1 (.dsj.test), uses test.db
@@ -70,6 +75,9 @@ npm run seed:load -- --messages 50000   # explicit count; scales time range auto
 npm run delete:test      # wipe the test DB
 npm test                 # run Vitest unit tests (pure functions only, no Tauri)
 npm run test:watch       # watch mode
+
+# iOS
+./build_ios.sh           # build frontend + cap sync + fix SPM + pod install; then rebuild in Xcode
 ```
 
 First run compiles Rust packages (3-5 min). Subsequent runs are fast.
@@ -128,7 +136,8 @@ src/
     tracker-presets.ts        # BUILTIN_PRESETS, seedTrackerPresets
     emojiOverrides.ts         # EmojiOverride interface; CRUD for emoji_overrides table
     sync-device.ts            # getOrCreateDeviceId, initSyncCtx; getDeviceName/Type/Port + setters
-                              #   (all backed by private getDeviceConfig/setDeviceConfig helpers)
+                              #   initSyncCtx reloads trusted peer_codes into Rust cache at startup
+                              #   (Rust peer_codes map is in-memory only — lost on every restart)
     sync-events.ts            # logCreate, logUpdate, logDelete, getEntityId, getLocalEventsSince
     sync-peers.ts             # getSyncPeers, getSyncPeerById, upsertSyncPeer, removeSyncPeer, recordSyncComplete
     sync-apply.ts             # SYNC_TABLES, EID_TO_FK, NATURAL_KEY_COLS; buildStructureSnapshot, applyRemoteEvents
@@ -152,6 +161,10 @@ src/
     useSearchState.ts         # search state + debounce effect + closeSearch/adjustDate
     useTrackerState.ts        # tracker/field/record-form/report state + channel-change effect
     useScratchExport.ts       # scratch export state + handleExportNote/Channel/openChannelExport
+  native/
+    platform.ts               # isTauri() / isCapacitor()
+    db.ts / fs.ts / urls.ts   # Tauri vs Capacitor shims
+    syncCrypto.ts             # Web Crypto API sync for Capacitor: sendToPeer() replicates sync_send_to_peer
   components/
     security/                 # PassphrasePrompt, RecoveryCodeDisplay, PostRecoverySetup,
                               #   EncryptionNudge, PassphraseStrength
@@ -168,6 +181,9 @@ scripts/
   seed-test-db.cjs / seed-load-test.cjs / delete-test-db.cjs
   import-sp-json.cjs          # SP JSON import (--file, --import, --db, --skip-* flags)
   check-i18n.cjs              # compare locale files against en.json
+  cap-fix-spm.cjs             # empties Package.swift to prevent SPM/CocoaPods conflicts on iOS build
+build_ios.sh                  # build frontend + cap sync + fix SPM + pod install
+run.sh                        # run desktop dev or release against prod DB
 src-tauri/
   src/lib.rs                  # mod declarations, run() entry point (menu bar + sync server setup), all tests
   src/db.rs                   # DbState, helpers (to_sql, from_sql, resolve_db_path, sidecar_path,
@@ -331,7 +347,9 @@ Opt-in via Settings → Security. Vault design: random 256-bit master key encryp
 
 ## P2P Sync
 
-LAN sync via per-device event log, entity_id UUID4s, LWW conflict resolution, first-sync merge. Per-device sync policy (messageDays, autoBackup) stored in device_config table — not AppConfig. Transport: axum HTTP + AES-256-GCM + HMAC-SHA256. See `docs/sync.md` for full design, Rust server details, JS sync client API, and Tauri command reference.
+LAN sync via per-device event log, entity_id UUID4s, LWW conflict resolution, first-sync merge. Per-device sync policy (messageDays, autoBackup) stored in device_config table — not AppConfig. Transport: axum HTTP + AES-256-GCM + HMAC-SHA256. `syncNow()` works on both Tauri (via `invoke('sync_send_to_peer', ...)`) and Capacitor (via `sendToPeer()` in `native/syncCrypto.ts` using Web Crypto API). Pairing (`/dsj/pair`) uses plain fetch on both platforms. See `docs/sync.md` for full design, Rust server details, JS sync client API, and Tauri command reference.
+
+**Sync gotcha:** When iOS pairs by connecting to the desktop, `requester_device_id` must come from `getOrCreateDeviceId()`, not from the Tauri ServerInfo (which is null on Capacitor). Bug: sending `''` causes the desktop to store `peer_codes[''] = peer_code`; subsequent syncs fail with 401 because the real UUID isn't found.
 
 ## UI Behavior
 

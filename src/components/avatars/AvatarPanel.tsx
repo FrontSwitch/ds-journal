@@ -426,9 +426,9 @@ export default function AvatarPanel({ channelId, onClose }: Props) {
         title={avatar.name}
       >
         {avatar.image_data ? (
-          <img src={`data:image/png;base64,${avatar.image_data}`} alt={avatar.name} className="avatar-img" />
+          <img src={`data:image/png;base64,${avatar.image_data}`} alt={avatar.name} className="avatar-img" draggable={false} />
         ) : avatar.image_path ? (
-          <img src={assetUrl(avatar.image_path)!} alt={avatar.name} className="avatar-img" />
+          <img src={assetUrl(avatar.image_path)!} alt={avatar.name} className="avatar-img" draggable={false} />
         ) : (
           <div className="avatar-img placeholder" style={{ background: avatar.color }}>
             {avatar.icon_letters || getInitials(avatar.name, allNames)}

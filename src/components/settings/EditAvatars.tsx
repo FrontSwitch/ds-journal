@@ -150,14 +150,21 @@ export default function EditAvatars({ onClose, initialAvatarId }: Props) {
   async function importImageToDb() {
     if (!selected || !imagePath.trim()) return
     setImportingImage(true)
+    let blobUrl: string | null = null
     try {
       const src = assetUrl(imagePath.trim())
-      if (!src) return
+      if (!src) throw new Error('Could not resolve image path')
+      // Fetch as blob → object URL so canvas.toDataURL() never hits cross-origin taint
+      // (WKWebView taints the canvas for images loaded from tauri:// scheme URLs directly)
+      const response = await fetch(src)
+      if (!response.ok) throw new Error(`Failed to fetch image: ${response.status}`)
+      const blob = await response.blob()
+      blobUrl = URL.createObjectURL(blob)
       const img = new Image()
       await new Promise<void>((resolve, reject) => {
         img.onload = () => resolve()
-        img.onerror = reject
-        img.src = src
+        img.onerror = () => reject(new Error('Image failed to load'))
+        img.src = blobUrl!
       })
       const size = imageMaxSize
       const scale = Math.min(1, size / Math.max(img.naturalWidth, img.naturalHeight))
@@ -175,8 +182,9 @@ export default function EditAvatars({ onClose, initialAvatarId }: Props) {
       setHasImageData(true)
       load()
     } catch (e) {
-      alert(String(e))
+      alert(e instanceof Error ? e.message : String(e))
     } finally {
+      if (blobUrl) URL.revokeObjectURL(blobUrl)
       setImportingImage(false)
     }
   }
