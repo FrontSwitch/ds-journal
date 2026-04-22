@@ -12,7 +12,13 @@ export default function MobileLayout() {
   const [showAvatars, setShowAvatars] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
   const [aboutTab, setAboutTab] = useState<'about' | 'help' | 'credits'>('about')
-  const { selectedChannelId, avatarFilter, showSettings, setShowSettings, showDebug, setShowDebug } = useAppStore()
+  const { selectedChannelId, avatarFilter, showSettings, setShowSettings, showDebug, setShowDebug, openAvatarPanelRequest } = useAppStore()
+
+  useEffect(() => {
+    if (openAvatarPanelRequest === 0) return
+    setShowAvatars(true)
+    setShowSidebar(false)
+  }, [openAvatarPanelRequest])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {

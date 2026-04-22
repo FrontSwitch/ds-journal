@@ -73,7 +73,7 @@ function decayBotTags(
 export default function ChatPanel({ channelId, avatarFilter }: Props) {
   const isMobile = useMobile()
   const {
-    selectedAvatarId, avatarPanelMode, setAvatarPanelMode, config,
+    selectedAvatarId, avatarPanelMode, setAvatarPanelMode, requestOpenAvatarPanel, config,
     setSelectedChannel, setSelectedAvatar, setShowSettings, setShowDebug,
     setPendingSettingsPage,
     setPendingOpenAvatarId, setPendingNewNoteAvatarId,
@@ -753,6 +753,11 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
     reload()
   }
 
+  function handleOpenAvatarPanel() {
+    if (avatarPanelMode === 'hidden') setAvatarPanelMode('small')
+    requestOpenAvatarPanel()
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     // Slash command autocomplete (command name still being typed — no space yet)
     if (slash.isOpen) {
@@ -1115,7 +1120,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
                 <span className="avatar-name-label">{selectedAvatar.name}</span>
               </>
             ) : (
-              <span className="avatar-name-label muted">{t('chat.selectAvatarHint')}</span>
+              <button className="avatar-name-label muted avatar-hint-btn" onClick={handleOpenAvatarPanel}>{t('chat.selectAvatarHint')}</button>
             )}
             {writeSession && (() => {
               const elapsed = fmtElapsed(Date.now() - writeSession.startTime)
@@ -1244,7 +1249,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
                 <span className="avatar-name-label">{selectedAvatar.name}</span>
               </>
             ) : (
-              <span className="avatar-name-label muted">{t('chat.selectAvatarHint')}</span>
+              <button className="avatar-name-label muted avatar-hint-btn" onClick={handleOpenAvatarPanel}>{t('chat.selectAvatarHint')}</button>
             )}
             {avatarPanelMode === 'hidden' && (
               <button className="avatars-btn" onClick={() => setAvatarPanelMode('small')}>{t('chat.avatars')}</button>
