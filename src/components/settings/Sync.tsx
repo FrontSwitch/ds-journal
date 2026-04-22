@@ -4,6 +4,7 @@ import {
   getSyncPeers, syncNow, completePairing, removeSyncPeer,
   getDeviceName, setDeviceName, getDeviceType, setDeviceType,
   getSyncPort, setSyncPort, getOpenConflictsWithNames, resolveConflict,
+  getOrCreateDeviceId,
 } from '../../db/sync'
 import { t } from '../../i18n'
 import type { SyncPeer, DeviceType, SyncConflict } from '../../types'
@@ -152,7 +153,7 @@ export default function Sync({ onClose }: Props) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          requester_device_id: info?.device_id ?? '',
+          requester_device_id: info?.device_id ?? getOrCreateDeviceId(),
           requester_device_name: deviceName.trim() || undefined,
           requester_device_type: deviceType,
           requester_address: info ? `${info.local_ip}:${info.port}` : '',

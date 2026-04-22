@@ -57,6 +57,13 @@ export async function initSyncCtx(): Promise<void> {
     const name = await getDeviceName()
     const type = await getDeviceType()
     await invoke('sync_set_device_info', { deviceName: name ?? '', deviceType: type })
+    // Reload trusted peer codes into Rust cache (lost on every restart — cache is in-memory only)
+    const peers = await db.select<{ device_id: string; peer_code: string }[]>(
+      `SELECT device_id, peer_code FROM sync_peers WHERE trusted = 1 AND peer_code IS NOT NULL`
+    )
+    for (const p of peers) {
+      await invoke('sync_update_peer_cache', { deviceId: p.device_id, peerCode: p.peer_code })
+    }
     // Apply stored preferred port (starts on random; restart to preferred port if set)
     await applyPreferredPort()
   }
