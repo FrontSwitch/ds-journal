@@ -258,6 +258,13 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
     return `${m}:${String(s).padStart(2, '0')}`
   }
 
+  function buildWriteNudge(session: WriteSession): string {
+    const elapsed = fmtElapsed(Date.now() - session.startTime)
+    return session.goalType === 'words'
+      ? t('chat.writeNudgeWords', { elapsed, words: String(session.wordCount), goal: String(session.goalValue) })
+      : t('chat.writeNudgeTime', { elapsed, words: String(session.wordCount), remaining: String(Math.max(0, session.goalValue - Math.floor((Date.now() - session.startTime) / 60000))) + ' min' })
+  }
+
   const endWriteSession = useCallback(async (session: WriteSession, avatarId: number | null, avatarName: string | null, avatarColor: string | null) => {
     if (writeTickRef.current) { clearInterval(writeTickRef.current); writeTickRef.current = null }
     writeSessionRef.current = null
@@ -629,10 +636,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
           botTimerRef.current = null
           let result = matchBot(msgText, capturedTags, capturedConfig.rules, capturedTone)
           if (result && result.ruleName === 'catchall' && capturedSession) {
-            const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
-            const nudge = capturedSession.goalType === 'words'
-              ? t('chat.writeNudgeWords', { elapsed, words: String(capturedSession.wordCount), goal: String(capturedSession.goalValue) })
-              : t('chat.writeNudgeTime', { elapsed, words: String(capturedSession.wordCount), remaining: String(Math.max(0, capturedSession.goalValue - Math.floor((Date.now() - capturedSession.startTime) / 60000))) + ' min' })
+            const nudge = buildWriteNudge(capturedSession)
             result = { ...result, response: nudge, ruleName: 'write-nudge' }
           }
           if (result) {
@@ -642,10 +646,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
             }
             setAutoScroll(true)
           } else if (capturedSession) {
-            const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
-            const nudge = capturedSession.goalType === 'words'
-              ? t('chat.writeNudgeWords', { elapsed, words: String(capturedSession.wordCount), goal: String(capturedSession.goalValue) })
-              : t('chat.writeNudgeTime', { elapsed, words: String(capturedSession.wordCount), remaining: String(Math.max(0, capturedSession.goalValue - Math.floor((Date.now() - capturedSession.startTime) / 60000))) + ' min' })
+            const nudge = buildWriteNudge(capturedSession)
             setBotMessage({ id: Date.now(), text: nudge, ruleName: 'write-nudge', addedTags: [], contextTags: [], createdAt: Date.now() })
             setAutoScroll(true)
           }
@@ -656,10 +657,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         const capturedSession = writeSessionRef.current
         botTimerRef.current = setTimeout(() => {
           botTimerRef.current = null
-          const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
-          const nudge = capturedSession.goalType === 'words'
-            ? t('chat.writeNudgeWords', { elapsed, words: String(capturedSession.wordCount), goal: String(capturedSession.goalValue) })
-            : t('chat.writeNudgeTime', { elapsed, words: String(capturedSession.wordCount), remaining: String(Math.max(0, capturedSession.goalValue - Math.floor((Date.now() - capturedSession.startTime) / 60000))) + ' min' })
+          const nudge = buildWriteNudge(capturedSession)
           setBotMessage({ id: Date.now(), text: nudge, ruleName: 'write-nudge', addedTags: [], contextTags: [], createdAt: Date.now() })
           setAutoScroll(true)
         }, 8000)
@@ -700,10 +698,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         botTimerRef.current = null
         let result = matchBot(msgText, capturedTags, capturedConfig.rules, capturedTone)
         if (result && result.ruleName === 'catchall' && capturedSession) {
-          const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
-          const nudge = capturedSession.goalType === 'words'
-            ? t('chat.writeNudgeWords', { elapsed, words: String(capturedSession.wordCount), goal: String(capturedSession.goalValue) })
-            : t('chat.writeNudgeTime', { elapsed, words: String(capturedSession.wordCount), remaining: String(Math.max(0, capturedSession.goalValue - Math.floor((Date.now() - capturedSession.startTime) / 60000))) + ' min' })
+          const nudge = buildWriteNudge(capturedSession)
           result = { ...result, response: nudge, ruleName: 'write-nudge' }
         }
         if (result) {
@@ -713,10 +708,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
           }
           setAutoScroll(true)
         } else if (capturedSession) {
-          const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
-          const nudge = capturedSession.goalType === 'words'
-            ? t('chat.writeNudgeWords', { elapsed, words: String(capturedSession.wordCount), goal: String(capturedSession.goalValue) })
-            : t('chat.writeNudgeTime', { elapsed, words: String(capturedSession.wordCount), remaining: String(Math.max(0, capturedSession.goalValue - Math.floor((Date.now() - capturedSession.startTime) / 60000))) + ' min' })
+          const nudge = buildWriteNudge(capturedSession)
           setBotMessage({ id: Date.now(), text: nudge, ruleName: 'write-nudge', addedTags: [], contextTags: [], createdAt: Date.now() })
           setAutoScroll(true)
         }
@@ -727,10 +719,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
       const capturedSession = writeSessionRef.current
       botTimerRef.current = setTimeout(() => {
         botTimerRef.current = null
-        const elapsed = fmtElapsed(Date.now() - capturedSession.startTime)
-        const nudge = capturedSession.goalType === 'words'
-          ? t('chat.writeNudgeWords', { elapsed, words: String(capturedSession.wordCount), goal: String(capturedSession.goalValue) })
-          : t('chat.writeNudgeTime', { elapsed, words: String(capturedSession.wordCount), remaining: String(Math.max(0, capturedSession.goalValue - Math.floor((Date.now() - capturedSession.startTime) / 60000))) + ' min' })
+        const nudge = buildWriteNudge(capturedSession)
         setBotMessage({ id: Date.now(), text: nudge, ruleName: 'write-nudge', addedTags: [], contextTags: [], createdAt: Date.now() })
         setAutoScroll(true)
       }, 8000)
