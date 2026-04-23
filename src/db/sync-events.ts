@@ -57,6 +57,16 @@ export async function logDelete(
   )
 }
 
+/** Fetch entity_id for id, then emit an update event — no-op if entity_id is missing. */
+export async function logUpdateById(
+  entityType: string,
+  id: number,
+  payload: Record<string, unknown>
+): Promise<void> {
+  const entityId = await getEntityId(entityType, id)
+  if (entityId) await logUpdate(entityType, entityId, payload)
+}
+
 /** Look up the entity_id for any content-table row by its integer PK. */
 export async function getEntityId(table: string, id: number): Promise<string | null> {
   const db = await getDb()

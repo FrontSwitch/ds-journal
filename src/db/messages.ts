@@ -1,5 +1,5 @@
 import { getDb } from './index'
-import { logCreate, logUpdate, getEntityId } from './sync'
+import { logCreate, logUpdate, logUpdateById, getEntityId } from './sync'
 import type { MessageRow } from '../types'
 import { upsertTagsFromText } from './tags'
 import { insertImage } from './images'
@@ -106,15 +106,13 @@ export async function searchMessages(query: string, channelId?: number, avatarId
 export async function deleteMessage(id: number): Promise<void> {
   const db = await getDb()
   await db.execute(`UPDATE messages SET deleted = 1 WHERE id = ?`, [id])
-  const entityId = await getEntityId('messages', id)
-  if (entityId) await logUpdate('messages', entityId, { deleted: 1 })
+  await logUpdateById('messages', id, { deleted: 1 })
 }
 
 export async function undeleteMessage(id: number): Promise<void> {
   const db = await getDb()
   await db.execute(`UPDATE messages SET deleted = 0 WHERE id = ?`, [id])
-  const entityId = await getEntityId('messages', id)
-  if (entityId) await logUpdate('messages', entityId, { deleted: 0 })
+  await logUpdateById('messages', id, { deleted: 0 })
 }
 
 export async function sendImageMessage(
@@ -177,6 +175,5 @@ export async function editMessage(id: number, newText: string): Promise<void> {
     [newText, id]
   )
   await upsertTagsFromText(newText)
-  const entityId = await getEntityId('messages', id)
-  if (entityId) await logUpdate('messages', entityId, { text: newText })
+  await logUpdateById('messages', id, { text: newText })
 }

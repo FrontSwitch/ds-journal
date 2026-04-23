@@ -1,5 +1,5 @@
 import { getDb } from './index'
-import { logCreate, logUpdate, logDelete, getEntityId } from './sync'
+import { logCreate, logUpdateById, logDelete, getEntityId } from './sync'
 
 export interface EmojiOverride {
   id: number
@@ -45,8 +45,7 @@ export async function updateEmojiOverride(
     'UPDATE emoji_overrides SET name = ?, aliases = ?, emoji = ?, category = ? WHERE id = ?',
     [name, aliases, emoji, category, id]
   )
-  const entityId = await getEntityId('emoji_overrides', id)
-  if (entityId) await logUpdate('emoji_overrides', entityId, { name, aliases, emoji, category })
+  await logUpdateById('emoji_overrides', id, { name, aliases, emoji, category })
 }
 
 export async function deleteEmojiOverride(id: number): Promise<void> {

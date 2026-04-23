@@ -1,5 +1,5 @@
 import { getDb, setSortOrders } from './index'
-import { logCreate, logUpdate, logDelete, getEntityId } from './sync'
+import { logCreate, logUpdateById, logDelete, getEntityId } from './sync'
 import { toSqlDatetime } from '../lib/dateUtils'
 import type { Tracker, TrackerField, TrackerRecord, TrackerRecordValueRow } from '../types'
 
@@ -80,15 +80,13 @@ export async function updateTracker(
     'UPDATE trackers SET name = ?, description = ?, color = ?, hidden = ? WHERE id = ?',
     [name, description, color, hidden, id]
   )
-  const entityId = await getEntityId('trackers', id)
-  if (entityId) await logUpdate('trackers', entityId, { name, description, color, hidden })
+  await logUpdateById('trackers', id, { name, description, color, hidden })
 
   // keep channel name and hidden in sync
   const tracker = await getTracker(id)
   if (tracker) {
     await db.execute('UPDATE channels SET name = ?, hidden = ? WHERE id = ?', [name, hidden, tracker.channel_id])
-    const chanEntityId = await getEntityId('channels', tracker.channel_id)
-    if (chanEntityId) await logUpdate('channels', chanEntityId, { name, hidden })
+    await logUpdateById('channels', tracker.channel_id, { name, hidden })
   }
 }
 
@@ -199,8 +197,7 @@ export async function updateTrackerField(
       id,
     ]
   )
-  const entityId = await getEntityId('tracker_fields', id)
-  if (entityId) await logUpdate('tracker_fields', entityId, {
+  await logUpdateById('tracker_fields', id, {
     name, field_type: fieldType, required: options.required ?? 1,
     list_values: options.listValues ?? null, range_min: options.rangeMin ?? null,
     range_max: options.rangeMax ?? null, custom_editor: options.customEditor ?? null,
@@ -403,6 +400,5 @@ export async function setTrackerSyncEnabled(id: number, enabled: boolean): Promi
   const db = await getDb()
   const v = enabled ? 1 : 0
   await db.execute('UPDATE trackers SET sync_enabled = ? WHERE id = ?', [v, id])
-  const entityId = await getEntityId('trackers', id)
-  if (entityId) await logUpdate('trackers', entityId, { sync_enabled: v })
+  await logUpdateById('trackers', id, { sync_enabled: v })
 }

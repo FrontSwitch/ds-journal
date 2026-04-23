@@ -1,5 +1,5 @@
 import { getDb, setSortOrders } from './index'
-import { logCreate, logUpdate, logDelete, getEntityId } from './sync'
+import { logCreate, logUpdate, logUpdateById, logDelete, getEntityId } from './sync'
 import type { Avatar, AvatarField, AvatarFieldType, AvatarFieldValue, AvatarGroup, AvatarNote } from '../types'
 
 export async function getAvatars(): Promise<Avatar[]> {
@@ -53,15 +53,13 @@ export async function updateAvatar(id: number, name: string, color: string, imag
     'UPDATE avatars SET name = ?, color = ?, image_path = ?, description = ?, pronouns = ?, hidden = ?, icon_letters = ? WHERE id = ?',
     [name, color, imagePath, description, pronouns, hidden, iconLetters, id]
   )
-  const entityId = await getEntityId('avatars', id)
-  if (entityId) await logUpdate('avatars', entityId, { name, color, image_path: imagePath, description, pronouns, hidden, icon_letters: iconLetters })
+  await logUpdateById('avatars', id, { name, color, image_path: imagePath, description, pronouns, hidden, icon_letters: iconLetters })
 }
 
 export async function setAvatarImageData(id: number, imageData: string | null): Promise<void> {
   const db = await getDb()
   await db.execute('UPDATE avatars SET image_data = ? WHERE id = ?', [imageData, id])
-  const entityId = await getEntityId('avatars', id)
-  if (entityId) await logUpdate('avatars', entityId, { image_data: imageData })
+  await logUpdateById('avatars', id, { image_data: imageData })
 }
 
 export async function deleteAvatar(id: number): Promise<void> {
@@ -103,8 +101,7 @@ export async function setGroupSortOrders(ids: number[]): Promise<void> {
 export async function renameAvatarGroup(id: number, name: string): Promise<void> {
   const db = await getDb()
   await db.execute('UPDATE avatar_groups SET name = ? WHERE id = ?', [name, id])
-  const entityId = await getEntityId('avatar_groups', id)
-  if (entityId) await logUpdate('avatar_groups', entityId, { name })
+  await logUpdateById('avatar_groups', id, { name })
 }
 
 export async function updateAvatarGroup(id: number, name: string, description: string | null, color: string | null, hidden: number): Promise<void> {
@@ -113,8 +110,7 @@ export async function updateAvatarGroup(id: number, name: string, description: s
     'UPDATE avatar_groups SET name = ?, description = ?, color = ?, hidden = ? WHERE id = ?',
     [name, description, color, hidden, id]
   )
-  const entityId = await getEntityId('avatar_groups', id)
-  if (entityId) await logUpdate('avatar_groups', entityId, { name, description, color, hidden })
+  await logUpdateById('avatar_groups', id, { name, description, color, hidden })
 }
 
 export async function deleteAvatarGroup(id: number): Promise<void> {
@@ -134,8 +130,7 @@ export async function setGroupMembers(groupId: number, avatarIds: number[]): Pro
       [avatarId, groupId]
     )
   }
-  const entityId = await getEntityId('avatar_groups', groupId)
-  if (entityId) await logUpdate('avatar_groups', entityId, { member_ids: avatarIds })
+  await logUpdateById('avatar_groups', groupId, { member_ids: avatarIds })
 }
 
 // ── Avatar fields ──────────────────────────────────────────────────────────────
@@ -163,8 +158,7 @@ export async function updateAvatarField(id: number, name: string, fieldType: Ava
     'UPDATE avatar_fields SET name = ?, field_type = ?, list_values = ? WHERE id = ?',
     [name, fieldType, listValues, id]
   )
-  const entityId = await getEntityId('avatar_fields', id)
-  if (entityId) await logUpdate('avatar_fields', entityId, { name, field_type: fieldType, list_values: listValues })
+  await logUpdateById('avatar_fields', id, { name, field_type: fieldType, list_values: listValues })
 }
 
 export async function deleteAvatarField(id: number): Promise<void> {
@@ -202,8 +196,7 @@ export async function setAvatarFieldValues(avatarId: number, values: { fieldId: 
       )
     }
   }
-  const entityId = await getEntityId('avatars', avatarId)
-  if (entityId) await logUpdate('avatars', entityId, { field_values: values })
+  await logUpdateById('avatars', avatarId, { field_values: values })
 }
 
 export async function setAvatarGroups(avatarId: number, groupIds: number[]): Promise<void> {
@@ -215,8 +208,7 @@ export async function setAvatarGroups(avatarId: number, groupIds: number[]): Pro
       [avatarId, groupId]
     )
   }
-  const entityId = await getEntityId('avatars', avatarId)
-  if (entityId) await logUpdate('avatars', entityId, { group_ids: groupIds })
+  await logUpdateById('avatars', avatarId, { group_ids: groupIds })
 }
 
 // ── Avatar notes ────────────────────────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import { getDb, setSortOrders } from './index'
-import { logCreate, logUpdate, logDelete, getEntityId } from './sync'
+import { logCreate, logUpdate, logDelete, logUpdateById, getEntityId } from './sync'
 import type { Channel, Folder } from '../types'
 
 export interface ChannelCounts {
@@ -66,8 +66,7 @@ export async function createChannel(name: string, folderId: number | null, descr
 export async function renameFolder(id: number, name: string): Promise<void> {
   const db = await getDb()
   await db.execute('UPDATE folders SET name = ? WHERE id = ?', [name, id])
-  const entityId = await getEntityId('folders', id)
-  if (entityId) await logUpdate('folders', entityId, { name })
+  await logUpdateById('folders', id, { name })
 }
 
 export async function updateFolder(id: number, name: string, description: string | null, color: string | null, hidden: number, viewMode: string | null = null): Promise<void> {
@@ -76,8 +75,7 @@ export async function updateFolder(id: number, name: string, description: string
     'UPDATE folders SET name = ?, description = ?, color = ?, hidden = ?, view_mode = ? WHERE id = ?',
     [name, description, color, hidden, viewMode, id]
   )
-  const entityId = await getEntityId('folders', id)
-  if (entityId) await logUpdate('folders', entityId, { name, description, color, hidden, view_mode: viewMode })
+  await logUpdateById('folders', id, { name, description, color, hidden, view_mode: viewMode })
 }
 
 export async function setFolderSortOrders(ids: number[]): Promise<void> {
@@ -87,8 +85,7 @@ export async function setFolderSortOrders(ids: number[]): Promise<void> {
 export async function renameChannel(id: number, name: string): Promise<void> {
   const db = await getDb()
   await db.execute('UPDATE channels SET name = ? WHERE id = ?', [name, id])
-  const entityId = await getEntityId('channels', id)
-  if (entityId) await logUpdate('channels', entityId, { name })
+  await logUpdateById('channels', id, { name })
 }
 
 export async function updateChannel(id: number, name: string, description: string | null, color: string | null, hidden: number, viewMode: string | null = null): Promise<void> {
@@ -97,8 +94,7 @@ export async function updateChannel(id: number, name: string, description: strin
     'UPDATE channels SET name = ?, description = ?, color = ?, hidden = ?, view_mode = ? WHERE id = ?',
     [name, description, color, hidden, viewMode, id]
   )
-  const entityId = await getEntityId('channels', id)
-  if (entityId) await logUpdate('channels', entityId, { name, description, color, hidden, view_mode: viewMode })
+  await logUpdateById('channels', id, { name, description, color, hidden, view_mode: viewMode })
 }
 
 export async function getChannelViewModes(channelId: number): Promise<{ channelMode: string | null; folderMode: string | null }> {
@@ -128,15 +124,13 @@ export async function deleteFolder(id: number): Promise<void> {
 export async function softDeleteChannel(id: number): Promise<void> {
   const db = await getDb()
   await db.execute('UPDATE channels SET hidden = 1 WHERE id = ?', [id])
-  const entityId = await getEntityId('channels', id)
-  if (entityId) await logUpdate('channels', entityId, { hidden: 1 })
+  await logUpdateById('channels', id, { hidden: 1 })
 }
 
 export async function restoreChannel(id: number): Promise<void> {
   const db = await getDb()
   await db.execute('UPDATE channels SET hidden = 0 WHERE id = ?', [id])
-  const entityId = await getEntityId('channels', id)
-  if (entityId) await logUpdate('channels', entityId, { hidden: 0 })
+  await logUpdateById('channels', id, { hidden: 0 })
 }
 
 export async function deleteChannel(id: number): Promise<void> {
@@ -158,8 +152,7 @@ export async function setChannelSyncEnabled(id: number, enabled: boolean): Promi
   const db = await getDb()
   const v = enabled ? 1 : 0
   await db.execute('UPDATE channels SET sync_enabled = ? WHERE id = ?', [v, id])
-  const entityId = await getEntityId('channels', id)
-  if (entityId) await logUpdate('channels', entityId, { sync_enabled: v })
+  await logUpdateById('channels', id, { sync_enabled: v })
 }
 
 export async function updateLastAvatar(channelId: number, avatarId: number): Promise<void> {
