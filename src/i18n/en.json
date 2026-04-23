@@ -156,6 +156,7 @@
     },
     "registry": {
       "settingsLevel":       { "label": "Settings detail level",          "desc": "Controls which settings are visible on this page." },
+      "theme":               { "label": "Theme",                           "desc": "Color scheme: Dark, Dim (softer dark), Light, or Sepia (warm cream)." },
       "hideAfterMinutes":    { "label": "Hide after inactivity",           "desc": "Minimizes the window after this many minutes of inactivity. 0 = disabled." },
       "tags":                { "label": "Tag autocomplete (#)",            "desc": "Enable #tag autocomplete and storage in messages." },
       "mentions":            { "label": "Avatar mention autocomplete (@)", "desc": "Enable @name autocomplete for avatars in messages." },

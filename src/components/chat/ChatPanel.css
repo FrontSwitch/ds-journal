@@ -438,7 +438,7 @@ button.avatar-hint-btn {
 .send-btn {
   padding: 8px 16px;
   background: var(--accent);
-  color: #1e1e2e;
+  color: var(--text-on-accent);
   border-radius: 4px;
   font-weight: 600;
   font-size: 13px;

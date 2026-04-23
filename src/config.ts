@@ -26,6 +26,7 @@ export interface AppConfig {
     viewMode: 'normal' | 'compact' | 'log'
     use24HourClock: boolean
     language: string
+    theme: 'dark' | 'dim' | 'light' | 'sepia'
   }
   db: {
     initialMessageLoad: number
@@ -86,6 +87,21 @@ export const REGISTRY: ConfigDef[] = [
       { value: ConfigLevel.Normal,   label: 'Normal' },
       { value: ConfigLevel.Advanced, label: 'Advanced' },
       { value: ConfigLevel.System,   label: 'System' },
+    ],
+  },
+  {
+    path: 'ui.theme',
+    group: 'UI', groupKey: 'editConfig.groups.ui',
+    label: 'Theme', labelKey: 'editConfig.registry.theme.label',
+    description: 'Color scheme for the app.', descKey: 'editConfig.registry.theme.desc',
+    type: 'select',
+    level: ConfigLevel.Basic,
+    default: 'dark',
+    options: [
+      { value: 'dark',  label: 'Dark' },
+      { value: 'dim',   label: 'Dim' },
+      { value: 'light', label: 'Light' },
+      { value: 'sepia', label: 'Sepia' },
     ],
   },
   {
@@ -252,7 +268,7 @@ export const REGISTRY: ConfigDef[] = [
 // ── Defaults ─────────────────────────────────────────────────────────────────
 
 export const DEFAULTS: AppConfig = {
-  ui:       { settingsLevel: ConfigLevel.Basic, hideAfterMinutes: 0, threadedView: true, viewMode: 'log' as const, use24HourClock: false, language: 'en' },
+  ui:       { settingsLevel: ConfigLevel.Basic, hideAfterMinutes: 0, threadedView: true, viewMode: 'log' as const, use24HourClock: false, language: 'en', theme: 'dark' as const },
   db:       { initialMessageLoad: 50, tagPruneLimit: 10000 },
   features: { tags: true, mentions: true, showFrontGroup: true, builtinShortcodes: true, skinTone: '' },
   threads:  { maxDepth: 5, depthColors: '#89b4fa,#cba6f7,#a6e3a1,#f9e2af,#f38ba8' },

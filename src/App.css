@@ -7,6 +7,7 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 
+  /* Dark theme (default — Catppuccin Mocha) */
   --bg: #1e1e2e;
   --bg-panel: #181825;
   --bg-hover: #313244;
@@ -15,9 +16,62 @@
   --text: #cdd6f4;
   --text-muted: #6c7086;
   --accent: #89b4fa;
+  --text-on-accent: #1e1e2e;
+  --color-danger: #f38ba8;
+  --color-warning: #fab387;
+  --color-success: #a6e3a1;
+
   --sidebar-width: 220px;
   --avatar-panel-width: 200px;
   --avatar-panel-width-wide: 260px;
+}
+
+/* Dim theme — Catppuccin Frappé */
+[data-theme="dim"] {
+  --bg: #303446;
+  --bg-panel: #292c3c;
+  --bg-hover: #414559;
+  --bg-active: #51576d;
+  --border: #414559;
+  --text: #c6d0f5;
+  --text-muted: #737994;
+  --accent: #8caaee;
+  --text-on-accent: #292c3c;
+  --color-danger: #ea999c;
+  --color-warning: #ef9f76;
+  --color-success: #a6d189;
+}
+
+/* Light theme — Catppuccin Latte */
+[data-theme="light"] {
+  --bg: #eff1f5;
+  --bg-panel: #e6e9ef;
+  --bg-hover: #dce0e8;
+  --bg-active: #ccd0da;
+  --border: #ccd0da;
+  --text: #4c4f69;
+  --text-muted: #8c8fa1;
+  --accent: #1e66f5;
+  --text-on-accent: #ffffff;
+  --color-danger: #d20f39;
+  --color-warning: #df8e1d;
+  --color-success: #40a02b;
+}
+
+/* Sepia theme — warm cream journal */
+[data-theme="sepia"] {
+  --bg: #f5f0e8;
+  --bg-panel: #ede8df;
+  --bg-hover: #dfd9cc;
+  --bg-active: #d1cabc;
+  --border: #c8c1b1;
+  --text: #3d3526;
+  --text-muted: #8a7f6a;
+  --accent: #8b5e3c;
+  --text-on-accent: #ffffff;
+  --color-danger: #9a3220;
+  --color-warning: #8f5e38;
+  --color-success: #5a7a40;
 }
 
 * {

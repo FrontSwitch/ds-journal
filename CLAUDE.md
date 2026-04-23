@@ -286,6 +286,7 @@ tn('backup.copy', count)                    // plural: uses copyOne / copyOther
 
 ```ts
 ui.settingsLevel      // ConfigLevel enum — which settings are visible
+ui.theme              // 'dark' | 'dim' | 'light' | 'sepia' — color scheme (default 'dark')
 ui.hideAfterMinutes   // auto-minimize after N minutes idle (0 = disabled)
 ui.viewMode           // 'normal' | 'compact' | 'log' — overridable per channel/folder
 ui.threadedView       // boolean — indent replies (default true); flat in log mode always
@@ -413,15 +414,33 @@ Content-matching rules (emotional keywords, activity words) were explored and ab
 
 ### Writing session (`/write`)
 - `/write 5 minutes` or `/write 200 words` — start; `/write stop` — end manually
-- Session state: `writeSession` + `writeSessionRef` (ref used in callbacks to avoid stale closure)
+- Session state: `writeSession` + `writeSessionRef` (ref used in callbacks to avoid stale closure); `WriteSession` has `goalReached?: boolean`
 - `writeTickRef` — `setInterval` every 1s, increments `writeTick` to force status bar re-render
-- Word counting: happens on every `handleSend` (both regular channel and scratch paths)
-- Goal reached: `endWriteSession` is called BEFORE `reload()` so both the last user message and summary are committed before a single fetch — avoids race where summary appears before last message
+- Word counting in chat: cumulative, incremented per `handleSend` on both regular and scratch paths
+- Word counting in `/page` mode: `PageEditor` fires `onWordCountChange(count)` on each editor update (via `onWordCountChangeRef` to avoid stale closure); `ChatPanel` sets `writeSession.wordCount` directly to the live page word count (not cumulative)
+- Goal reached in chat: `endWriteSession` called immediately (posts summary, ends session)
+- Goal reached in `/page` mode: sets `goalReached = true` on the session but does NOT end it — status shows `writeGoalReached` string; timer keeps running; session ends on Publish
+- On Publish with active write session: `endWriteSession` is called before `reload()` so summary is committed before the page message fetch
+- Write status in `/page` mode: passed as `writeStatus` string prop to `PageEditor`; rendered in toolbar as `.page-editor-write-status` span
 - Intent message (`✍ Writing goal: …`) and summary (`✍ Wrote N words in M minutes.`) use `addScratchMessage` for scratch/allMessages channels, `sendMessage` for regular channels; both use the currently selected avatar
 - Threading: in regular channels, all messages sent during a session are replies to the intent message (`parent_msg_id = intentMsgId`); summary is also a reply. Scratch/allMessages: no threading (`intentMsgId = null`).
 - `sendMessage` in `db/messages.ts` returns `Promise<number>` (the new row id) — used to capture `intentMsgId` at session start
 - Bot catchall fires write nudge text instead of its normal response when a write session is active (`result.ruleName === 'catchall' && capturedSession`)
 - `botMessage` is in the scroll effect deps so the nudge/bot message scrolls into view when it appears
+
+## Theming
+
+Four themes: `dark` (Catppuccin Mocha, default), `dim` (Catppuccin Frappé), `light` (Catppuccin Latte), `sepia` (warm cream). Applied via `document.documentElement.setAttribute('data-theme', config.ui.theme)` in `App.tsx` on every render; CSS selectors `[data-theme="..."]` on `<html>` override the root variables.
+
+**CSS variables** — always use these, never hardcode hex colors:
+- `--bg`, `--bg-panel`, `--bg-hover`, `--bg-active` — surface hierarchy
+- `--border` — dividers and outlines
+- `--text`, `--text-muted` — foreground
+- `--accent` — primary interactive color (buttons, links, active states)
+- `--text-on-accent` — foreground on `--accent`-colored surfaces (e.g. send button, save button). Dark in dark themes, white in light themes.
+- `--color-danger` — destructive actions and errors
+- `--color-warning` — caution states
+- `--color-success` — ok/success states (e.g. sync status bar)
 
 ## Known Gotchas
 

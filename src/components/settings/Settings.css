@@ -238,7 +238,7 @@
 }
 
 .channel-editor-row button:hover { background: var(--bg-active); color: var(--text); }
-.channel-editor-row button.danger:hover { color: #f38ba8; }
+.channel-editor-row button.danger:hover { color: var(--color-danger); }
 
 .channel-editor-row select {
   font-size: 12px;
@@ -484,7 +484,7 @@
 .save-btn {
   padding: 6px 14px;
   background: var(--accent);
-  color: #1e1e2e;
+  color: var(--text-on-accent);
   border-radius: 4px;
   font-weight: 600;
   font-size: 13px;
@@ -495,7 +495,7 @@
 .delete-btn {
   padding: 6px 14px;
   background: var(--bg-hover);
-  color: #f38ba8;
+  color: var(--color-danger);
   border-radius: 4px;
   font-size: 13px;
 }
@@ -553,7 +553,7 @@
 }
 
 .group-row button:hover { background: var(--bg-active); color: var(--text); }
-.group-row button.danger:hover { color: #f38ba8; }
+.group-row button.danger:hover { color: var(--color-danger); }
 
 .add-group-row {
   display: flex;
@@ -591,7 +591,7 @@
   flex-shrink: 0;
 }
 
-.tag-row-delete:hover { background: var(--bg-active); color: #f38ba8; }
+.tag-row-delete:hover { background: var(--bg-active); color: var(--color-danger); }
 
 /* Config editor */
 .config-filter {
@@ -1003,7 +1003,7 @@
   line-height: 1;
 }
 
-.sync-remove-btn:hover:not(:disabled) { color: #f38ba8; background: color-mix(in srgb, #f38ba8 15%, transparent); }
+.sync-remove-btn:hover:not(:disabled) { color: var(--color-danger); background: color-mix(in srgb, #f38ba8 15%, transparent); }
 .sync-remove-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .sync-connect-toggle {

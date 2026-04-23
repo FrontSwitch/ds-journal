@@ -33,6 +33,7 @@ export default function App() {
   const { selectedChannelId, setSelectedChannel, config, setConfig, showSettings, nudgeCheckRequest,
           pendingRecoveryCode, setPendingRecoveryCode } = useAppStore()
   setLocale(config.ui.language ?? 'en')
+  document.documentElement.setAttribute('data-theme', config.ui.theme ?? 'dark')
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const prevShowSettings = useRef(showSettings)
   const isMobile = useMobile()

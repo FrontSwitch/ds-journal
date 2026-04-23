@@ -99,7 +99,7 @@
 }
 
 .sidebar-sync-status-bar.syncing { color: var(--text-muted); }
-.sidebar-sync-status-bar.ok      { color: #a6e3a1; }
+.sidebar-sync-status-bar.ok      { color: var(--color-success); }
 .sidebar-sync-status-bar.err     { color: #f38ba8; }
 
 .sidebar-sync-error-detail {
