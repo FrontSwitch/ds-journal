@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import ColorInput from './ColorInput'
 import { t } from '../../i18n'
 import { useChannels } from '../../hooks/useChannels'
+import { useEntityForm } from '../../hooks/useEntityForm'
 import {
   createFolder, createChannel,
   deleteFolder, deleteChannel, softDeleteChannel, restoreChannel, moveChannelToFolder,
@@ -30,14 +31,17 @@ export default function EditChannels({ onClose }: Props) {
   }, [])
 
   const [selected, setSelected] = useState<Selected>(null)
-  const [editName, setEditName] = useState('')
-  const [editDescription, setEditDescription] = useState('')
-  const [editColor, setEditColor] = useState('')
-  const [editHidden, setEditHidden] = useState(false)
+  const {
+    editName, setEditName,
+    editDescription, setEditDescription,
+    editColor, setEditColor,
+    editHidden, setEditHidden,
+    confirmDelete, setConfirmDelete,
+    setEntityFields, resetEntityFields,
+  } = useEntityForm()
   const [editSyncEnabled, setEditSyncEnabled] = useState(true)
   const [editFolderId, setEditFolderId] = useState<number | null>(null)
   const [editViewMode, setEditViewMode] = useState<string>('')
-  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const [collapsedFolders, setCollapsedFolders] = useState<Record<number, boolean>>({})
 
@@ -63,14 +67,10 @@ export default function EditChannels({ onClose }: Props) {
   function selectItem(type: 'channel', item: Channel): void
   function selectItem(type: 'folder' | 'channel', item: Folder | Channel) {
     setSelected({ type, item } as Selected)
-    setEditName(item.name)
-    setEditDescription(item.description ?? '')
-    setEditColor(item.color ?? '')
-    setEditHidden(isHidden(item.hidden))
+    setEntityFields(item)
     setEditSyncEnabled(type === 'channel' ? ((item as Channel).sync_enabled ?? 1) !== 0 : true)
     setEditFolderId(type === 'channel' ? (item as Channel).folder_id : null)
     setEditViewMode(item.view_mode ?? '')
-    setConfirmDelete(false)
   }
 
   function clearSelection() {
@@ -134,25 +134,17 @@ export default function EditChannels({ onClose }: Props) {
 
   function openNewFolder() {
     setSelected({ type: 'new-folder' })
-    setEditName('')
-    setEditDescription('')
-    setEditColor('')
-    setEditHidden(false)
+    resetEntityFields()
     setEditSyncEnabled(true)
     setEditViewMode('')
-    setConfirmDelete(false)
   }
 
   function openNewChannel() {
     setSelected({ type: 'new-channel' })
-    setEditName('')
-    setEditDescription('')
-    setEditColor('')
-    setEditHidden(false)
+    resetEntityFields()
     setEditSyncEnabled(true)
     setEditFolderId(null)
     setEditViewMode('')
-    setConfirmDelete(false)
   }
 
   async function moveFolderOrder(index: number, dir: 'up' | 'down') {

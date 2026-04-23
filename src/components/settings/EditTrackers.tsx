@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useEntityForm } from '../../hooks/useEntityForm'
 import ColorInput from './ColorInput'
 import {
   getTrackers, createTracker, updateTracker, deleteTracker, setTrackerSortOrders,
@@ -21,12 +22,15 @@ export default function EditTrackers({ onClose }: Props) {
   const [fields, setFields] = useState<TrackerField[]>([])
 
   // tracker form
-  const [editName, setEditName] = useState('')
-  const [editColor, setEditColor] = useState('')
-  const [editDescription, setEditDescription] = useState('')
-  const [editHidden, setEditHidden] = useState(false)
+  const {
+    editName, setEditName,
+    editDescription, setEditDescription,
+    editColor, setEditColor,
+    editHidden, setEditHidden,
+    confirmDelete, setConfirmDelete,
+    setEntityFields, resetEntityFields,
+  } = useEntityForm()
   const [editSyncEnabled, setEditSyncEnabled] = useState(true)
-  const [confirmDelete, setConfirmDelete] = useState(false)
 
   // new tracker mode
   const [isNewTracker, setIsNewTracker] = useState(false)
@@ -56,12 +60,8 @@ export default function EditTrackers({ onClose }: Props) {
 
   function selectTracker(t: Tracker) {
     setSelectedId(t.id)
-    setEditName(t.name)
-    setEditColor(t.color ?? '')
-    setEditDescription(t.description ?? '')
-    setEditHidden(isHidden(t.hidden))
+    setEntityFields(t)
     setEditSyncEnabled((t.sync_enabled ?? 1) !== 0)
-    setConfirmDelete(false)
     setFieldTarget(null)
     setConfirmDeleteField(null)
     loadFields(t.id)
@@ -70,11 +70,7 @@ export default function EditTrackers({ onClose }: Props) {
   function openNewTracker() {
     setSelectedId(null)
     setIsNewTracker(true)
-    setEditName('')
-    setEditColor('')
-    setEditDescription('')
-    setEditHidden(false)
-    setConfirmDelete(false)
+    resetEntityFields()
     setFieldTarget(null)
     setConfirmDeleteField(null)
   }
