@@ -34,6 +34,7 @@ import { useSlashInput, SETTINGS_PAGES } from '../../hooks/useSlashInput'
 import { TAROT_DECK } from '../../data/tarot'
 import { useEmojiInput } from '../../hooks/useEmojiInput'
 import { matchBot, getBotConfig, listBotNames, distillTone, TONE_HISTORY_SIZE, type ResolvedBotConfig, type BotMessage, type ToneSnapshot } from '../../lib/botEngine'
+import { fmtElapsed, fmtMsgTime, fmtRestoreTime } from '../../lib/formatTime'
 import './ChatPanel.css'
 
 interface Props {
@@ -250,13 +251,6 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [searchResults])
-
-  function fmtElapsed(ms: number): string {
-    const totalSec = Math.floor(ms / 1000)
-    const m = Math.floor(totalSec / 60)
-    const s = totalSec % 60
-    return `${m}:${String(s).padStart(2, '0')}`
-  }
 
   function buildWriteNudge(session: WriteSession): string {
     const elapsed = fmtElapsed(Date.now() - session.startTime)
@@ -1373,8 +1367,7 @@ function LogMessageItem({ msg, parentMsg, isAllMessages, editing, onEditStart, o
   const isFrontLog = isFrontSentinel(msg.text)
   const deletable = deleteWindowMinutes > 0 && !msg.tracker_record_id && !isFrontLog && !msg.deleted && ageMs < deleteWindowMinutes * 60_000
   const editable = editWindowMinutes > 0 && !msg.tracker_record_id && !isFrontLog && !msg.deleted && ageMs < editWindowMinutes * 60_000
-  const restoreUntilMs = new Date(msg.created_at + 'Z').getTime() + deleteWindowMinutes * 60_000
-  const restoreUntilStr = new Date(restoreUntilMs).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+  const restoreUntilStr = fmtRestoreTime(msg.created_at, deleteWindowMinutes)
 
   function handleDoubleClick() {
     if (msg.deleted) { onUndelete(); return }
@@ -1478,11 +1471,8 @@ function MessageItem({ msg, depth, depthStyle, isAllMessages, editing, onEditSta
   const isFrontLog = isFrontSentinel(msg.text)
   const deletable = deleteWindowMinutes > 0 && !msg.tracker_record_id && !isFrontLog && !msg.deleted && ageMs < deleteWindowMinutes * 60_000
   const editable = editWindowMinutes > 0 && !msg.tracker_record_id && !isFrontLog && !msg.deleted && ageMs < editWindowMinutes * 60_000
-  const restoreUntilMs = new Date(msg.created_at + 'Z').getTime() + deleteWindowMinutes * 60_000
-  const restoreUntilStr = new Date(restoreUntilMs).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
-  const date = new Date(msg.created_at + 'Z')
-  const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: !use24HourClock })
-  const dateStr = date.toLocaleDateString()
+  const restoreUntilStr = fmtRestoreTime(msg.created_at, deleteWindowMinutes)
+  const { timeStr, dateStr } = fmtMsgTime(msg.created_at, use24HourClock)
 
   function handleDoubleClick() {
     if (msg.deleted) { onUndelete(); return }
@@ -1570,9 +1560,7 @@ function extractPageTitle(html: string): string {
 
 function PageItem({ msg, use24HourClock }: { msg: MessageRow; use24HourClock: boolean }) {
   const [expanded, setExpanded] = useState(true)
-  const date = new Date(msg.created_at + 'Z')
-  const timeStr = date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: !use24HourClock })
-  const dateStr = date.toLocaleDateString()
+  const { timeStr, dateStr } = fmtMsgTime(msg.created_at, use24HourClock)
   const title = extractPageTitle(msg.text)
   return (
     <div className={`page-item${expanded ? ' page-item-expanded' : ''}`}>
