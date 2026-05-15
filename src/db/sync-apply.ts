@@ -1,5 +1,6 @@
 import { getDb } from './index'
 import { getOrCreateDeviceId } from './sync-device'
+import type { NativeDb } from '../native/db'
 import type { SyncEvent } from '../types'
 
 // --- Cold sync: structure snapshot ---
@@ -15,11 +16,11 @@ const VIRTUAL_FIELDS = new Set(['member_ids', 'group_ids', 'field_values', 'valu
 
 // Allowlist column names from sync payloads to prevent injection via crafted peer events.
 // Only lowercase letters and underscores are valid SQLite column names in this schema.
-function safeCol(name: string): boolean {
+export function safeCol(name: string): boolean {
   return /^[a-z_]+$/.test(name)
 }
 
-function sanitizePayload(payload: Record<string, unknown>): Record<string, unknown> {
+export function sanitizePayload(payload: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(Object.entries(payload).filter(([k]) => safeCol(k)))
 }
 
@@ -52,8 +53,7 @@ const NATURAL_KEY_COLS: Partial<Record<string, string[]>> = {
 }
 
 /** Resolve a known entity_id to the local integer PK. */
-async function resolveEntityId(table: string, entityId: string): Promise<number | null> {
-  const db = await getDb()
+async function resolveEntityId(table: string, entityId: string, db: NativeDb): Promise<number | null> {
   const rows = await db.select<{ id: number }[]>(
     `SELECT id FROM ${table} WHERE entity_id = ?`, [entityId]
   )
@@ -66,7 +66,7 @@ async function resolveEntityId(table: string, entityId: string): Promise<number 
  * we adopt the incoming entity_id (first-sync merge) instead of inserting a duplicate.
  */
 async function mergeOrInsert(
-  db: Awaited<ReturnType<typeof getDb>>,
+  db: NativeDb,
   entityType: string,
   entityId: string,
   payload: Record<string, unknown>
@@ -126,8 +126,8 @@ async function mergeOrInsert(
  * FK references use _*_eid fields (entity_ids) instead of integer IDs so they
  * resolve correctly on any device.
  */
-export async function buildStructureSnapshot(): Promise<SyncEvent[]> {
-  const db = await getDb()
+export async function buildStructureSnapshot(injectedDb?: NativeDb): Promise<SyncEvent[]> {
+  const db = injectedDb ?? await getDb()
   const deviceId = getOrCreateDeviceId()
   const events: SyncEvent[] = []
 
@@ -266,10 +266,11 @@ export async function buildStructureSnapshot(): Promise<SyncEvent[]> {
 
 export async function applyRemoteEvents(
   events: SyncEvent[],
-  theirDeviceId: string
+  theirDeviceId: string,
+  injectedDb?: NativeDb
 ): Promise<void> {
   if (events.length === 0) return
-  const db = await getDb()
+  const db = injectedDb ?? await getDb()
   const myDeviceId = getOrCreateDeviceId()
   // Sort by timestamp; snapshot events (ts=0) always applied first for FK resolution
   const sorted = [...events].sort((a, b) => a.timestamp - b.timestamp)
@@ -300,7 +301,7 @@ export async function applyRemoteEvents(
         for (const { eid, col, table } of EID_TO_FK) {
           if (eid in payload) {
             delete payload[col]  // remove stale integer if present
-            const localId = payload[eid] ? await resolveEntityId(table, payload[eid] as string) : null
+            const localId = payload[eid] ? await resolveEntityId(table, payload[eid] as string, db) : null
             delete payload[eid]
             payload[col] = localId
           }
@@ -320,10 +321,10 @@ export async function applyRemoteEvents(
 
         // Apply junction/child tables after entity is guaranteed to exist
         if (_member_eids && event.entity_type === 'avatar_groups') {
-          const groupId = await resolveEntityId('avatar_groups', event.entity_id)
+          const groupId = await resolveEntityId('avatar_groups', event.entity_id, db)
           if (groupId) {
             for (const avatarEid of _member_eids) {
-              const avatarId = await resolveEntityId('avatars', avatarEid)
+              const avatarId = await resolveEntityId('avatars', avatarEid, db)
               if (avatarId) await db.execute(
                 `INSERT OR IGNORE INTO avatar_group_members (avatar_id, group_id) VALUES (?, ?)`,
                 [avatarId, groupId]
@@ -332,10 +333,10 @@ export async function applyRemoteEvents(
           }
         }
         if (_field_values && event.entity_type === 'avatars') {
-          const avatarId = await resolveEntityId('avatars', event.entity_id)
+          const avatarId = await resolveEntityId('avatars', event.entity_id, db)
           if (avatarId) {
             for (const fv of _field_values) {
-              const fieldId = await resolveEntityId('avatar_fields', fv.eid)
+              const fieldId = await resolveEntityId('avatar_fields', fv.eid, db)
               if (fieldId) await db.execute(
                 `INSERT OR REPLACE INTO avatar_field_values (avatar_id, field_id, value) VALUES (?, ?, ?)`,
                 [avatarId, fieldId, fv.value]
@@ -344,13 +345,13 @@ export async function applyRemoteEvents(
           }
         }
         if (_record_values && event.entity_type === 'tracker_records') {
-          const recordId = await resolveEntityId('tracker_records', event.entity_id)
+          const recordId = await resolveEntityId('tracker_records', event.entity_id, db)
           if (recordId) {
             for (const rv of _record_values) {
-              const fieldId = await resolveEntityId('tracker_fields', rv.field_eid)
+              const fieldId = await resolveEntityId('tracker_fields', rv.field_eid, db)
               if (!fieldId) continue
               const valueAvatarId = rv._value_avatar_eid
-                ? await resolveEntityId('avatars', rv._value_avatar_eid)
+                ? await resolveEntityId('avatars', rv._value_avatar_eid, db)
                 : null
               await db.execute(
                 `INSERT OR REPLACE INTO tracker_record_values
@@ -369,7 +370,7 @@ export async function applyRemoteEvents(
         for (const { eid, col, table } of EID_TO_FK) {
           if (eid in payload) {
             delete payload[col]
-            const localId = payload[eid] ? await resolveEntityId(table, payload[eid] as string) : null
+            const localId = payload[eid] ? await resolveEntityId(table, payload[eid] as string, db) : null
             delete payload[eid]
             payload[col] = localId
           }
@@ -422,11 +423,11 @@ export async function applyRemoteEvents(
 
           // Apply junction table updates (entity_id-based format only)
           if (_member_eids !== undefined && event.entity_type === 'avatar_groups') {
-            const groupId = await resolveEntityId('avatar_groups', event.entity_id)
+            const groupId = await resolveEntityId('avatar_groups', event.entity_id, db)
             if (groupId) {
               await db.execute(`DELETE FROM avatar_group_members WHERE group_id = ?`, [groupId])
               for (const avatarEid of _member_eids) {
-                const avatarId = await resolveEntityId('avatars', avatarEid)
+                const avatarId = await resolveEntityId('avatars', avatarEid, db)
                 if (avatarId) await db.execute(
                   `INSERT OR IGNORE INTO avatar_group_members (avatar_id, group_id) VALUES (?, ?)`,
                   [avatarId, groupId]
@@ -435,11 +436,11 @@ export async function applyRemoteEvents(
             }
           }
           if (_field_values !== undefined && event.entity_type === 'avatars') {
-            const avatarId = await resolveEntityId('avatars', event.entity_id)
+            const avatarId = await resolveEntityId('avatars', event.entity_id, db)
             if (avatarId) {
               await db.execute(`DELETE FROM avatar_field_values WHERE avatar_id = ?`, [avatarId])
               for (const fv of _field_values) {
-                const fieldId = await resolveEntityId('avatar_fields', fv.eid)
+                const fieldId = await resolveEntityId('avatar_fields', fv.eid, db)
                 if (fieldId) await db.execute(
                   `INSERT OR REPLACE INTO avatar_field_values (avatar_id, field_id, value) VALUES (?, ?, ?)`,
                   [avatarId, fieldId, fv.value]

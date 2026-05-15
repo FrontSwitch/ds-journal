@@ -53,8 +53,7 @@
     "scratchExportChannel": "Exportar a canal",
     "scratchClear": "Limpiar",
     "scratchForAvatar": "Para:",
-    "scratchToChannel": "A:",
-    "scratchExport": "Exportar"
+    "scratchToChannel": "A:"
   },
   "avatarPanel": {
     "title": "Avatares",

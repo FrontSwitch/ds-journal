@@ -9,6 +9,55 @@ iOS:
 general:
   ?
 
+## May 15 Testing
+⏺ Here's my honest assessment of what's practical:                                                                
+                                                                                                                  
+  What you have                                                        
+                                                                                                                  
+  Good coverage of pure utilities and the security UI. Zero sync coverage — the entire event log, entity          
+  resolution, and apply pipeline are untested.                                                                    
+                                                                                                                  
+  What's actually practical to add                                                                                
+                                                                                                                  
+  Tier 1 — Easy wins, high value (pure + mock-DB)                                                                 
+                                                                                                                  
+  These can be extracted or tested as-is with just a mocked { select, execute } object:                           
+                                                                                                                  
+  - Payload sanitization / safeCol() — not tested at all; prevents SQL injection via column names                 
+  - nextCounter() — monotonic device counter logic; easy to mock one select() call
+  - logCreate/logUpdate/logDelete — verify correct SQL shape and payload serialization                            
+  - getLocalEventsSince() — verify filter logic, entity-type filtering                                            
+                                                                                                                  
+  Tier 2 — Medium effort, highest confidence value                                                                
+                                                                                                                  
+  - mergeOrInsert() / first-sync natural key merge — this is the most fragile logic: "does an avatar with same    
+  name already exist? adopt entity_id instead of duplicating." Mockable with 2-3 chained select() responses.
+  - applyRemoteEvents() create/update/delete paths — test each operation type independently with a fully mocked   
+  DB; verify the right INSERT/UPDATE SQL is issued and conflicts are recorded correctly.                          
+   
+  Tier 3 — Integration tests against real SQLite (the confidence booster)                                         
+                                                            
+  Since you already have npm run seed:test and the dsj.test DB, you could write tests that:                       
+  1. Initialize a fresh in-memory or temp SQLite DB with the schema
+  2. Run logCreate() → getLocalEventsSince() → applyRemoteEvents() as a two-device simulation                     
+  3. Assert the destination DB has the right rows                                            
+                                                                                                                  
+  This is the "does sync actually work end-to-end?" check. The catch: you'd need to either run against a real     
+  SQLite file or introduce a test-mode DB shim. The codebase uses Tauri IPC for all DB calls, so the shim would   
+  need to intercept invoke().                                                                                     
+                                                                                                                  
+  My recommendation                                         
+
+  Start with Tier 1 + Tier 2. Mock the DB interface ({ select: vi.fn(), execute: vi.fn() }), test each function in
+   sync-events.ts and sync-apply.ts independently. This gives you ~80% of the confidence with ~20% of the
+  integration complexity.                                                                                         
+                                                            
+  For Tier 3, the most practical approach is to refactor the sync functions to accept a DB argument (rather than  
+  importing the singleton), then inject either a real SQLite connection or a mock in tests. Looking at the code,
+  applyRemoteEvents() and handleSyncRequest() in sync.ts likely already thread the DB through — worth checking    
+  whether they accept db as a param.                        
+
+  
 ## May 15 Bugs
 Layout/UX
 	x	Show channel name in top bar

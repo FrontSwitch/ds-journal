@@ -2,6 +2,8 @@
 
 DSJ has two test suites: TypeScript (Vitest + React Testing Library) and Rust (cargo test).
 
+`npm test` runs everything — pure unit tests, mock-DB tests, **real-SQLite integration tests** (T3, via `better-sqlite3`), React component tests, and i18n checks.
+
 ## Running tests
 
 ```bash
@@ -13,7 +15,7 @@ cd src-tauri && cargo test   # Rust unit tests (~8s, includes Argon2 KDF)
 
 ## TypeScript tests (Vitest)
 
-**243 tests across 14 files.**
+**314 tests across 17 files.**
 
 ### Setup
 
@@ -24,6 +26,21 @@ cd src-tauri && cargo test   # Rust unit tests (~8s, includes Argon2 KDF)
   - `tauri-event.ts` — `listen` and `emit` are `vi.fn()`
   - `tauri-sql.ts` — SQL plugin stub
 - All three are aliased in `vitest.config.ts` so imports of `@tauri-apps/api/core` etc. resolve to the mocks automatically.
+
+### Sync tests (`src/db/`)
+
+**58 tests across 2 files.** Three tiers: pure, mock-DB, and real-SQLite integration.
+
+| File | Tier | What it tests |
+|---|---|---|
+| `sync-events.test.ts` | T1 (mock DB) | `logCreate`, `logUpdate`, `logDelete`, `logUpdateById`, `getEntityId`, `getLocalEventsSince` — SQL shape, param order, filter conditions |
+| `sync-apply.test.ts` | T1 pure | `safeCol`, `sanitizePayload` — injection-prevention allowlist |
+| `sync-apply.test.ts` | T2 (mock DB) | `applyRemoteEvents`: dedup, unknown entity skip, create/update/delete paths, FK `_*_eid` resolution, LWW conflict recording, conflict dedup, cold-sync sentinel not stored in event_log, first-sync merge |
+| `sync-apply.test.ts` | T3 (real SQLite) | Two-device structure sync; first-sync merge (entity_id adoption); LWW conflict and no-conflict; message sync with FK resolution; message soft-delete; avatar group members; event log round-trip; cutoffMs filter |
+
+**T3 uses `better-sqlite3`** (already in devDependencies) to run a real in-memory SQLite DB. Helper: `src/db/sync-test-utils.ts` — `makeTestDb()` creates the schema, `makeNativeDb()` wraps it in the `NativeDb` interface, `makeEvent()` builds test events.
+
+**Injected DB pattern**: sync functions accept an optional `injectedDb?: NativeDb` parameter. When omitted, they fall back to `getDb()` as in production. Tests pass a real or mock DB directly — no module mocking needed.
 
 ### Pure function tests (`src/lib/`)
 
@@ -113,7 +130,8 @@ Note: Argon2id tests are intentionally slow (KDF tuned for security). `cargo tes
 ## What is NOT tested
 
 - **ChatPanel** and most other React components — too many Tauri IPC and DB dependencies to mock meaningfully. RTL tests are focused on the security layer where trust invariants matter most.
-- **DB queries** — tested implicitly by running the app against test/load DBs (`npm run dev:test`, `npm run seed:load`).
+- **`buildStructureSnapshot`** — reads 10+ tables for cold-sync; tested implicitly by running two-device sync manually (`npm run dev:test` + `npm run dev:test2`).
+- **`syncNow` / `handleSyncRequest` orchestration** — high-level sync coordination in `sync.ts`; depends on Tauri `invoke` and real peer transport. Test manually.
 - **Tauri commands end-to-end** — the Rust commands (`db_setup_encryption`, `db_open_passphrase`, etc.) require a real SQLCipher DB. Test manually with `npm run dev:test`.
 
 ## Manual testing cheat sheet
