@@ -10,8 +10,8 @@
 
 .lightbox-close {
   position: absolute;
-  top: 16px;
-  right: 20px;
+  top: calc(env(safe-area-inset-top) + 16px);
+  right: calc(env(safe-area-inset-right) + 20px);
   background: none;
   border: none;
   color: #fff;
