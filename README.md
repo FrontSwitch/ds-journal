@@ -59,7 +59,8 @@ Early Access. Used daily by the system that built it. Rough edges exist.
 | Version | Status | Focus |
 |---------|-------|----|
 | v0.9 | Apr 2026 | First public release |
-| v0.10 | Current | "page" mode. Early iOS/Sync |
+| v0.10 | Apr 2026 | "page" mode. Early iOS/Sync |
+| v0.10.1 | Current | Bug fixes. |
 | v1.0 | Soon | Stability — a few weeks of real use, bug fixes |
 | v1.1 | I need it! | iOS support and Peer to Peer sync |
 | v1.2 | Planned | Reminders and Polls |
