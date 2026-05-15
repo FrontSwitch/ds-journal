@@ -77,9 +77,19 @@ interface Props {
   onClose: () => void
 }
 
+function loadShowAvatar(trackerId: number): boolean {
+  const raw = localStorage.getItem(`dsj-report-show-avatar-${trackerId}`)
+  return raw === null ? true : raw === '1'
+}
+
 export default function TrackerReport({ tracker, fields, avatars, use24HourClock, onClose }: Props) {
   const [period, setPeriod] = useState<Period>('7d')
-  const [showAvatar, setShowAvatar] = useState(true)
+  const [showAvatar, setShowAvatar] = useState(() => loadShowAvatar(tracker.id))
+
+  function handleShowAvatarChange(checked: boolean) {
+    setShowAvatar(checked)
+    localStorage.setItem(`dsj-report-show-avatar-${tracker.id}`, checked ? '1' : '0')
+  }
   const [records, setRecords] = useState<TrackerRecord[]>([])
   const [counts, setCounts] = useState({ total: 0, week: 0, month: 0, year: 0 })
 
@@ -119,7 +129,7 @@ export default function TrackerReport({ tracker, fields, avatars, use24HourClock
               ))}
             </div>
             <label className="report-avatar-toggle">
-              <input type="checkbox" checked={showAvatar} onChange={e => setShowAvatar(e.target.checked)} />
+              <input type="checkbox" checked={showAvatar} onChange={e => handleShowAvatarChange(e.target.checked)} />
               {t('trackerReport.showAvatar')}
             </label>
             <button className="report-print-btn" onClick={() => window.print()}>

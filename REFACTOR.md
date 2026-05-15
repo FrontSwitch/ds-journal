@@ -21,8 +21,8 @@ Layout/UX
 Bugs
 	∙	Last avatar forgotten in channel
 	x	Load more button shows when there’s nothing more to load
-	∙	Tracker: sum of ints should be int not float
-	∙	Tracker: remember show-avatar flag
+	x	Tracker: sum of ints should be int not float
+	x	Tracker: remember show-avatar flag
 Design questions
 	∙	Channel picker: show folder dot, sort by folder, space for filter
 	∙	“Export to channel” — is that the right term?
