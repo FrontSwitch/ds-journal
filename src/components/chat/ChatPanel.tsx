@@ -245,6 +245,15 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
   }, [channelId])
 
   useEffect(() => {
+    if (!channelId || channelId === ALL_MESSAGES_ID || channelId === SCRATCH_ID || channelId === ALBUM_ID) return
+    if (selectedAvatarId !== null) return
+    getChannels().then(channels => {
+      const ch = channels.find(c => c.id === channelId)
+      if (ch?.last_avatar_id != null) setSelectedAvatar(ch.last_avatar_id)
+    })
+  }, [channelId])
+
+  useEffect(() => {
     if (autoScroll) bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, autoScroll, botMessage])
 

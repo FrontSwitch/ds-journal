@@ -19,7 +19,7 @@ Layout/UX
 	x	Clicking avatar in chat should open avatar panel
 	
 Bugs
-	∙	Last avatar forgotten in channel
+	x	Last avatar forgotten in channel
 	x	Load more button shows when there’s nothing more to load
 	x	Tracker: sum of ints should be int not float
 	x	Tracker: remember show-avatar flag
