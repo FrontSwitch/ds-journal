@@ -89,7 +89,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
   const deleteWindowMinutes = config.messages?.deleteWindowMinutes ?? 10
   const editWindowMinutes = config.messages?.editWindowMinutes ?? 30
   const { messages, loading, reload, loadMore, canLoadMore } = useMessages(channelId, avatarFilter, config.db.initialMessageLoad, deleteWindowMinutes)
-  const { avatars } = useAvatars(null)
+  const { avatars, groups, ungrouped } = useAvatars(null)
   const [text, setText] = useState('')
   const [editing, setEditing] = useState<{ id: number; text: string } | null>(null)
   const [frontLogConfig, setFrontLogConfig] = useState<FrontLogConfig | null>(null)
@@ -948,9 +948,18 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
               <span className="scratch-export-label">{t('chat.scratchForAvatar')}</span>
               <select value={scratchExportAvatarId ?? ''} onChange={e => setScratchExportAvatarId(Number(e.target.value) || null)}>
                 <option value="">—</option>
-                {avatars.filter(a => !isHidden(a.hidden)).map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                {groups.filter(g => !isHidden(g.group.hidden)).map(g => (
+                  <optgroup key={g.group.id} label={g.group.name}>
+                    {g.avatars.filter(a => !isHidden(a.hidden)).map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                  </optgroup>
+                ))}
+                {ungrouped.filter(a => !isHidden(a.hidden)).length > 0 && (
+                  <optgroup label="—">
+                    {ungrouped.filter(a => !isHidden(a.hidden)).map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                  </optgroup>
+                )}
               </select>
-              <button className="scratch-export-btn" onClick={handleExportNote} disabled={!scratchExportAvatarId || scratchMessages.length === 0}>{t('chat.scratchExport')}</button>
+              <button className="scratch-export-btn" onClick={handleExportNote} disabled={!scratchExportAvatarId || scratchMessages.length === 0}>{t('chat.scratchExportSave')}</button>
               <button className="scratch-cancel-btn" onClick={() => setScratchExport(null)}>{t('chat.cancel')}</button>
             </span>
           ) : scratchExport === 'channel' ? (
@@ -958,9 +967,13 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
               <span className="scratch-export-label">{t('chat.scratchToChannel')}</span>
               <select value={scratchExportChannelId ?? ''} onChange={e => setScratchExportChannelId(Number(e.target.value) || null)}>
                 <option value="">—</option>
-                {scratchExportChannels.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {scratchExportChannels.map(g => (
+                  <optgroup key={g.folder.id} label={g.folder.name}>
+                    {g.channels.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  </optgroup>
+                ))}
               </select>
-              <button className="scratch-export-btn" onClick={handleExportChannel} disabled={!scratchExportChannelId || scratchMessages.length === 0}>{t('chat.scratchExport')}</button>
+              <button className="scratch-export-btn" onClick={handleExportChannel} disabled={!scratchExportChannelId || scratchMessages.length === 0}>{t('chat.scratchExportMove')}</button>
               <button className="scratch-cancel-btn" onClick={() => setScratchExport(null)}>{t('chat.cancel')}</button>
             </span>
           ) : (

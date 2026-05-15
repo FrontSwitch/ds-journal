@@ -24,8 +24,8 @@ Bugs
 	x	Tracker: sum of ints should be int not float
 	x	Tracker: remember show-avatar flag
 Design questions
-	∙	Channel picker: show folder dot, sort by folder, space for filter
-	∙	“Export to channel” — is that the right term?
+	x	Channel picker: show folder dot, sort by folder, space for filter
+	x	“Export to channel” — is that the right term?
 
 ## April 22
   ---                                                                                                   
