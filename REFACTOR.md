@@ -15,7 +15,7 @@ Layout/UX
   x desktop test with mobile layout - just narrow the window!
 	x	Avatar screen: show name of selected
 	x	Close button on About is impossible to press
-	∙	Shrink history area when keyboard opens, keep top bar fixed
+	x	Shrink history area when keyboard opens, keep top bar fixed
 	x	Clicking avatar in chat should open avatar panel
 	
 Bugs

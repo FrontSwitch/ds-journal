@@ -252,6 +252,22 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [searchResults])
 
+  // After keyboard resize, snap to bottom if the user was already there.
+  // Uses requestAnimationFrame so the layout has reflowed before we scroll.
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    const onResize = () => {
+      if (autoScroll) {
+        requestAnimationFrame(() => {
+          bottomRef.current?.scrollIntoView({ behavior: 'instant' })
+        })
+      }
+    }
+    vv.addEventListener('resize', onResize)
+    return () => vv.removeEventListener('resize', onResize)
+  }, [autoScroll])
+
   function buildWriteNudge(session: WriteSession): string {
     const elapsed = fmtElapsed(Date.now() - session.startTime)
     return session.goalType === 'words'

@@ -41,6 +41,29 @@ export default function MobileLayout() {
     return () => window.removeEventListener('keydown', handler)
   }, [showDebug])
 
+  // Track visual viewport so the layout fits the area above the keyboard.
+  // On iOS WKWebView: vv.height shrinks when keyboard appears; vv.offsetTop shifts the
+  // visual viewport down relative to the layout viewport (content appears off the top).
+  // We apply both height and a translateY to keep the layout inside the visible area.
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    const root = document.documentElement
+    const update = () => {
+      root.style.setProperty('--mobile-viewport-height', `${vv.height}px`)
+      root.style.setProperty('--mobile-viewport-offset', `${vv.offsetTop}px`)
+    }
+    update()
+    vv.addEventListener('resize', update)
+    vv.addEventListener('scroll', update)
+    return () => {
+      vv.removeEventListener('resize', update)
+      vv.removeEventListener('scroll', update)
+      root.style.removeProperty('--mobile-viewport-height')
+      root.style.removeProperty('--mobile-viewport-offset')
+    }
+  }, [])
+
   return (
     <div className="app-layout mobile">
       {showDebug && <DebugPanel onClose={() => setShowDebug(false)} />}

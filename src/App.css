@@ -150,6 +150,9 @@ input:focus, textarea:focus {
   width: 100%;
   overflow-x: hidden;
   padding-top: env(safe-area-inset-top);
+  height: var(--mobile-viewport-height, 100dvh);
+  transform: translateY(var(--mobile-viewport-offset, 0px));
+  transform-origin: top left;
 }
 
 .mobile-top-bar {
