@@ -41,7 +41,7 @@ export function useMessages(channelId: number | null, avatarFilter: number | nul
     if (limitIndex < LIMITS.length - 1) setLimitIndex(i => i + 1)
   }
 
-  const canLoadMore = limitIndex < LIMITS.length - 1
+  const canLoadMore = limitIndex < LIMITS.length - 1 && messages.length >= limit
 
   return { messages, loading, reload: load, loadMore, canLoadMore }
 }

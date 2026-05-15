@@ -20,7 +20,7 @@ Layout/UX
 	
 Bugs
 	∙	Last avatar forgotten in channel
-	∙	Load more button shows when there’s nothing more to load
+	x	Load more button shows when there’s nothing more to load
 	∙	Tracker: sum of ints should be int not float
 	∙	Tracker: remember show-avatar flag
 Design questions
