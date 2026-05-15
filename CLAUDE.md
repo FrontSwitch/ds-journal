@@ -26,8 +26,6 @@ When updating this file: if a section can be summarized in one sentence with a `
 
 A local, private journal for dissociative systems (DID/OSDD). Multiple avatars (alters) post messages into channels, and can submit structured tracker records. Built with Tauri (desktop) + Capacitor (iOS) + React + TypeScript + SQLite.
 
-**Formerly:** syschat. Renamed 2026-03-22. GitHub handle: FrontSwitch.
-
 **Versioning:** Minor version bumps (`x.Y.z`) whenever the DB schema changes (new tables, columns, or migrations). Patch bumps for fixes/UI changes.
 
 ## What it is
@@ -59,7 +57,6 @@ A local, private journal for dissociative systems (DID/OSDD). Multiple avatars (
 ## Running
 
 ```bash
-cd ~/dev/tools/syschat   # folder name unchanged
 
 # Desktop
 ./run.sh                 # dev server against prod DB (hot-reload)

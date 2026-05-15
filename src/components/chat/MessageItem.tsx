@@ -2,7 +2,8 @@ import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import type { RenderedMessage } from '../../lib/messageUtils'
 import type { MessageRow, TrackerRecord, Avatar } from '../../types'
-import { assetUrl, getMessageDisplayText } from '../../types'
+import { getMessageDisplayText } from '../../types'
+import { AvatarIcon } from '../avatars/AvatarIcon'
 import { fmtRestoreTime, fmtMsgTime } from '../../lib/formatTime'
 import FrontLogMessage, { isFrontSentinel } from './FrontLogMessage'
 import ImageMessage from './ImageMessage'
@@ -157,12 +158,14 @@ export function MessageItem({ msg, depth, depthStyle, isAllMessages, editing, on
   return (
     <div className="message-item" style={depthStyle(depth)} onDoubleClick={handleDoubleClick} onClick={e => { if (e.ctrlKey || e.metaKey) { e.preventDefault(); inspectMessage(msg) } }}>
       <div className="message-avatar-col">
-        {msg.avatar_image_data
-          ? <img src={`data:image/png;base64,${msg.avatar_image_data}`} className="message-avatar-img" alt={msg.avatar_name ?? ''} />
-          : msg.avatar_image_path
-          ? <img src={assetUrl(msg.avatar_image_path)!} className="message-avatar-img" alt={msg.avatar_name ?? ''} />
-          : <div className="message-avatar-dot" style={{ background: msg.avatar_color ?? 'var(--text-muted)' }} />
-        }
+        <AvatarIcon
+          image_data={msg.avatar_image_data}
+          image_path={msg.avatar_image_path}
+          icon_letters={msg.avatar_icon_letters}
+          name={msg.avatar_name ?? ''}
+          color={msg.avatar_color}
+          size={20}
+        />
         {!msg.deleted && onReply && (
           <button className="reply-btn" onClick={e => { e.stopPropagation(); onReply() }} title="Reply">↩</button>
         )}

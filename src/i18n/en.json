@@ -75,6 +75,7 @@
   },
   "avatarPanel": {
     "title": "Avatars",
+    "none": "None",
     "compact": "Compact",
     "full": "Full",
     "hide": "Hide",

@@ -40,7 +40,8 @@ import {
   setAvatarImageData,
 } from '../../db/avatars'
 import type { Avatar, AvatarField, AvatarGroup } from '../../types'
-import { assetUrl, getInitials, isHidden } from '../../types'
+import { assetUrl, isHidden } from '../../types'
+import { AvatarIcon } from '../avatars/AvatarIcon'
 import { t } from '../../i18n'
 
 interface Props { onClose: () => void; initialAvatarId?: number }
@@ -226,12 +227,15 @@ export default function EditAvatars({ onClose, initialAvatarId }: Props) {
                   className={`settings-avatar-row ${selected?.id === a.id ? 'active' : ''}`}
                   onClick={() => selectAvatar(a)}
                 >
-                  {a.image_path
-                    ? <img src={assetUrl(a.image_path)!} className="settings-avatar-img" alt={a.name} />
-                    : <div className="settings-avatar-dot" style={{ background: a.color }}>
-                        {a.icon_letters || getInitials(a.name, avatars.map(x => x.name))}
-                      </div>
-                  }
+                  <AvatarIcon
+                    image_data={a.image_data}
+                    image_path={a.image_path}
+                    icon_letters={a.icon_letters}
+                    name={a.name}
+                    color={a.color}
+                    allNames={avatars.map(x => x.name)}
+                    size={24}
+                  />
                   {a.name}
                 </div>
               ))}

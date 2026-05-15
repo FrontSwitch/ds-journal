@@ -60,6 +60,7 @@ export interface MessageRow {
   avatar_color: string | null
   avatar_image_path: string | null
   avatar_image_data: string | null   // base64 from avatars.image_data
+  avatar_icon_letters: string | null
   tracker_record_id: number | null
   parent_msg_id: number | null
   message_type: string

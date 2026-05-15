@@ -1,5 +1,43 @@
 # Refactor Backlog
 
+
+## Bugs
+
+iOS:
+  need to show channel in chat as no "channel panel"
+  sync did not put actors into groups
+general:
+  ?
+
+## May 15 Bugs
+Layout/UX
+	x	Show channel name in top bar
+  x desktop test with mobile layout - just narrow the window!
+	x	Avatar screen: show name of selected
+	∙	Close button on About is impossible to press
+	∙	Shrink history area when keyboard opens, keep top bar fixed
+	∙	Clicking avatar in chat should open avatar panel
+	∙	Put folder/dot channel indicator in chat panel
+Bugs
+	∙	Last avatar forgotten in channel
+	∙	Load more button shows when there’s nothing more to load
+	∙	Tracker: sum of ints should be int not float
+	∙	Tracker: remember show-avatar flag
+Design questions
+	∙	Channel picker: show folder dot, sort by folder, space for filter
+	∙	“Export to channel” — is that the right term?
+
+## April 22
+  ---                                                                                                   
+  5. Settings components are 500+ lines each — Sync.tsx (533), EditShortcodes.tsx (517), EditTrackers.tsx  
+  (508) all mix state, handlers, and render logic. EditTrackers is the best candidate: extract
+  EditTrackerField and TrackerList sub-components.                                                         
+                                                            
+  6. Message SELECT query duplication — SELECT_CHANNEL vs SELECT_ALL in messages.ts differ only in whether 
+  they join the channel name. A buildMessageQuery(includeChannelName) factory would clean this up.
+                                                                                                           
+
+## Peer to peer sync
 Peer to peer sync.
 ordering of events is per device, not global.
 

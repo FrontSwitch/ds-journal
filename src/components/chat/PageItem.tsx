@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { MessageRow } from '../../types'
-import { assetUrl } from '../../types'
+import { AvatarIcon } from '../avatars/AvatarIcon'
 import { fmtMsgTime } from '../../lib/formatTime'
 
 function extractPageTitle(html: string): string {
@@ -18,12 +18,14 @@ export default function PageItem({ msg, use24HourClock }: { msg: MessageRow; use
   return (
     <div className={`page-item${expanded ? ' page-item-expanded' : ''}`}>
       <button className="page-item-header" onClick={() => setExpanded(v => !v)}>
-        {msg.avatar_image_data
-          ? <img src={`data:image/png;base64,${msg.avatar_image_data}`} className="page-item-avatar-img" alt={msg.avatar_name ?? ''} />
-          : msg.avatar_image_path
-          ? <img src={assetUrl(msg.avatar_image_path)!} className="page-item-avatar-img" alt={msg.avatar_name ?? ''} />
-          : <span className="page-item-avatar-dot" style={{ background: msg.avatar_color ?? 'var(--text-muted)' }} />
-        }
+        <AvatarIcon
+          image_data={msg.avatar_image_data}
+          image_path={msg.avatar_image_path}
+          icon_letters={msg.avatar_icon_letters}
+          name={msg.avatar_name ?? ''}
+          color={msg.avatar_color}
+          size={16}
+        />
         <span className="page-item-author" style={{ color: msg.avatar_color ?? 'var(--text-muted)' }}>
           {msg.avatar_name ?? '—'}
         </span>

@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useAppStore } from '../store/app'
+import { useChannels } from '../hooks/useChannels'
+import { ALL_MESSAGES_ID, SCRATCH_ID, ALBUM_ID } from '../types'
+import { t } from '../i18n'
 import Sidebar from '../components/sidebar/Sidebar'
 import ChatPanel from '../components/chat/ChatPanel'
 import AvatarPanel from '../components/avatars/AvatarPanel'
@@ -13,6 +16,16 @@ export default function MobileLayout() {
   const [showAbout, setShowAbout] = useState(false)
   const [aboutTab, setAboutTab] = useState<'about' | 'help' | 'credits'>('about')
   const { selectedChannelId, avatarFilter, showSettings, setShowSettings, showDebug, setShowDebug, openAvatarPanelRequest } = useAppStore()
+  const { channels } = useChannels()
+
+  const currentChannel = channels.find(c => c.id === selectedChannelId)
+  const channelName = (() => {
+    if (selectedChannelId === ALL_MESSAGES_ID) return t('sidebar.allMessages')
+    if (selectedChannelId === SCRATCH_ID) return t('sidebar.scratch')
+    if (selectedChannelId === ALBUM_ID) return t('sidebar.album')
+    return currentChannel?.name ?? ''
+  })()
+  const channelColor = currentChannel?.color ?? undefined
 
   useEffect(() => {
     if (openAvatarPanelRequest === 0) return
@@ -37,6 +50,7 @@ export default function MobileLayout() {
           onClick={() => { setShowSidebar(v => !v); setShowAvatars(false) }}
           title="Channels"
         >☰</button>
+        <span className="mobile-top-title" style={channelColor ? { color: channelColor } : undefined}>{channelName}</span>
         <button
           className={`mobile-top-btn${showAvatars ? ' active' : ''}`}
           onClick={() => { setShowAvatars(v => !v); setShowSidebar(false) }}

@@ -23,6 +23,19 @@
   min-width: 0;
 }
 
+.panel-header-title {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.panel-header-none {
+  color: var(--text-muted);
+}
+
 .wide-toggle {
   color: var(--text-muted);
   font-size: 16px;
@@ -186,31 +199,6 @@
   justify-content: flex-start;
 }
 
-.avatar-item.wide .avatar-img {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-}
-
-.avatar-img {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-  pointer-events: none;
-  -webkit-touch-callout: none;
-  user-select: none;
-}
-
-.avatar-img.placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 13px;
-  color: #1e1e2e;
-}
 
 .avatar-label-group {
   display: flex;

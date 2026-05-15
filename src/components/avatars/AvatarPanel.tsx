@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useAvatars } from '../../hooks/useAvatars'
 import { useAppStore } from '../../store/app'
-import { ALL_MESSAGES_ID, assetUrl, getInitials, isHidden } from '../../types'
+import { ALL_MESSAGES_ID, getInitials, isHidden } from '../../types'
+import { AvatarIcon } from './AvatarIcon'
 import type { Avatar, AvatarField, AvatarFieldValue, AvatarNote } from '../../types'
 import { t } from '../../i18n'
 import { parseIntRange, intRangesOverlap, formatIntRange } from '../../lib/avatarFieldUtils'
@@ -315,6 +316,7 @@ export default function AvatarPanel({ channelId, onClose }: Props) {
   const wide = avatarPanelMode === 'full'
   const isAllMessages = channelId === ALL_MESSAGES_ID
   const allNames = avatars.map(a => a.name)
+  const selectedAvatar = selectedAvatarId != null ? avatars.find(a => a.id === selectedAvatarId) ?? null : null
 
   useEffect(() => {
     document.querySelector('.app-layout')?.classList.toggle('wide-avatars', wide)
@@ -425,15 +427,15 @@ export default function AvatarPanel({ channelId, onClose }: Props) {
         style={{ '--avatar-color': avatar.color } as React.CSSProperties}
         title={avatar.name}
       >
-        {avatar.image_data ? (
-          <img src={`data:image/png;base64,${avatar.image_data}`} alt={avatar.name} className="avatar-img" draggable={false} />
-        ) : avatar.image_path ? (
-          <img src={assetUrl(avatar.image_path)!} alt={avatar.name} className="avatar-img" draggable={false} />
-        ) : (
-          <div className="avatar-img placeholder" style={{ background: avatar.color }}>
-            {avatar.icon_letters || getInitials(avatar.name, allNames)}
-          </div>
-        )}
+        <AvatarIcon
+          image_data={avatar.image_data}
+          image_path={avatar.image_path}
+          icon_letters={avatar.icon_letters}
+          name={avatar.name}
+          color={avatar.color}
+          allNames={allNames}
+          size={wide ? 28 : undefined}
+        />
         {wide && (
           <div className="avatar-label-group">
             <span className="avatar-label">{avatar.name}</span>
@@ -535,7 +537,31 @@ export default function AvatarPanel({ channelId, onClose }: Props) {
         {onClose && (
           <button className="wide-toggle" onClick={onClose} title="Close">←</button>
         )}
-        <span>{t('avatarPanel.title')}</span>
+        <span className="panel-header-title">
+          {t('avatarPanel.title')}
+          {!wide && (
+            <>
+              {': '}
+              {selectedAvatar ? (
+                <>
+                  <AvatarIcon
+                    image_data={selectedAvatar.image_data}
+                    image_path={selectedAvatar.image_path}
+                    icon_letters={selectedAvatar.icon_letters}
+                    name={selectedAvatar.name}
+                    color={selectedAvatar.color}
+                    allNames={allNames}
+                    size={16}
+                  />
+                  {' '}
+                  <span style={{ color: selectedAvatar.color }}>{selectedAvatar.name}</span>
+                </>
+              ) : (
+                <span className="panel-header-none">{t('avatarPanel.none')}</span>
+              )}
+            </>
+          )}
+        </span>
         <button className="wide-toggle" onClick={() => setAvatarPanelMode(wide ? 'small' : 'full')} title={wide ? t('avatarPanel.compact') : t('avatarPanel.full')}>
           {wide ? '⟨' : '⟩'}
         </button>

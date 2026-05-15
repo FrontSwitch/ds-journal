@@ -8,7 +8,7 @@ import { insertImage } from './images'
 const SELECT_CHANNEL = `
   SELECT m.id, m.channel_id, '' as channel_name, m.text, m.original_text, m.deleted, m.created_at,
          m.tracker_record_id, m.parent_msg_id, m.message_type,
-         a.id as avatar_id, a.name as avatar_name, a.color as avatar_color, a.image_path as avatar_image_path, a.image_data as avatar_image_data,
+         a.id as avatar_id, a.name as avatar_name, a.color as avatar_color, a.image_path as avatar_image_path, a.image_data as avatar_image_data, a.icon_letters as avatar_icon_letters,
          mi.image_path, mi.caption as image_caption, mi.location as image_location, mi.people as image_people
   FROM messages m
   LEFT JOIN avatars a ON m.avatar_id = a.id
@@ -18,7 +18,7 @@ const SELECT_CHANNEL = `
 const SELECT_ALL = `
   SELECT m.id, m.channel_id, c.name as channel_name, m.text, m.original_text, m.deleted, m.created_at,
          m.tracker_record_id, m.parent_msg_id, m.message_type,
-         a.id as avatar_id, a.name as avatar_name, a.color as avatar_color, a.image_path as avatar_image_path, a.image_data as avatar_image_data,
+         a.id as avatar_id, a.name as avatar_name, a.color as avatar_color, a.image_path as avatar_image_path, a.image_data as avatar_image_data, a.icon_letters as avatar_icon_letters,
          mi.image_path, mi.caption as image_caption, mi.location as image_location, mi.people as image_people
   FROM messages m
   LEFT JOIN avatars a ON m.avatar_id = a.id

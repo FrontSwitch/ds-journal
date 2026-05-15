@@ -153,20 +153,6 @@
   width: 28px;
 }
 
-.message-avatar-dot {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.message-avatar-img {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
 
 .reply-btn {
   font-size: 20px;
@@ -816,10 +802,8 @@ button.avatar-hint-btn {
   font-size: 12px;
 }
 
-.message-list.compact .message-avatar-dot,
-.message-list.compact .message-avatar-img {
-  width: 16px;
-  height: 16px;
+.message-list.compact .avatar-icon {
+  --ai-size: 16px;
 }
 
 .message-list.compact .message-avatar-col {

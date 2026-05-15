@@ -33,20 +33,6 @@
   margin-left: 10px;
 }
 
-.page-editor-avatar-dot {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.page-editor-avatar-img {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  object-fit: cover;
-}
 
 .page-editor-avatar-name {
   font-size: 13px;
@@ -294,21 +280,6 @@
   border-bottom: 1px solid var(--border);
 }
 
-.page-item-avatar-dot {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.page-item-avatar-img {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  object-fit: cover;
-  flex-shrink: 0;
-}
 
 .page-item-author {
   font-size: 13px;

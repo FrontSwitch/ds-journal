@@ -6,7 +6,8 @@ import Placeholder from '@tiptap/extension-placeholder'
 import Suggestion from '@tiptap/suggestion'
 import type { SuggestionProps, SuggestionKeyDownProps } from '@tiptap/suggestion'
 import type { Avatar } from '../../types'
-import { assetUrl, isHidden } from '../../types'
+import { isHidden } from '../../types'
+import { AvatarIcon } from '../avatars/AvatarIcon'
 import { getTagSuggestions } from '../../db/tags'
 import { getChannels } from '../../db/channels'
 import './PageEditor.css'
@@ -318,12 +319,16 @@ export function PageEditor({ channelId, avatars, selectedAvatar, onPublish, onBa
       <div className="page-editor-toolbar">
         <button className="page-editor-back" onClick={onBack} title="Back to chat — draft is saved">← Back</button>
         <div className="page-editor-avatar">
-          {selectedAvatar?.image_data
-            ? <img src={`data:image/png;base64,${selectedAvatar.image_data}`} className="page-editor-avatar-img" alt={selectedAvatar.name} />
-            : selectedAvatar?.image_path
-            ? <img src={assetUrl(selectedAvatar.image_path)!} className="page-editor-avatar-img" alt={selectedAvatar.name} />
-            : <span className="page-editor-avatar-dot" style={{ background: selectedAvatar?.color ?? 'var(--text-muted)' }} />
-          }
+          {selectedAvatar && (
+            <AvatarIcon
+              image_data={selectedAvatar.image_data}
+              image_path={selectedAvatar.image_path}
+              icon_letters={selectedAvatar.icon_letters}
+              name={selectedAvatar.name}
+              color={selectedAvatar.color}
+              size={20}
+            />
+          )}
           <span className="page-editor-avatar-name" style={{ color: selectedAvatar?.color ?? 'var(--text-muted)' }}>
             {selectedAvatar?.name ?? 'anonymous'}
           </span>
