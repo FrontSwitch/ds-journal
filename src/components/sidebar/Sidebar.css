@@ -16,12 +16,23 @@
   gap: 8px;
 }
 
+.sidebar-header.mobile-header {
+  flex-direction: row;
+  align-items: center;
+  padding-bottom: 10px;
+  gap: 8px;
+}
+
 .sidebar-header-title {
   flex: 1;
   font-size: 15px;
   font-weight: 600;
   color: var(--text);
   padding-bottom: 10px;
+}
+
+.sidebar-header.mobile-header .sidebar-header-title {
+  padding-bottom: 0;
 }
 
 .sidebar-title {

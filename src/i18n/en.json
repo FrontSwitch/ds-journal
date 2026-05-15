@@ -173,6 +173,7 @@
       "deleteWindowMinutes":    { "label": "Delete window (minutes)",   "desc": "How long after sending a message can be deleted. 0 = never. Max 6000 (~100 hours)." },
       "editWindowMinutes":      { "label": "Edit window (minutes)",     "desc": "How long after sending a message can be edited. 0 = never. Max 6000 (~100 hours)." },
       "builtinShortcodes":      { "label": "Built-in shortcodes",       "desc": "When off, only your custom shortcodes from Settings → Edit Shortcodes are active." },
+      "avatarQuickSelect":      { "label": "Avatar quick-select",       "desc": "Tap the avatar name in chat to open the avatar panel. Selecting an avatar closes it automatically." },
       "autoSyncOnStartup":      { "label": "Sync on startup",            "desc": "Automatically sync with all paired devices when the app starts." },
       "autoSyncMinutes":        { "label": "Auto-sync interval (minutes)", "desc": "Sync with paired devices every N minutes. 0 = disabled." }
     }

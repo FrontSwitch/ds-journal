@@ -17,6 +17,7 @@ import { ALL_MESSAGES_ID, SCRATCH_ID, ALBUM_ID, getMessageDisplayText, isHidden 
 import { buildThreadedList, buildLogRows } from '../../lib/messageUtils'
 import type { RenderedMessage } from '../../lib/messageUtils'
 import { isTauri } from '../../native/platform'
+import { AvatarIcon } from '../avatars/AvatarIcon'
 import { t } from '../../i18n'
 import RecordEntryForm from './RecordEntryForm'
 import ImagePostForm from './ImagePostForm'
@@ -738,7 +739,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
 
   function handleOpenAvatarPanel() {
     if (avatarPanelMode === 'hidden') setAvatarPanelMode('small')
-    requestOpenAvatarPanel()
+    requestOpenAvatarPanel(true)
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -1119,10 +1120,10 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         <div className="chat-input-area">
           <div className="avatar-indicator">
             {selectedAvatar ? (
-              <>
-                <div className="avatar-dot" style={{ background: selectedAvatar.color }} />
-                <span className="avatar-name-label">{selectedAvatar.name}</span>
-              </>
+              <button className="avatar-hint-btn avatar-selected-btn" onClick={config.features.avatarQuickSelect ? handleOpenAvatarPanel : undefined}>
+                <AvatarIcon name={selectedAvatar.name} color={selectedAvatar.color} icon_letters={selectedAvatar.icon_letters} image_data={selectedAvatar.image_data} image_path={selectedAvatar.image_path} size={18} />
+                <span className="avatar-name-label" style={{ color: selectedAvatar.color ?? undefined }}>{selectedAvatar.name}</span>
+              </button>
             ) : (
               <button className="avatar-name-label muted avatar-hint-btn" onClick={handleOpenAvatarPanel}>{t('chat.selectAvatarHint')}</button>
             )}
@@ -1248,10 +1249,10 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         <div className="chat-input-area">
           <div className="avatar-indicator">
             {selectedAvatar ? (
-              <>
-                <div className="avatar-dot" style={{ background: selectedAvatar.color }} />
-                <span className="avatar-name-label">{selectedAvatar.name}</span>
-              </>
+              <button className="avatar-hint-btn avatar-selected-btn" onClick={config.features.avatarQuickSelect ? handleOpenAvatarPanel : undefined}>
+                <AvatarIcon name={selectedAvatar.name} color={selectedAvatar.color} icon_letters={selectedAvatar.icon_letters} image_data={selectedAvatar.image_data} image_path={selectedAvatar.image_path} size={18} />
+                <span className="avatar-name-label" style={{ color: selectedAvatar.color ?? undefined }}>{selectedAvatar.name}</span>
+              </button>
             ) : (
               <button className="avatar-name-label muted avatar-hint-btn" onClick={handleOpenAvatarPanel}>{t('chat.selectAvatarHint')}</button>
             )}

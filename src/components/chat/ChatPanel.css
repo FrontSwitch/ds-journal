@@ -332,6 +332,12 @@ button.avatar-hint-btn {
   font-family: inherit;
 }
 
+button.avatar-selected-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .cmd-error {
   font-size: 12px;
   color: var(--danger, #e05c5c);

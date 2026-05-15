@@ -20,6 +20,7 @@ function formatNoteDate(iso: string): string {
 interface Props {
   channelId: number | null
   onClose?: () => void
+  autoClose?: boolean
 }
 
 function AvatarInfoPopup({ avatar, fields, fieldValues, avatars, selectedAvatarId, onClose, initialView }: {
@@ -295,7 +296,7 @@ function AvatarInfoPopup({ avatar, fields, fieldValues, avatars, selectedAvatarI
 
 interface ContextMenu { avatar: Avatar; x: number; y: number }
 
-export default function AvatarPanel({ channelId, onClose }: Props) {
+export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const [filter, setFilter] = useState('')
   const [fieldFilterId, setFieldFilterId] = useState<number | null>(null)
@@ -366,7 +367,9 @@ export default function AvatarPanel({ channelId, onClose }: Props) {
     } else {
       setSelectedAvatar(selectedAvatarId === avatar.id ? null : avatar.id)
     }
-    if (!onClose) {
+    if (autoClose && onClose) {
+      onClose()
+    } else if (!onClose) {
       document.querySelector<HTMLTextAreaElement>('.chat-panel textarea')?.focus()
     }
   }

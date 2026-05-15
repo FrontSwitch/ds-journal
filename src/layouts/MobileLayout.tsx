@@ -15,7 +15,7 @@ export default function MobileLayout() {
   const [showAvatars, setShowAvatars] = useState(false)
   const [showAbout, setShowAbout] = useState(false)
   const [aboutTab, setAboutTab] = useState<'about' | 'help' | 'credits'>('about')
-  const { selectedChannelId, avatarFilter, showSettings, setShowSettings, showDebug, setShowDebug, openAvatarPanelRequest } = useAppStore()
+  const { selectedChannelId, avatarFilter, showSettings, setShowSettings, showDebug, setShowDebug, openAvatarPanelRequest, avatarPanelReturnToChat, setAvatarPanelReturnToChat } = useAppStore()
   const { channels } = useChannels()
 
   const currentChannel = channels.find(c => c.id === selectedChannelId)
@@ -78,7 +78,11 @@ export default function MobileLayout() {
 
       {showAvatars && (
         <div className="mobile-overlay">
-          <AvatarPanel channelId={selectedChannelId} onClose={() => setShowAvatars(false)} />
+          <AvatarPanel
+            channelId={selectedChannelId}
+            autoClose={avatarPanelReturnToChat}
+            onClose={() => { setShowAvatars(false); setAvatarPanelReturnToChat(false) }}
+          />
         </div>
       )}
 

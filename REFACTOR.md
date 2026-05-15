@@ -14,10 +14,10 @@ Layout/UX
 	x	Show channel name in top bar
   x desktop test with mobile layout - just narrow the window!
 	x	Avatar screen: show name of selected
-	∙	Close button on About is impossible to press
+	x	Close button on About is impossible to press
 	∙	Shrink history area when keyboard opens, keep top bar fixed
-	∙	Clicking avatar in chat should open avatar panel
-	∙	Put folder/dot channel indicator in chat panel
+	x	Clicking avatar in chat should open avatar panel
+	
 Bugs
 	∙	Last avatar forgotten in channel
 	∙	Load more button shows when there’s nothing more to load

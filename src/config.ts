@@ -38,6 +38,7 @@ export interface AppConfig {
     showFrontGroup: boolean
     builtinShortcodes: boolean
     skinTone: string
+    avatarQuickSelect: boolean
   }
   threads: {
     maxDepth: number
@@ -145,6 +146,15 @@ export const REGISTRY: ConfigDef[] = [
     group: 'Features', groupKey: 'editConfig.groups.features',
     label: 'Built-in shortcodes', labelKey: 'editConfig.registry.builtinShortcodes.label',
     description: 'When off, only your custom shortcodes from Settings → Edit Shortcodes are active.', descKey: 'editConfig.registry.builtinShortcodes.desc',
+    type: 'boolean',
+    level: ConfigLevel.Normal,
+    default: true,
+  },
+  {
+    path: 'features.avatarQuickSelect',
+    group: 'Features', groupKey: 'editConfig.groups.features',
+    label: 'Avatar quick-select', labelKey: 'editConfig.registry.avatarQuickSelect.label',
+    description: 'Tap the avatar name in chat to open the avatar panel. Selecting an avatar closes it automatically.', descKey: 'editConfig.registry.avatarQuickSelect.desc',
     type: 'boolean',
     level: ConfigLevel.Normal,
     default: true,
@@ -270,7 +280,7 @@ export const REGISTRY: ConfigDef[] = [
 export const DEFAULTS: AppConfig = {
   ui:       { settingsLevel: ConfigLevel.Basic, hideAfterMinutes: 0, threadedView: true, viewMode: 'log' as const, use24HourClock: false, language: 'en', theme: 'dark' as const },
   db:       { initialMessageLoad: 50, tagPruneLimit: 10000 },
-  features: { tags: true, mentions: true, showFrontGroup: true, builtinShortcodes: true, skinTone: '' },
+  features: { tags: true, mentions: true, showFrontGroup: true, builtinShortcodes: true, skinTone: '', avatarQuickSelect: true },
   threads:  { maxDepth: 5, depthColors: '#89b4fa,#cba6f7,#a6e3a1,#f9e2af,#f38ba8' },
   messages: { deleteWindowMinutes: 10, editWindowMinutes: 30 },
   security: { encryptDatabase: false, rememberPassphrase: false },

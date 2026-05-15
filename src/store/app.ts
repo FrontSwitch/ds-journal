@@ -45,6 +45,7 @@ interface AppState {
   scratchMessages: ScratchMessage[]
   nudgeCheckRequest: number               // increment to trigger a nudge check in App
   openAvatarPanelRequest: number          // increment to open avatar panel (mobile overlay)
+  avatarPanelReturnToChat: boolean        // true when panel opened from chat avatar button
   pendingRecoveryCode: string | null      // persists to localStorage until acknowledged
   setSelectedChannel: (id: number | null) => void
   setSelectedAvatar: (id: number | null) => void
@@ -62,7 +63,8 @@ interface AppState {
   addScratchMessage: (msg: Omit<ScratchMessage, 'id'>) => void
   clearScratch: () => void
   requestNudgeCheck: () => void
-  requestOpenAvatarPanel: () => void
+  requestOpenAvatarPanel: (returnToChat?: boolean) => void
+  setAvatarPanelReturnToChat: (val: boolean) => void
   setPendingRecoveryCode: (code: string | null) => void
 }
 
@@ -84,6 +86,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   scratchMessages: [],
   nudgeCheckRequest: 0,
   openAvatarPanelRequest: 0,
+  avatarPanelReturnToChat: false,
   pendingRecoveryCode: localStorage.getItem(RECOVERY_PENDING_KEY) ?? null,
 
   setSelectedChannel: (id) => {
@@ -115,7 +118,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   })),
   clearScratch: () => set({ scratchMessages: [] }),
   requestNudgeCheck: () => set(s => ({ nudgeCheckRequest: s.nudgeCheckRequest + 1 })),
-  requestOpenAvatarPanel: () => set(s => ({ openAvatarPanelRequest: s.openAvatarPanelRequest + 1 })),
+  requestOpenAvatarPanel: (returnToChat = false) => set(s => ({ openAvatarPanelRequest: s.openAvatarPanelRequest + 1, avatarPanelReturnToChat: returnToChat })),
+  setAvatarPanelReturnToChat: (val) => set({ avatarPanelReturnToChat: val }),
 
   setPendingRecoveryCode: (code) => {
     if (code) localStorage.setItem(RECOVERY_PENDING_KEY, code)
