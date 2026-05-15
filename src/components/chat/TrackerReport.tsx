@@ -26,7 +26,7 @@ function formatDate(iso: string, use24h: boolean): string {
   return `${date} ${time}`
 }
 
-function computeSummary(op: string, records: TrackerRecord[], fieldId: number): string {
+function computeSummary(op: string, records: TrackerRecord[], fieldId: number, fieldType?: string): string {
   if (op === 'none') return ''
   const nums: number[] = []
   const bools: number[] = []
@@ -40,8 +40,9 @@ function computeSummary(op: string, records: TrackerRecord[], fieldId: number): 
   if (op === 'count_false') return String(bools.filter(b => !b).length)
   const values = nums.length > 0 ? nums : bools
   if (values.length === 0) return '—'
-  if (op === 'sum')     return String(values.reduce((a, b) => a + b, 0))
-  if (op === 'average') return (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2)
+  const isInt = fieldType === 'integer'
+  if (op === 'sum')     return String(isInt ? Math.round(values.reduce((a, b) => a + b, 0)) : values.reduce((a, b) => a + b, 0))
+  if (op === 'average') return (values.reduce((a, b) => a + b, 0) / values.length).toFixed(isInt ? 1 : 2)
   if (op === 'min')     return String(Math.min(...values))
   if (op === 'max')     return String(Math.max(...values))
   return ''
@@ -180,7 +181,7 @@ export default function TrackerReport({ tracker, fields, avatars, use24HourClock
                     {showAvatar && <td />}
                     {fields.map(f => (
                       <td key={f.id}>
-                        <strong>{computeSummary(f.summary_op ?? 'none', records, f.id)}</strong>
+                        <strong>{computeSummary(f.summary_op ?? 'none', records, f.id, f.field_type)}</strong>
                       </td>
                     ))}
                   </tr>
