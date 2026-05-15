@@ -10,6 +10,171 @@ import type { Tracker, TrackerField, FieldType, SummaryOp } from '../../types'
 import { FIELD_TYPES, SUMMARY_OPS, isHidden } from '../../types'
 import { t } from '../../i18n'
 
+interface TrackerFieldEditorProps {
+  fieldTarget: TrackerField | 'new'
+  fieldName: string; setFieldName: (v: string) => void
+  fieldType: FieldType; setFieldType: (v: FieldType) => void
+  fieldRequired: boolean; setFieldRequired: (v: boolean) => void
+  fieldListValues: string; setFieldListValues: (v: string) => void
+  fieldRangeMin: string; setFieldRangeMin: (v: string) => void
+  fieldRangeMax: string; setFieldRangeMax: (v: string) => void
+  fieldCustomEditor: string; setFieldCustomEditor: (v: string) => void
+  fieldSummaryOp: SummaryOp; setFieldSummaryOp: (v: SummaryOp) => void
+  fieldDefaultValue: string; setFieldDefaultValue: (v: string) => void
+  onSave: () => void
+  onClose: () => void
+}
+
+function TrackerFieldEditor({
+  fieldTarget, fieldName, setFieldName, fieldType, setFieldType,
+  fieldRequired, setFieldRequired, fieldListValues, setFieldListValues,
+  fieldRangeMin, setFieldRangeMin, fieldRangeMax, setFieldRangeMax,
+  fieldCustomEditor, setFieldCustomEditor, fieldSummaryOp, setFieldSummaryOp,
+  fieldDefaultValue, setFieldDefaultValue, onSave, onClose,
+}: TrackerFieldEditorProps) {
+  return (
+    <div className="group-edit-panel">
+      <div className="settings-section-title">
+        {fieldTarget === 'new' ? t('editTrackers.newField') : t('editTrackers.editFieldTitle', { name: (fieldTarget as TrackerField).name })}
+      </div>
+
+      <label className="field-label">{t('editTrackers.fieldName')}</label>
+      <input
+        autoFocus={fieldTarget === 'new'}
+        value={fieldName}
+        onChange={e => setFieldName(e.target.value)}
+        placeholder={t('editTrackers.fieldNamePlaceholder')}
+        onKeyDown={e => { if (e.key === 'Escape') onClose() }}
+      />
+
+      <label className="field-label">{t('editTrackers.fieldType')}</label>
+      <select
+        value={fieldType}
+        onChange={e => setFieldType(e.target.value as FieldType)}
+        style={{ fontSize: 13, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: 4, padding: '5px 8px' }}
+      >
+        {FIELD_TYPES.map(ft => (
+          <option key={ft} value={ft}>{fieldTypeLabel(ft)}</option>
+        ))}
+      </select>
+
+      <label className="field-label checkbox-label">
+        <input type="checkbox" checked={fieldRequired} onChange={e => setFieldRequired(e.target.checked)} />
+        {t('editTrackers.fieldRequired')}
+      </label>
+
+      {fieldType === 'list' && (
+        <>
+          <label className="field-label">{t('editTrackers.fieldListValues')}</label>
+          <input
+            value={fieldListValues}
+            onChange={e => setFieldListValues(e.target.value)}
+            placeholder={t('editTrackers.fieldListValuesPlaceholder')}
+          />
+        </>
+      )}
+
+      {(fieldType === 'integer' || fieldType === 'number') && (
+        <div style={{ display: 'flex', gap: 8 }}>
+          <div style={{ flex: 1 }}>
+            <label className="field-label">{t('editTrackers.fieldMin')}</label>
+            <input type="number" value={fieldRangeMin} onChange={e => setFieldRangeMin(e.target.value)} placeholder="0" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <label className="field-label">{t('editTrackers.fieldMax')}</label>
+            <input type="number" value={fieldRangeMax} onChange={e => setFieldRangeMax(e.target.value)} placeholder="10" />
+          </div>
+        </div>
+      )}
+
+      {fieldType === 'custom' && (
+        <>
+          <label className="field-label">{t('editTrackers.fieldCustomEditor')}</label>
+          <input
+            value={fieldCustomEditor}
+            onChange={e => setFieldCustomEditor(e.target.value)}
+            placeholder={t('editTrackers.fieldCustomEditorPlaceholder')}
+          />
+        </>
+      )}
+
+      <label className="field-label">{t('editTrackers.fieldSummaryOp')}</label>
+      <select
+        value={fieldSummaryOp}
+        onChange={e => setFieldSummaryOp(e.target.value as SummaryOp)}
+        style={{ fontSize: 13, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: 4, padding: '5px 8px' }}
+      >
+        {SUMMARY_OPS.map(op => (
+          <option key={op} value={op}>{t(`editTrackers.summaryOps.${op}` as Parameters<typeof t>[0])}</option>
+        ))}
+      </select>
+
+      <label className="field-label">{t('editTrackers.fieldDefaultValue')}</label>
+      {(fieldType === 'date' || fieldType === 'datetime' || fieldType === 'who') ? (
+        <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+          {t(`editTrackers.fieldDefaultAuto.${fieldType}` as Parameters<typeof t>[0])}
+        </span>
+      ) : fieldType === 'boolean' ? (
+        <input
+          type="checkbox"
+          checked={fieldDefaultValue === 'true'}
+          onChange={e => setFieldDefaultValue(e.target.checked ? 'true' : 'false')}
+          style={{ width: 16, height: 16 }}
+        />
+      ) : (fieldType === 'integer' || fieldType === 'number') ? (
+        <input
+          type="number"
+          value={fieldDefaultValue}
+          onChange={e => setFieldDefaultValue(e.target.value)}
+          placeholder={t('editTrackers.fieldDefaultValuePlaceholder')}
+        />
+      ) : fieldType === 'list' ? (
+        (() => {
+          const opts = fieldListValues ? fieldListValues.split(',').map(s => s.trim()).filter(Boolean) : []
+          return opts.length > 0 ? (
+            <select
+              value={fieldDefaultValue}
+              onChange={e => setFieldDefaultValue(e.target.value)}
+              style={{ fontSize: 13, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: 4, padding: '5px 8px' }}
+            >
+              <option value="">{t('editTrackers.fieldDefaultNone')}</option>
+              {opts.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+          ) : (
+            <input
+              type="text"
+              value={fieldDefaultValue}
+              onChange={e => setFieldDefaultValue(e.target.value)}
+              placeholder={t('editTrackers.fieldDefaultValuePlaceholder')}
+            />
+          )
+        })()
+      ) : fieldType === 'color' ? (
+        <input
+          type="color"
+          value={fieldDefaultValue || '#888888'}
+          onChange={e => setFieldDefaultValue(e.target.value)}
+          style={{ width: 48, height: 32, padding: 2, cursor: 'pointer' }}
+        />
+      ) : (
+        <input
+          type="text"
+          value={fieldDefaultValue}
+          onChange={e => setFieldDefaultValue(e.target.value)}
+          placeholder={t('editTrackers.fieldDefaultValuePlaceholder')}
+        />
+      )}
+
+      <div className="form-actions">
+        <button className="save-btn" onClick={onSave} disabled={!fieldName.trim()}>
+          {fieldTarget === 'new' ? t('editTrackers.addFieldBtn') : t('editTrackers.saveFieldBtn')}
+        </button>
+        <button className="cancel-btn" onClick={onClose}>{t('editTrackers.cancel')}</button>
+      </div>
+    </div>
+  )
+}
+
 interface Props { onClose: () => void }
 
 function fieldTypeLabel(ft: FieldType): string {
@@ -354,145 +519,20 @@ export default function EditTrackers({ onClose }: Props) {
 
               {/* ── Field editor ── */}
               {fieldTarget !== null && (
-                <div className="group-edit-panel">
-                  <div className="settings-section-title">
-                    {fieldTarget === 'new' ? t('editTrackers.newField') : t('editTrackers.editFieldTitle', { name: (fieldTarget as TrackerField).name })}
-                  </div>
-
-                  <label className="field-label">{t('editTrackers.fieldName')}</label>
-                  <input
-                    autoFocus={fieldTarget === 'new'}
-                    value={fieldName}
-                    onChange={e => setFieldName(e.target.value)}
-                    placeholder={t('editTrackers.fieldNamePlaceholder')}
-                    onKeyDown={e => { if (e.key === 'Escape') closeFieldEditor() }}
-                  />
-
-                  <label className="field-label">{t('editTrackers.fieldType')}</label>
-                  <select
-                    value={fieldType}
-                    onChange={e => setFieldType(e.target.value as FieldType)}
-                    style={{ fontSize: 13, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: 4, padding: '5px 8px' }}
-                  >
-                    {FIELD_TYPES.map(ft => (
-                      <option key={ft} value={ft}>{fieldTypeLabel(ft)}</option>
-                    ))}
-                  </select>
-
-                  <label className="field-label checkbox-label">
-                    <input type="checkbox" checked={fieldRequired} onChange={e => setFieldRequired(e.target.checked)} />
-                    {t('editTrackers.fieldRequired')}
-                  </label>
-
-                  {fieldType === 'list' && (
-                    <>
-                      <label className="field-label">{t('editTrackers.fieldListValues')}</label>
-                      <input
-                        value={fieldListValues}
-                        onChange={e => setFieldListValues(e.target.value)}
-                        placeholder={t('editTrackers.fieldListValuesPlaceholder')}
-                      />
-                    </>
-                  )}
-
-                  {(fieldType === 'integer' || fieldType === 'number') && (
-                    <div style={{ display: 'flex', gap: 8 }}>
-                      <div style={{ flex: 1 }}>
-                        <label className="field-label">{t('editTrackers.fieldMin')}</label>
-                        <input type="number" value={fieldRangeMin} onChange={e => setFieldRangeMin(e.target.value)} placeholder="0" />
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <label className="field-label">{t('editTrackers.fieldMax')}</label>
-                        <input type="number" value={fieldRangeMax} onChange={e => setFieldRangeMax(e.target.value)} placeholder="10" />
-                      </div>
-                    </div>
-                  )}
-
-                  {fieldType === 'custom' && (
-                    <>
-                      <label className="field-label">{t('editTrackers.fieldCustomEditor')}</label>
-                      <input
-                        value={fieldCustomEditor}
-                        onChange={e => setFieldCustomEditor(e.target.value)}
-                        placeholder={t('editTrackers.fieldCustomEditorPlaceholder')}
-                      />
-                    </>
-                  )}
-
-                  <label className="field-label">{t('editTrackers.fieldSummaryOp')}</label>
-                  <select
-                    value={fieldSummaryOp}
-                    onChange={e => setFieldSummaryOp(e.target.value as SummaryOp)}
-                    style={{ fontSize: 13, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: 4, padding: '5px 8px' }}
-                  >
-                    {SUMMARY_OPS.map(op => (
-                      <option key={op} value={op}>{t(`editTrackers.summaryOps.${op}` as Parameters<typeof t>[0])}</option>
-                    ))}
-                  </select>
-
-                  <label className="field-label">{t('editTrackers.fieldDefaultValue')}</label>
-                  {(fieldType === 'date' || fieldType === 'datetime' || fieldType === 'who') ? (
-                    <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                      {t(`editTrackers.fieldDefaultAuto.${fieldType}` as Parameters<typeof t>[0])}
-                    </span>
-                  ) : fieldType === 'boolean' ? (
-                    <input
-                      type="checkbox"
-                      checked={fieldDefaultValue === 'true'}
-                      onChange={e => setFieldDefaultValue(e.target.checked ? 'true' : 'false')}
-                      style={{ width: 16, height: 16 }}
-                    />
-                  ) : (fieldType === 'integer' || fieldType === 'number') ? (
-                    <input
-                      type="number"
-                      value={fieldDefaultValue}
-                      onChange={e => setFieldDefaultValue(e.target.value)}
-                      placeholder={t('editTrackers.fieldDefaultValuePlaceholder')}
-                    />
-                  ) : fieldType === 'list' ? (
-                    (() => {
-                      const opts = fieldListValues ? fieldListValues.split(',').map(s => s.trim()).filter(Boolean) : []
-                      return opts.length > 0 ? (
-                        <select
-                          value={fieldDefaultValue}
-                          onChange={e => setFieldDefaultValue(e.target.value)}
-                          style={{ fontSize: 13, background: 'var(--bg-hover)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: 4, padding: '5px 8px' }}
-                        >
-                          <option value="">{t('editTrackers.fieldDefaultNone')}</option>
-                          {opts.map(o => <option key={o} value={o}>{o}</option>)}
-                        </select>
-                      ) : (
-                        <input
-                          type="text"
-                          value={fieldDefaultValue}
-                          onChange={e => setFieldDefaultValue(e.target.value)}
-                          placeholder={t('editTrackers.fieldDefaultValuePlaceholder')}
-                        />
-                      )
-                    })()
-                  ) : fieldType === 'color' ? (
-                    <input
-                      type="color"
-                      value={fieldDefaultValue || '#888888'}
-                      onChange={e => setFieldDefaultValue(e.target.value)}
-                      style={{ width: 48, height: 32, padding: 2, cursor: 'pointer' }}
-                    />
-                  ) : (
-                    <input
-                      type="text"
-                      value={fieldDefaultValue}
-                      onChange={e => setFieldDefaultValue(e.target.value)}
-                      placeholder={t('editTrackers.fieldDefaultValuePlaceholder')}
-                    />
-                  )}
-
-                  <div className="form-actions">
-                    <button className="save-btn" onClick={handleSaveField} disabled={!fieldName.trim()}>
-                      {fieldTarget === 'new' ? t('editTrackers.addFieldBtn') : t('editTrackers.saveFieldBtn')}
-                    </button>
-                    <button className="cancel-btn" onClick={closeFieldEditor}>{t('editTrackers.cancel')}</button>
-                  </div>
-                </div>
+                <TrackerFieldEditor
+                  fieldTarget={fieldTarget}
+                  fieldName={fieldName} setFieldName={setFieldName}
+                  fieldType={fieldType} setFieldType={setFieldType}
+                  fieldRequired={fieldRequired} setFieldRequired={setFieldRequired}
+                  fieldListValues={fieldListValues} setFieldListValues={setFieldListValues}
+                  fieldRangeMin={fieldRangeMin} setFieldRangeMin={setFieldRangeMin}
+                  fieldRangeMax={fieldRangeMax} setFieldRangeMax={setFieldRangeMax}
+                  fieldCustomEditor={fieldCustomEditor} setFieldCustomEditor={setFieldCustomEditor}
+                  fieldSummaryOp={fieldSummaryOp} setFieldSummaryOp={setFieldSummaryOp}
+                  fieldDefaultValue={fieldDefaultValue} setFieldDefaultValue={setFieldDefaultValue}
+                  onSave={handleSaveField}
+                  onClose={closeFieldEditor}
+                />
               )}
               </>)}
             </>

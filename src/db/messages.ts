@@ -4,26 +4,18 @@ import type { MessageRow } from '../types'
 import { upsertTagsFromText } from './tags'
 import { insertImage } from './images'
 
-// Single-channel SELECT: no channels join needed (channel is known, name never shown per-message)
-const SELECT_CHANNEL = `
-  SELECT m.id, m.channel_id, '' as channel_name, m.text, m.original_text, m.deleted, m.created_at,
+function buildMessageSelect(includeChannelName: boolean): string {
+  const channelNameCol = includeChannelName ? 'c.name' : "''"
+  const channelJoin = includeChannelName ? '\n  JOIN channels c ON m.channel_id = c.id' : ''
+  return `
+  SELECT m.id, m.channel_id, ${channelNameCol} as channel_name, m.text, m.original_text, m.deleted, m.created_at,
          m.tracker_record_id, m.parent_msg_id, m.message_type,
          a.id as avatar_id, a.name as avatar_name, a.color as avatar_color, a.image_path as avatar_image_path, a.image_data as avatar_image_data, a.icon_letters as avatar_icon_letters,
          mi.image_path, mi.caption as image_caption, mi.location as image_location, mi.people as image_people
   FROM messages m
   LEFT JOIN avatars a ON m.avatar_id = a.id
-  LEFT JOIN message_images mi ON mi.message_id = m.id`
-
-// All-messages SELECT: needs channel name for display
-const SELECT_ALL = `
-  SELECT m.id, m.channel_id, c.name as channel_name, m.text, m.original_text, m.deleted, m.created_at,
-         m.tracker_record_id, m.parent_msg_id, m.message_type,
-         a.id as avatar_id, a.name as avatar_name, a.color as avatar_color, a.image_path as avatar_image_path, a.image_data as avatar_image_data, a.icon_letters as avatar_icon_letters,
-         mi.image_path, mi.caption as image_caption, mi.location as image_location, mi.people as image_people
-  FROM messages m
-  LEFT JOIN avatars a ON m.avatar_id = a.id
-  LEFT JOIN message_images mi ON mi.message_id = m.id
-  JOIN channels c ON m.channel_id = c.id`
+  LEFT JOIN message_images mi ON mi.message_id = m.id${channelJoin}`
+}
 
 async function fetchMessages(
   base: string,
@@ -50,15 +42,15 @@ async function fetchMessages(
 }
 
 export function getMessages(channelId: number, limit: number, deletedSince?: string | null): Promise<MessageRow[]> {
-  return fetchMessages(SELECT_CHANNEL, 'm.channel_id = ?', [channelId], limit, deletedSince)
+  return fetchMessages(buildMessageSelect(false), 'm.channel_id = ?', [channelId], limit, deletedSince)
 }
 
 export function getAllMessages(limit: number, deletedSince?: string | null): Promise<MessageRow[]> {
-  return fetchMessages(SELECT_ALL, null, [], limit, deletedSince)
+  return fetchMessages(buildMessageSelect(true), null, [], limit, deletedSince)
 }
 
 export function getAllMessagesByAvatar(avatarId: number, limit: number, deletedSince?: string | null): Promise<MessageRow[]> {
-  return fetchMessages(SELECT_ALL, 'm.avatar_id = ?', [avatarId], limit, deletedSince)
+  return fetchMessages(buildMessageSelect(true), 'm.avatar_id = ?', [avatarId], limit, deletedSince)
 }
 
 export async function sendMessage(channelId: number, avatarId: number | null, text: string, parentMsgId?: number | null, messageType?: string): Promise<number> {
@@ -97,7 +89,7 @@ export async function searchMessages(query: string, channelId?: number, avatarId
   if (avatarId !== undefined) { conditions.push("m.avatar_id = ?"); params.push(avatarId) }
   if (date) { conditions.push("DATE(m.created_at) = ?"); params.push(date) }
   const rows = await db.select<MessageRow[]>(
-    `${SELECT_ALL} WHERE ${conditions.join(" AND ")} ORDER BY m.created_at DESC LIMIT 500`,
+    `${buildMessageSelect(true)} WHERE ${conditions.join(" AND ")} ORDER BY m.created_at DESC LIMIT 500`,
     params
   )
   return [...rows].reverse()
