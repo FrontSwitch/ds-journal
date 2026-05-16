@@ -102,6 +102,7 @@
     "newNoteTitle": "New note",
     "titlePlaceholder": "Title…",
     "favorite": "Favorite",
+    "unfavorite": "Remove favorite",
     "colorLabel": "Color",
     "authorLabel": "Author",
     "editorLabel": "Editor",

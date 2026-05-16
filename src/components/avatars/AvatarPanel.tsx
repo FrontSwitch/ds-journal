@@ -104,6 +104,15 @@ function AvatarInfoPopup({ avatar, fields, fieldValues, avatars, selectedAvatarI
 
   const visibleAvatars = avatars.filter(a => !isHidden(a.hidden))
 
+  async function handleToggleFavorite() {
+    if (!editNote) return
+    const newFav = editNote.favorite ? 0 : 1
+    await updateAvatarNote(editNote.id, editNote.title, editNote.body, editNote.color ?? null, newFav, editNote.editor_avatar_id)
+    const refreshed = await getAvatarNotes(avatar.id)
+    setNotes(refreshed)
+    setEditNote(refreshed.find(n => n.id === editNote.id) ?? null)
+  }
+
   if (view === 'view' && editNote) {
     const author = visibleAvatars.find(a => a.id === editNote.author_avatar_id)
     return (
@@ -113,8 +122,10 @@ function AvatarInfoPopup({ avatar, fields, fieldValues, avatars, selectedAvatarI
             <button className="avatar-info-back" onClick={() => setView('info')}>←</button>
             <span className="avatar-info-edit-label" style={editNote.color ? { color: editNote.color } : undefined}>
               {editNote.title || t('avatarNotes.untitled')}
-              {!!editNote.favorite && <span className="avatar-note-view-star"> ★</span>}
             </span>
+            <button className={`avatar-note-fav-btn${editNote.favorite ? ' active' : ''}`} onClick={handleToggleFavorite} title={editNote.favorite ? t('avatarNotes.unfavorite') : t('avatarNotes.favorite')}>
+              {editNote.favorite ? '★' : '☆'}
+            </button>
             <button className="avatar-info-close" onClick={onClose}>✕</button>
           </div>
           <div className="avatar-note-view-meta">
@@ -157,10 +168,10 @@ function AvatarInfoPopup({ avatar, fields, fieldValues, avatars, selectedAvatarI
                 autoFocus
               />
               <button
-                className={`avatar-note-fav-btn ${editFavorite ? 'active' : ''}`}
+                className={`avatar-note-fav-btn${editFavorite ? ' active' : ''}`}
                 onClick={() => setEditFavorite(f => !f)}
-                title={t('avatarNotes.favorite')}
-              >★</button>
+                title={editFavorite ? t('avatarNotes.unfavorite') : t('avatarNotes.favorite')}
+              >{editFavorite ? '★' : '☆'}</button>
             </div>
             <div className="avatar-note-meta-row">
               <label className="avatar-note-color-label">
@@ -449,6 +460,13 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
             )}
           </div>
         )}
+        {wide && selected && (
+          <button
+            className="avatar-info-btn"
+            title="Avatar info"
+            onClick={e => { e.stopPropagation(); openInfo(avatar) }}
+          >ⓘ</button>
+        )}
       </div>
     )
   }
@@ -537,39 +555,47 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
         />
       )}
       <div className="panel-header">
-        {onClose && (
-          <button className="wide-toggle" onClick={onClose} title="Close">←</button>
-        )}
-        <span className="panel-header-title">
-          {t('avatarPanel.title')}
-          {!wide && (
-            <>
-              {': '}
-              {selectedAvatar ? (
-                <>
-                  <AvatarIcon
-                    image_data={selectedAvatar.image_data}
-                    image_path={selectedAvatar.image_path}
-                    icon_letters={selectedAvatar.icon_letters}
-                    name={selectedAvatar.name}
-                    color={selectedAvatar.color}
-                    allNames={allNames}
-                    size={16}
-                  />
-                  {' '}
-                  <span style={{ color: selectedAvatar.color }}>{selectedAvatar.name}</span>
-                </>
-              ) : (
-                <span className="panel-header-none">{t('avatarPanel.none')}</span>
-              )}
-            </>
+        <div className="panel-header-row">
+          {onClose && (
+            <button className="wide-toggle" onClick={onClose} title="Close">←</button>
           )}
-        </span>
-        <button className="wide-toggle" onClick={() => setAvatarPanelMode(wide ? 'small' : 'full')} title={wide ? t('avatarPanel.compact') : t('avatarPanel.full')}>
-          {wide ? '⟨' : '⟩'}
-        </button>
-        {!onClose && (
-          <button className="wide-toggle" onClick={() => setAvatarPanelMode('hidden')} title={t('avatarPanel.hide')}>✕</button>
+          <span className="panel-header-title">
+            {t('avatarPanel.title')}
+            {': '}
+            {selectedAvatar ? (
+              <>
+                <AvatarIcon
+                  image_data={selectedAvatar.image_data}
+                  image_path={selectedAvatar.image_path}
+                  icon_letters={selectedAvatar.icon_letters}
+                  name={selectedAvatar.name}
+                  color={selectedAvatar.color}
+                  allNames={allNames}
+                  size={16}
+                />
+                {' '}
+                <span style={{ color: selectedAvatar.color }}>{selectedAvatar.name}</span>
+              </>
+            ) : (
+              <span className="panel-header-none">{t('avatarPanel.none')}</span>
+            )}
+          </span>
+          <button className="wide-toggle" onClick={() => setAvatarPanelMode(wide ? 'small' : 'full')} title={wide ? t('avatarPanel.compact') : t('avatarPanel.full')}>
+            {wide ? '⟨' : '⟩'}
+          </button>
+          {!onClose && (
+            <button className="wide-toggle" onClick={() => setAvatarPanelMode('hidden')} title={t('avatarPanel.hide')}>✕</button>
+          )}
+        </div>
+        {selectedAvatar && (
+          <div className="panel-header-sub">
+            <button className="avatar-info-btn" title="Avatar info" onClick={() => openInfo(selectedAvatar)}>ⓘ</button>
+            {(selectedAvatar.pronouns || selectedAvatar.description) && (
+              <span className="panel-header-sublabel">
+                {[selectedAvatar.pronouns, selectedAvatar.description].filter(Boolean).join(' · ')}
+              </span>
+            )}
+          </div>
         )}
       </div>
 

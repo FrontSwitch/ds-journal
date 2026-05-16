@@ -6,21 +6,44 @@
 }
 
 .panel-header {
-  padding: 14px 12px;
+  padding: 14px 12px 8px;
   padding-right: max(12px, env(safe-area-inset-right));
   font-weight: 600;
   font-size: 13px;
   border-bottom: 1px solid var(--border);
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 4px;
   flex-shrink: 0;
   min-width: 0;
 }
 
-.panel-header > span {
+.panel-header-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.panel-header-row > span {
   flex: 1;
   min-width: 0;
+}
+
+.panel-header-sub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.panel-header-sublabel {
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .panel-header-title {
@@ -36,17 +59,6 @@
   color: var(--text-muted);
 }
 
-.wide-toggle {
-  color: var(--text-muted);
-  font-size: 16px;
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.wide-toggle:hover {
-  background: var(--bg-hover);
-  color: var(--text);
-}
 
 .panel-loading {
   padding: 16px;
@@ -190,6 +202,30 @@
   border-color: var(--avatar-color, var(--accent));
 }
 
+.avatar-info-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  line-height: 1;
+  border-radius: 3px;
+  padding: 1px 3px;
+  flex-shrink: 0;
+  font-size: 20px;
+}
+
+.avatar-info-btn:hover {
+  color: var(--accent);
+  background: var(--bg-hover);
+}
+
+/* wide: push info button to far right */
+.avatar-item.wide .avatar-info-btn {
+  margin-left: auto;
+  font-size: 21px;
+  padding: 2px 5px;
+}
+
 .avatar-item.wide {
   display: flex;
   align-items: center;
@@ -255,6 +291,8 @@
   flex-direction: column;
   gap: 10px;
   padding: 16px 14px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-right: max(14px, env(safe-area-inset-right));
   overflow-y: auto;
 }
 
@@ -467,9 +505,6 @@
   font-style: italic;
 }
 
-.avatar-note-view-star {
-  color: #f5a623;
-}
 
 .avatar-note-editor {
   display: flex;
@@ -501,12 +536,15 @@
   font-size: 16px;
   color: var(--text-muted);
   background: none;
+  border: none;
   padding: 2px 4px;
+  border-radius: 3px;
+  cursor: pointer;
   flex-shrink: 0;
 }
 
 .avatar-note-fav-btn.active { color: #f5a623; }
-.avatar-note-fav-btn:hover { color: #f5a623; }
+.avatar-note-fav-btn:hover { background: var(--bg-hover); }
 
 .avatar-note-meta-row {
   display: flex;

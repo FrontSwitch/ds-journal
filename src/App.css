@@ -268,6 +268,24 @@ input:focus, textarea:focus {
   font-size: 16px;
 }
 
+/* Shared back/close toggle button */
+.wide-toggle {
+  color: var(--text-muted);
+  font-size: 16px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.wide-toggle:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
 /* AvatarPanel fills the mobile overlay */
 .mobile-overlay .avatar-panel {
   flex: 1;

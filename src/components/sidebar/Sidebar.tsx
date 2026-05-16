@@ -253,7 +253,7 @@ export default function Sidebar({ onClose }: Props = {}) {
     <aside className="sidebar" onClick={contextMenu ? closeContextMenu : undefined}>
       {onClose ? (
         <div className="sidebar-header mobile-header">
-          <button className="sidebar-icon-btn" onClick={onClose}>←</button>
+          <button className="wide-toggle" onClick={onClose} title="Close">←</button>
           <span className="sidebar-header-title">Channels</span>
         </div>
       ) : (
