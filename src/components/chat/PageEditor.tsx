@@ -10,6 +10,7 @@ import { isHidden } from '../../types'
 import { AvatarIcon } from '../avatars/AvatarIcon'
 import { getTagSuggestions } from '../../db/tags'
 import { getChannels } from '../../db/channels'
+import { readableColor } from '../../lib/colorUtils'
 import './PageEditor.css'
 
 interface Props {
@@ -329,7 +330,7 @@ export function PageEditor({ channelId, avatars, selectedAvatar, onPublish, onBa
               size={20}
             />
           )}
-          <span className="page-editor-avatar-name" style={{ color: selectedAvatar?.color ?? 'var(--text-muted)' }}>
+          <span className="page-editor-avatar-name" style={{ color: readableColor(selectedAvatar?.color) }}>
             {selectedAvatar?.name ?? 'anonymous'}
           </span>
         </div>

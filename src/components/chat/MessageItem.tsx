@@ -10,6 +10,7 @@ import ImageMessage from './ImageMessage'
 import TrackerRecordCard, { formatTrackerSummary } from './TrackerRecordCard'
 import { addLog } from '../../store/debug'
 import { t } from '../../i18n'
+import { readableColor } from '../../lib/colorUtils'
 
 function inspectMessage(msg: MessageRow) {
   const parent = msg.parent_msg_id != null ? `parent=#${msg.parent_msg_id}` : 'parent=none'
@@ -172,7 +173,7 @@ export function MessageItem({ msg, depth, depthStyle, isAllMessages, editing, on
       </div>
       <div className="message-body">
         <div className="message-meta">
-          <span className="message-avatar-name" style={{ color: msg.avatar_color ?? 'var(--text-muted)' }}>
+          <span className="message-avatar-name" style={{ color: readableColor(msg.avatar_color) }}>
             {msg.avatar_name ?? '—'}
           </span>
           {isAllMessages && <span className="message-muted"> · {msg.channel_name}</span>}

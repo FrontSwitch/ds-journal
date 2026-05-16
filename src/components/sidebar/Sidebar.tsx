@@ -12,6 +12,7 @@ import { isTauri } from '../../native/platform'
 import { getSyncPeers, syncNow } from '../../db/sync'
 import logo from '../../assets/logo.svg'
 import { t } from '../../i18n'
+import { readableColor } from '../../lib/colorUtils'
 import './Sidebar.css'
 
 interface Props {
@@ -199,7 +200,7 @@ export default function Sidebar({ onClose }: Props = {}) {
         onContextMenu={e => onContextMenu(e, 'channel', ch.id)}
       >
         <div className="channel-row">
-          <span className="channel-name" style={ch.color ? { color: ch.color } : trackerColors[ch.id] ? { color: trackerColors[ch.id] } : undefined}># {ch.name}</span>
+          <span className="channel-name" style={{ color: readableColor(ch.color ?? trackerColors[ch.id] ?? null) }}># {ch.name}</span>
           {hasActivity && (
             <span className="channel-counts">{c.day}/{c.week}/{c.month}</span>
           )}
@@ -235,7 +236,7 @@ export default function Sidebar({ onClose }: Props = {}) {
           onContextMenu={e => onContextMenu(e, 'folder', f.id)}
         >
           <span className="folder-arrow">{isCollapsed ? '▶' : '▼'}</span>
-          <span style={f.color ? { color: f.color } : undefined}>{f.name}</span>
+          <span style={{ color: readableColor(f.color) }}>{f.name}</span>
         </div>
         {f.description && <div className="channel-description folder-description">{f.description}</div>}
         {!isCollapsed && (

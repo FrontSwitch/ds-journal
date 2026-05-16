@@ -13,6 +13,7 @@
   pointer-events: none;
   -webkit-touch-callout: none;
   user-select: none;
+  box-shadow: 0 0 0 1.5px var(--border);
 }
 
 .avatar-icon img {

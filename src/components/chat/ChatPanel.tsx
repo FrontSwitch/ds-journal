@@ -33,6 +33,7 @@ import { TAROT_DECK } from '../../data/tarot'
 import { useEmojiInput } from '../../hooks/useEmojiInput'
 import { matchBot, getBotConfig, listBotNames, distillTone, TONE_HISTORY_SIZE, type ResolvedBotConfig, type BotMessage, type ToneSnapshot } from '../../lib/botEngine'
 import { fmtElapsed } from '../../lib/formatTime'
+import { readableColor } from '../../lib/colorUtils'
 import { LogMessageItem, MessageItem } from './MessageItem'
 import PageItem from './PageItem'
 import './ChatPanel.css'
@@ -1112,7 +1113,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
           <div className="avatar-indicator">
             <span className="avatar-name-label muted">All Messages</span>
             {avatarFilter != null && (
-              <span className="avatar-name-label" style={{ color: avatars.find(a => a.id === avatarFilter)?.color }}>
+              <span className="avatar-name-label" style={{ color: readableColor(avatars.find(a => a.id === avatarFilter)?.color) }}>
                 · {avatars.find(a => a.id === avatarFilter)?.name}
               </span>
             )}
@@ -1160,7 +1161,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
             {selectedAvatar ? (
               <button className="avatar-hint-btn avatar-selected-btn" onClick={config.features.avatarQuickSelect ? handleOpenAvatarPanel : undefined}>
                 <AvatarIcon name={selectedAvatar.name} color={selectedAvatar.color} icon_letters={selectedAvatar.icon_letters} image_data={selectedAvatar.image_data} image_path={selectedAvatar.image_path} size={18} />
-                <span className="avatar-name-label" style={{ color: selectedAvatar.color ?? undefined }}>{selectedAvatar.name}</span>
+                <span className="avatar-name-label" style={{ color: readableColor(selectedAvatar.color) }}>{selectedAvatar.name}</span>
               </button>
             ) : (
               <button className="avatar-name-label muted avatar-hint-btn" onClick={handleOpenAvatarPanel}>{t('chat.selectAvatarHint')}</button>
@@ -1289,7 +1290,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
             {selectedAvatar ? (
               <button className="avatar-hint-btn avatar-selected-btn" onClick={config.features.avatarQuickSelect ? handleOpenAvatarPanel : undefined}>
                 <AvatarIcon name={selectedAvatar.name} color={selectedAvatar.color} icon_letters={selectedAvatar.icon_letters} image_data={selectedAvatar.image_data} image_path={selectedAvatar.image_path} size={18} />
-                <span className="avatar-name-label" style={{ color: selectedAvatar.color ?? undefined }}>{selectedAvatar.name}</span>
+                <span className="avatar-name-label" style={{ color: readableColor(selectedAvatar.color) }}>{selectedAvatar.name}</span>
               </button>
             ) : (
               <button className="avatar-name-label muted avatar-hint-btn" onClick={handleOpenAvatarPanel}>{t('chat.selectAvatarHint')}</button>
@@ -1363,7 +1364,7 @@ function ScratchMessageItem({ msg, use24HourClock }: { msg: ScratchMessage; use2
   const time = new Date(msg.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: !use24HourClock })
   return (
     <div className="log-msg-row scratch-msg-row">
-      <span className="log-msg-name" style={{ color: msg.avatarColor ?? 'var(--text-muted)' }}>
+      <span className="log-msg-name" style={{ color: readableColor(msg.avatarColor) }}>
         {msg.avatarName ?? '—'}:{' '}
       </span>
       <span className="log-msg-text">{msg.text}</span>

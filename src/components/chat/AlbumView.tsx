@@ -4,6 +4,7 @@ import type { MessageImage } from '../../types'
 import { assetUrl } from '../../types'
 import { t } from '../../i18n'
 import Lightbox, { type LightboxImage } from './Lightbox'
+import { readableColor } from '../../lib/colorUtils'
 import './AlbumView.css'
 
 export default function AlbumView() {
@@ -56,7 +57,7 @@ export default function AlbumView() {
               {img.caption && <p className="album-tile-caption">{img.caption}</p>}
               <div className="album-tile-meta">
                 {img.avatar_name && (
-                  <span className="album-tile-avatar" style={{ color: img.avatar_color ?? undefined }}>
+                  <span className="album-tile-avatar" style={{ color: readableColor(img.avatar_color) }}>
                     {img.avatar_name}
                   </span>
                 )}

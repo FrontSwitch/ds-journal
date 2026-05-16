@@ -6,6 +6,7 @@ import { AvatarIcon } from './AvatarIcon'
 import type { Avatar, AvatarField, AvatarFieldValue, AvatarNote } from '../../types'
 import { t } from '../../i18n'
 import { parseIntRange, intRangesOverlap, formatIntRange } from '../../lib/avatarFieldUtils'
+import { readableColor } from '../../lib/colorUtils'
 import { getAvatarNotes, createAvatarNote, updateAvatarNote, deleteAvatarNote } from '../../db/avatars'
 import { getCurrentFront, enterFront, exitFront } from '../../db/front-log'
 import './AvatarPanel.css'
@@ -120,7 +121,7 @@ function AvatarInfoPopup({ avatar, fields, fieldValues, avatars, selectedAvatarI
         <div className="avatar-info-popup" onClick={e => e.stopPropagation()}>
           <div className="avatar-info-header">
             <button className="avatar-info-back" onClick={() => setView('info')}>←</button>
-            <span className="avatar-info-edit-label" style={editNote.color ? { color: editNote.color } : undefined}>
+            <span className="avatar-info-edit-label" style={{ color: readableColor(editNote.color) }}>
               {editNote.title || t('avatarNotes.untitled')}
             </span>
             <button className={`avatar-note-fav-btn${editNote.favorite ? ' active' : ''}`} onClick={handleToggleFavorite} title={editNote.favorite ? t('avatarNotes.unfavorite') : t('avatarNotes.favorite')}>
@@ -475,7 +476,7 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
     const visibleAvatars = groupAvatars.filter(a => !isHidden(a.hidden))
     if (visibleAvatars.length === 0) return null
     const isCollapsed = collapsed[key]
-    const headerStyle = groupColor ? { color: groupColor } as React.CSSProperties : undefined
+    const headerStyle = { color: readableColor(groupColor) } as React.CSSProperties
     return (
       <div key={key} className="avatar-group">
         <div className="group-header" style={headerStyle} onClick={() => toggleCollapse(key)}>
@@ -574,7 +575,7 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
                   size={16}
                 />
                 {' '}
-                <span style={{ color: selectedAvatar.color }}>{selectedAvatar.name}</span>
+                <span style={{ color: readableColor(selectedAvatar.color) }}>{selectedAvatar.name}</span>
               </>
             ) : (
               <span className="panel-header-none">{t('avatarPanel.none')}</span>
