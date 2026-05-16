@@ -5,7 +5,7 @@ import { ALL_MESSAGES_ID, buildInitialsMap, isHidden } from '../../types'
 import { AvatarIcon } from './AvatarIcon'
 import type { Avatar, AvatarField, AvatarFieldValue, AvatarNote } from '../../types'
 import { t } from '../../i18n'
-import { parseIntRange, intRangesOverlap, formatIntRange } from '../../lib/avatarFieldUtils'
+import { parseIntRange, intRangesOverlap, formatIntRange, parseNumericQuery, matchNumericQuery } from '../../lib/avatarFieldUtils'
 import { readableColor } from '../../lib/colorUtils'
 import { getAvatarNotes, createAvatarNote, updateAvatarNote, deleteAvatarNote, getAvatarFieldValues, setAvatarFieldValues } from '../../db/avatars'
 import { getCurrentFront, enterFront, exitFront } from '../../db/front-log'
@@ -580,18 +580,34 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
     if (fieldActive) {
       const field = fields.find(f => f.id === fieldFilterId)
       if (field) {
-        const valQuery = fieldFilterValue.trim().toLowerCase()
+        const valQuery = fieldFilterValue.trim()
+        const numericQuery = parseNumericQuery(valQuery)
         result = result.filter(a => {
           const fv = fieldValues.find(v => v.avatar_id === a.id && v.field_id === field.id)
           if (!fv) return false
+          if (field.field_type === 'integer') {
+            const stored = parseInt(fv.value, 10)
+            if (isNaN(stored)) return false
+            if (numericQuery) return matchNumericQuery(numericQuery, stored)
+            return fv.value === valQuery
+          }
           if (field.field_type === 'intRange') {
             const stored = parseIntRange(fv.value)
             if (!stored) return false
-            const query = parseIntRange(valQuery)
+            if (numericQuery && numericQuery.op !== '=') {
+              // Apply operator to the appropriate bound
+              const bound = (numericQuery.op === '>' || numericQuery.op === '>=') ? stored[0] : stored[1]
+              return matchNumericQuery(numericQuery, bound)
+            }
+            // Plain number or "= N": overlap with [n, n]
+            const query = parseIntRange(valQuery.replace(/^=\s*/, ''))
             if (!query) return false
             return intRangesOverlap(stored, query)
           }
-          return fv.value.toLowerCase().includes(valQuery)
+          if (field.field_type === 'list') {
+            return fv.value === valQuery
+          }
+          return fv.value.toLowerCase().includes(valQuery.toLowerCase())
         })
       }
     }
@@ -705,14 +721,31 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
               <option value="">{t('avatarPanel.fieldPlaceholder')}</option>
               {fields.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
             </select>
-            {fieldFilterId !== null && (
-              <input
-                className="field-filter-value"
-                value={fieldFilterValue}
-                onChange={e => setFieldFilterValue(e.target.value)}
-                placeholder={t('avatarPanel.fieldValuePlaceholder')}
-              />
-            )}
+            {fieldFilterId !== null && (() => {
+              const selectedField = fields.find(f => f.id === fieldFilterId)
+              if (selectedField?.field_type === 'list' && selectedField.list_values) {
+                const options = selectedField.list_values.split(',').map(s => s.trim()).filter(Boolean)
+                return (
+                  <select
+                    className="field-filter-value field-filter-select"
+                    value={fieldFilterValue}
+                    onChange={e => setFieldFilterValue(e.target.value)}
+                  >
+                    <option value="">{t('avatarPanel.fieldValuePlaceholder')}</option>
+                    {options.map(o => <option key={o} value={o}>{o}</option>)}
+                  </select>
+                )
+              }
+              const isNumeric = selectedField?.field_type === 'integer' || selectedField?.field_type === 'intRange'
+              return (
+                <input
+                  className="field-filter-value"
+                  value={fieldFilterValue}
+                  onChange={e => setFieldFilterValue(e.target.value)}
+                  placeholder={isNumeric ? t('avatarPanel.fieldValueNumericPlaceholder') : t('avatarPanel.fieldValuePlaceholder')}
+                />
+              )
+            })()}
           </div>
         )}
       </div>

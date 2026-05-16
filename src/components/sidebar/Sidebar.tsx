@@ -369,7 +369,7 @@ export default function Sidebar({ onClose }: Props = {}) {
                     <AvatarIcon name={av.name} color={av.color} image_data={av.image_data} image_path={av.image_path} icon_letters={av.icon_letters} size={16} />
                     <span className="sidebar-front-name">{av.name}</span>
                     <span className="sidebar-front-since">since {sinceLabel(session.entered_at)}</span>
-                    <button className="sidebar-front-remove" title="Remove from front" onClick={() => handleRemoveFront(session.avatar_id)}>remove</button>
+                    <button className="sidebar-front-remove" title="Remove from front" onClick={() => session.avatar_id != null && handleRemoveFront(session.avatar_id)}>remove</button>
                   </span>
                 )
               })}

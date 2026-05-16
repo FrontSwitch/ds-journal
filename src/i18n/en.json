@@ -88,6 +88,7 @@
     "ungrouped": "Ungrouped",
     "fieldPlaceholder": "Field…",
     "fieldValuePlaceholder": "value…",
+    "fieldValueNumericPlaceholder": "> 5 or < 5…",
     "contextView": "View",
     "contextEdit": "Edit",
     "contextSetFront": "Set as Front",

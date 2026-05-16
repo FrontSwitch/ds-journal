@@ -31,6 +31,30 @@ export function intRangesOverlap(a: [number, number], b: [number, number]): bool
   return a[0] <= b[1] && a[1] >= b[0]
 }
 
+export type NumericQuery = { op: '>' | '>=' | '<' | '<=' | '='; n: number }
+
+/** Parse a numeric comparison query: "> 5", "<=10", "= 3", or plain "5". */
+export function parseNumericQuery(query: string): NumericQuery | null {
+  const s = query.trim()
+  if (!s) return null
+  const m = s.match(/^(>=|<=|>|<|=)?\s*(-?\d+)$/)
+  if (!m) return null
+  const n = parseInt(m[2], 10)
+  if (isNaN(n)) return null
+  return { op: (m[1] as NumericQuery['op']) || '=', n }
+}
+
+/** Apply a NumericQuery against a single integer value. */
+export function matchNumericQuery(q: NumericQuery, value: number): boolean {
+  switch (q.op) {
+    case '>':  return value > q.n
+    case '>=': return value >= q.n
+    case '<':  return value < q.n
+    case '<=': return value <= q.n
+    case '=':  return value === q.n
+  }
+}
+
 /** Display an intRange value nicely: "10-20" → "10–20", "25" → "25". */
 export function formatIntRange(raw: string): string {
   const r = parseIntRange(raw)
