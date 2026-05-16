@@ -59,8 +59,8 @@ export default function Backup({ onClose }: Props) {
   return (
     <>
       <div className="editor-header">
+        <button className="editor-close" onClick={onClose}>←</button>
         <span>{t('backup.title')}</span>
-        <button className="editor-close" onClick={onClose}>✕</button>
       </div>
       <div className="editor-body single" style={{ overflowY: 'auto' }}>
         <div className="editor-col" style={{ gap: 20 }}>

@@ -143,8 +143,8 @@ export default function Security({ onClose }: Props) {
         </div>
       )}
       <div className="editor-header">
+        <button className="editor-close" onClick={onClose}>←</button>
         <span>{t('security.title')}</span>
-        <button className="editor-close" onClick={onClose}>✕</button>
       </div>
       <div className="editor-body single">
         <div className="editor-col" style={{ maxWidth: 400, gap: 6 }}>

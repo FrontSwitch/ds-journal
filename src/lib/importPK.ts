@@ -13,6 +13,7 @@ interface PKMember {
   color?: string
   birthday?: string
   created?: string
+  avatar_url?: string
 }
 
 interface PKGroup {
@@ -66,9 +67,38 @@ export interface PKImportOptions {
 
 export interface PKImportResult {
   avatars: number
+  images: number
   groups: number
   switches: number
   warnings: string[]
+}
+
+async function fetchImageAsBase64(url: string): Promise<string | null> {
+  try {
+    const resp = await fetch(url)
+    if (!resp.ok) return null
+    const blob = await resp.blob()
+    const objectUrl = URL.createObjectURL(blob)
+    try {
+      const img = new Image()
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve()
+        img.onerror = reject
+        img.src = objectUrl
+      })
+      const canvas = document.createElement('canvas')
+      canvas.width = img.naturalWidth
+      canvas.height = img.naturalHeight
+      const ctx = canvas.getContext('2d')!
+      ctx.drawImage(img, 0, 0)
+      const dataUrl = canvas.toDataURL('image/png')
+      return dataUrl.replace(/^data:image\/png;base64,/, '')
+    } finally {
+      URL.revokeObjectURL(objectUrl)
+    }
+  } catch {
+    return null
+  }
 }
 
 export async function runPKImport(data: PKData, opts: PKImportOptions): Promise<PKImportResult> {
@@ -81,7 +111,7 @@ export async function runPKImport(data: PKData, opts: PKImportOptions): Promise<
   const memberIdMap: Record<string, number> = {}  // PK member id (5-char) → DSJ avatar id
   const warnings: string[] = []
 
-  const result: PKImportResult = { avatars: 0, groups: 0, switches: 0, warnings: [] }
+  const result: PKImportResult = { avatars: 0, images: 0, groups: 0, switches: 0, warnings: [] }
 
   async function selectOne<T>(sql: string, params: unknown[]): Promise<T | null> {
     const rows = await db.select<T[]>(sql, params)
@@ -113,6 +143,16 @@ export async function runPKImport(data: PKData, opts: PKImportOptions): Promise<
       memberIdMap[m.id] = id
       if (m.uuid) memberIdMap[m.uuid] = id
       result.avatars++
+
+      if (!opts.dryRun && id !== -1 && m.avatar_url) {
+        const imageData = await fetchImageAsBase64(m.avatar_url)
+        if (imageData) {
+          await db.execute('UPDATE avatars SET image_data = ? WHERE id = ?', [imageData, id])
+          result.images++
+        } else {
+          warnings.push(`Image fetch failed for "${displayName}"`)
+        }
+      }
     }
   }
 

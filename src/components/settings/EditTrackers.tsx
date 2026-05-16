@@ -380,8 +380,8 @@ export default function EditTrackers({ onClose }: Props) {
   return (
     <>
       <div className="editor-header">
+        <button className="editor-close" onClick={onClose}>←</button>
         <span>{t('editTrackers.title')}</span>
-        <button className="editor-close" onClick={onClose}>✕</button>
       </div>
 
       <div className="editor-body">

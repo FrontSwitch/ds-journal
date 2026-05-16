@@ -211,8 +211,8 @@ export default function EditChannels({ onClose }: Props) {
   if (loading) return (
     <>
       <div className="editor-header">
+        <button className="editor-close" onClick={onClose}>←</button>
         <span>{t('editChannels.title')}</span>
-        <button className="editor-close" onClick={onClose}>✕</button>
       </div>
       <div className="editor-body channels"><div className="editor-col"><span className="editor-placeholder">{t('editChannels.loading')}</span></div></div>
     </>
@@ -221,8 +221,8 @@ export default function EditChannels({ onClose }: Props) {
   return (
     <>
       <div className="editor-header">
+        <button className="editor-close" onClick={onClose}>←</button>
         <span>{t('editChannels.title')}</span>
-        <button className="editor-close" onClick={onClose}>✕</button>
       </div>
       <div className="editor-body channels">
         <div className="editor-col channel-list-col">

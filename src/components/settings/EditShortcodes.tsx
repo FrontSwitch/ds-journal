@@ -188,8 +188,8 @@ export default function EditShortcodes({ onClose }: Props) {
   return (
     <>
       <div className="editor-header">
+        <button className="editor-close" onClick={onClose}>←</button>
         <span>{t('editShortcodes.title')}</span>
-        <button className="editor-close" onClick={onClose}>✕</button>
       </div>
 
       <div className="editor-body" style={{ gridTemplateColumns: '440px 1fr' }}>

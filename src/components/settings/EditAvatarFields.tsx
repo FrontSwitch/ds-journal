@@ -79,8 +79,8 @@ export default function EditAvatarFields({ onClose }: Props) {
   return (
     <>
       <div className="editor-header">
+        <button className="editor-close" onClick={onClose}>←</button>
         <span>{t('editAvatarFields.title')}</span>
-        <button className="editor-close" onClick={onClose}>✕</button>
       </div>
       <div className="editor-body">
         <div className="editor-col">

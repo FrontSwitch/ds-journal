@@ -118,8 +118,8 @@ export default function Import({ onClose }: Props) {
   return (
     <div>
       <div className="editor-header">
+        <button className="editor-close" onClick={onClose}>←</button>
         <span>{t('settings.import')}</span>
-        <button className="editor-close" onClick={onClose}>✕</button>
       </div>
       <div className="editor-body single">
         <div className="editor-col" style={{ gap: 16, maxWidth: 500 }}>
@@ -301,7 +301,7 @@ export default function Import({ onClose }: Props) {
                 <div style={{ marginTop: 8 }}>
                   <div className="settings-section-title" style={{ marginBottom: 4 }}>{t('import.warnings')}</div>
                   {spResult.warnings.map((w, i) => (
-                    <p key={i} className="muted" style={{ fontSize: 12, color: '#f9e2af' }}>{w}</p>
+                    <p key={i} className="muted" style={{ fontSize: 12, color: 'var(--color-warning)' }}>{w}</p>
                   ))}
                 </div>
               )}
@@ -316,6 +316,7 @@ export default function Import({ onClose }: Props) {
                 <tbody>
                   {([
                     [t('import.resultAvatars'),  pkResult.avatars],
+                    [t('import.resultImages'),   pkResult.images],
                     [t('import.resultGroups'),   pkResult.groups],
                     [t('import.resultSwitches'), pkResult.switches],
                   ] as [string, number][]).map(([label, count]) => (
@@ -330,7 +331,7 @@ export default function Import({ onClose }: Props) {
                 <div style={{ marginTop: 8 }}>
                   <div className="settings-section-title" style={{ marginBottom: 4 }}>{t('import.warnings')}</div>
                   {pkResult.warnings.map((w, i) => (
-                    <p key={i} className="muted" style={{ fontSize: 12, color: '#f9e2af' }}>{w}</p>
+                    <p key={i} className="muted" style={{ fontSize: 12, color: 'var(--color-warning)' }}>{w}</p>
                   ))}
                 </div>
               )}
