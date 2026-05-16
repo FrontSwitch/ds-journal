@@ -7,8 +7,9 @@ import type { Avatar, AvatarField, AvatarFieldValue, AvatarNote } from '../../ty
 import { t } from '../../i18n'
 import { parseIntRange, intRangesOverlap, formatIntRange } from '../../lib/avatarFieldUtils'
 import { readableColor } from '../../lib/colorUtils'
-import { getAvatarNotes, createAvatarNote, updateAvatarNote, deleteAvatarNote, getAvatarFieldValues } from '../../db/avatars'
+import { getAvatarNotes, createAvatarNote, updateAvatarNote, deleteAvatarNote, getAvatarFieldValues, setAvatarFieldValues } from '../../db/avatars'
 import { getCurrentFront, enterFront, exitFront } from '../../db/front-log'
+import { AvatarFieldEditor } from './AvatarFieldEditor'
 import './AvatarPanel.css'
 
 function formatNoteDate(iso: string): string {
@@ -33,13 +34,13 @@ function AvatarInfoPopup({ avatar, fields, avatars, selectedAvatarId, onClose, i
   initialView?: 'edit'
 }) {
   const [myValues, setMyValues] = useState<AvatarFieldValue[]>([])
+  const [editFieldValues, setEditFieldValues] = useState<Record<number, string>>({})
   useEffect(() => { getAvatarFieldValues(avatar.id).then(setMyValues) }, [avatar.id])
   const valueMap: Record<number, string> = {}
   for (const v of myValues) valueMap[v.field_id] = v.value
-  const filledFields = fields.filter(f => valueMap[f.id])
 
   const [notes, setNotes] = useState<AvatarNote[]>([])
-  const [view, setView] = useState<'info' | 'view' | 'edit'>(initialView ?? 'info')
+  const [view, setView] = useState<'info' | 'view' | 'edit' | 'fields'>(initialView ?? 'info')
   const [editNote, setEditNote] = useState<AvatarNote | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [editBody, setEditBody] = useState('')
@@ -60,6 +61,19 @@ function AvatarInfoPopup({ avatar, fields, avatars, selectedAvatarId, onClose, i
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
+
+  function openFieldsEdit() {
+    setEditFieldValues({ ...valueMap })
+    setView('fields')
+  }
+
+  async function saveFieldValues() {
+    const fvList = Object.entries(editFieldValues).map(([fid, val]) => ({ fieldId: Number(fid), value: val }))
+    await setAvatarFieldValues(avatar.id, fvList)
+    const refreshed = await getAvatarFieldValues(avatar.id)
+    setMyValues(refreshed)
+    setView('info')
+  }
 
   function openNew() {
     setEditNote(null); setEditTitle(''); setEditBody('')
@@ -243,6 +257,30 @@ function AvatarInfoPopup({ avatar, fields, avatars, selectedAvatarId, onClose, i
     )
   }
 
+  if (view === 'fields') {
+    return (
+      <div className="avatar-info-overlay" onClick={onClose}>
+        <div className="avatar-info-popup" onClick={e => e.stopPropagation()}>
+          <div className="avatar-info-header">
+            <button className="avatar-info-back" onClick={() => setView('info')}>←</button>
+            <span className="avatar-info-edit-label">{t('avatarPanel.fieldsEditTitle')}</span>
+            <button className="avatar-info-close" onClick={onClose}>✕</button>
+          </div>
+          <div className="avatar-fields-editor">
+            <AvatarFieldEditor
+              fields={fields}
+              values={editFieldValues}
+              onChange={(fid, val) => setEditFieldValues(v => ({ ...v, [fid]: val }))}
+            />
+            <div className="avatar-note-actions">
+              <button className="avatar-note-save-btn" onClick={saveFieldValues}>{t('avatarPanel.saveFields')}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="avatar-info-overlay" onClick={onClose}>
       <div className="avatar-info-popup" onClick={e => e.stopPropagation()}>
@@ -257,15 +295,25 @@ function AvatarInfoPopup({ avatar, fields, avatars, selectedAvatarId, onClose, i
           <button className="avatar-info-close" onClick={onClose}>✕</button>
         </div>
         {avatar.description && <p className="avatar-info-desc">{avatar.description}</p>}
-        {filledFields.length > 0 && (
-          <dl className="avatar-info-fields">
-            {filledFields.map(f => (
-              <div key={f.id} className="avatar-info-field-row">
-                <dt>{f.name}</dt>
-                <dd>{f.field_type === 'intRange' ? formatIntRange(valueMap[f.id]) : valueMap[f.id]}</dd>
-              </div>
-            ))}
-          </dl>
+        {fields.length > 0 && (
+          <>
+            <div className="avatar-info-section-header">
+              <span>{t('avatarPanel.fieldsSection')}</span>
+              <button className="avatar-info-section-edit" onClick={openFieldsEdit}>{t('avatarPanel.editFields')}</button>
+            </div>
+            <dl className="avatar-info-fields">
+              {fields.map(f => (
+                <div key={f.id} className="avatar-info-field-row">
+                  <dt>{f.name}</dt>
+                  <dd className={valueMap[f.id] ? '' : 'avatar-info-field-empty'}>
+                    {valueMap[f.id]
+                      ? (f.field_type === 'intRange' ? formatIntRange(valueMap[f.id]) : valueMap[f.id])
+                      : '—'}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </>
         )}
         <div className="avatar-notes-section">
           <div className="avatar-notes-header">

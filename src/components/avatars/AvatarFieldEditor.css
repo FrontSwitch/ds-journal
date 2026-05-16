@@ -1,0 +1,53 @@
+.avatar-field-values {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 4px;
+}
+
+.avatar-field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avatar-field-name {
+  font-size: 12px;
+  color: var(--text-muted);
+  width: 90px;
+  flex-shrink: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.avatar-field-row input,
+.avatar-field-row select {
+  flex: 1;
+  font-size: 12px;
+  padding: 3px 6px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+}
+
+.intrange-input {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.intrange-input input {
+  width: 60px;
+  flex: 1;
+  font-size: 12px;
+  padding: 3px 6px;
+}
+
+.intrange-sep {
+  font-size: 12px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}

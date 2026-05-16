@@ -2,37 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { getBuiltinPacks } from '../../assets/builtinImages'
 import type { BuiltinPack } from '../../assets/builtinImages'
 import ColorInput from './ColorInput'
-import { parseIntRange } from '../../lib/avatarFieldUtils'
-
-function IntRangeInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const parsed = parseIntRange(value)
-  const lo = parsed ? String(parsed[0]) : ''
-  const hi = parsed && parsed[0] !== parsed[1] ? String(parsed[1]) : ''
-
-  function update(newLo: string, newHi: string) {
-    const a = newLo.trim(), b = newHi.trim()
-    if (!a && !b) { onChange(''); return }
-    onChange(b ? `${a || 0}-${b}` : a)
-  }
-
-  return (
-    <div className="intrange-input">
-      <input
-        type="number"
-        value={lo}
-        placeholder="min"
-        onChange={e => update(e.target.value, hi)}
-      />
-      <span className="intrange-sep">–</span>
-      <input
-        type="number"
-        value={hi}
-        placeholder="max"
-        onChange={e => update(lo, e.target.value)}
-      />
-    </div>
-  )
-}
+import { AvatarFieldEditor } from '../avatars/AvatarFieldEditor'
 import {
   getAvatars, getAvatarGroups, getAvatarGroupsForAvatar,
   createAvatar, updateAvatar, deleteAvatar, setAvatarGroups,
@@ -325,45 +295,11 @@ export default function EditAvatars({ onClose, initialAvatarId }: Props) {
           {fields.length > 0 && (
             <>
               <label className="field-label">{t('editAvatars.fields')}</label>
-              <div className="avatar-field-values">
-                {fields.map(f => (
-                  <div key={f.id} className="avatar-field-row">
-                    <span className="avatar-field-name">{f.name}</span>
-                    {f.field_type === 'intRange' ? (
-                      <IntRangeInput
-                        value={fieldValues[f.id] ?? ''}
-                        onChange={v => setFieldValues(fv => ({ ...fv, [f.id]: v }))}
-                      />
-                    ) : f.field_type === 'boolean' ? (
-                      <select
-                        value={fieldValues[f.id] ?? ''}
-                        onChange={e => setFieldValues(fv => ({ ...fv, [f.id]: e.target.value }))}
-                      >
-                        <option value="">—</option>
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
-                      </select>
-                    ) : f.field_type === 'list' && f.list_values ? (
-                      <select
-                        value={fieldValues[f.id] ?? ''}
-                        onChange={e => setFieldValues(fv => ({ ...fv, [f.id]: e.target.value }))}
-                      >
-                        <option value="">—</option>
-                        {f.list_values.split(',').map(o => o.trim()).filter(Boolean).map(o => (
-                          <option key={o} value={o}>{o}</option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        type={f.field_type === 'integer' ? 'number' : 'text'}
-                        value={fieldValues[f.id] ?? ''}
-                        onChange={e => setFieldValues(fv => ({ ...fv, [f.id]: e.target.value }))}
-                        placeholder="—"
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
+              <AvatarFieldEditor
+                fields={fields}
+                values={fieldValues}
+                onChange={(fid, val) => setFieldValues(fv => ({ ...fv, [fid]: val }))}
+              />
             </>
           )}
 

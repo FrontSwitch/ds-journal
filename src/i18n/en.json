@@ -94,7 +94,11 @@
     "contextAddFront": "Add to Front",
     "contextRemoveFront": "Remove from Front",
     "collapseAll": "Collapse All",
-    "expandAll": "Expand All"
+    "expandAll": "Expand All",
+    "fieldsSection": "Fields",
+    "editFields": "Edit",
+    "fieldsEditTitle": "Edit Fields",
+    "saveFields": "Save"
   },
   "avatarNotes": {
     "untitled": "(untitled)",
