@@ -530,6 +530,12 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
                 {[avatar.pronouns, avatar.description].filter(Boolean).join(' · ')}
               </span>
             )}
+            {selectedFilterField && (() => {
+              const fv = fieldValues.find(v => v.avatar_id === avatar.id && v.field_id === selectedFilterField.id)
+              if (!fv) return null
+              const display = selectedFilterField.field_type === 'intRange' ? formatIntRange(fv.value) : fv.value
+              return <span className="avatar-field-value">{selectedFilterField.name}: {display}</span>
+            })()}
           </div>
         )}
         {wide && selected && (
@@ -569,8 +575,9 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
 
   const nameActive = filter.trim().length > 0
   const fieldActive = fieldFilterId !== null && fieldFilterValue.trim().length > 0
-  // Load all field values the first time the field filter is used
-  useEffect(() => { if (fieldActive && !fieldValuesLoaded) loadFieldValues() }, [fieldActive])
+  const selectedFilterField = fieldFilterId !== null ? fields.find(f => f.id === fieldFilterId) ?? null : null
+  // Load field values as soon as a field is selected (for display + filtering)
+  useEffect(() => { if (fieldFilterId !== null && !fieldValuesLoaded) loadFieldValues() }, [fieldFilterId])
   const filtered = (nameActive || fieldActive) ? (() => {
     let result = avatars.filter(a => !isHidden(a.hidden))
     if (nameActive) {

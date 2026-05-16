@@ -280,6 +280,14 @@
   white-space: nowrap;
 }
 
+.avatar-field-value {
+  font-size: 11px;
+  color: var(--accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .group-description {
   padding: 0 12px 4px;
   font-size: 11px;

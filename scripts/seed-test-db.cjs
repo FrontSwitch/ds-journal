@@ -152,6 +152,22 @@ db.exec(`
     UNIQUE(record_id, field_id)
   );
 
+  CREATE TABLE avatar_fields (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    name        TEXT    NOT NULL,
+    field_type  TEXT    NOT NULL DEFAULT 'text',
+    list_values TEXT,
+    sort_order  INTEGER NOT NULL DEFAULT 0,
+    created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE TABLE avatar_field_values (
+    avatar_id  INTEGER NOT NULL REFERENCES avatars(id) ON DELETE CASCADE,
+    field_id   INTEGER NOT NULL REFERENCES avatar_fields(id) ON DELETE CASCADE,
+    value      TEXT    NOT NULL,
+    PRIMARY KEY (avatar_id, field_id)
+  );
+
   CREATE INDEX idx_messages_channel          ON messages(channel_id, deleted, created_at DESC);
   CREATE INDEX idx_messages_all              ON messages(deleted, created_at DESC);
   CREATE INDEX idx_messages_avatar           ON messages(avatar_id, deleted, created_at DESC);
@@ -326,6 +342,109 @@ insertChannel.run('old-general', folderOld, 0)
 insertChannel.run('old-events',  folderOld, 1)
 // Ungrouped (1)
 insertChannel.run('random', null, 0)
+
+// ── Avatar fields: Favorite Band ─────────────────────────────────────────────
+
+const BANDS = [
+  'Screaming Toaster Manifesto',
+  'The Dissonant Raccoons',
+  'Velvet Catastrophe',
+  'Gaslight Planetarium',
+  'Chronic Nap Emergency',
+  'The Existential Salamanders',
+  'Furniture Riots',
+  'Quantum Breakfast Club',
+  'Soggy Algorithm',
+  'The Magnificent Pancake Disaster',
+  'Void Warranty',
+  'Static Owl Convention',
+]
+
+const bandField = db.prepare(
+  'INSERT INTO avatar_fields (name, field_type, list_values, sort_order) VALUES (?, ?, ?, ?)'
+).run('Favorite Band', 'list', BANDS.join(','), 0).lastInsertRowid
+
+const insertFieldValue = db.prepare(
+  'INSERT INTO avatar_field_values (avatar_id, field_id, value) VALUES (?, ?, ?)'
+)
+
+// Assign bands to avatars by name
+const assignments = {
+  'Alex':      'Screaming Toaster Manifesto',
+  'Jamie':     'The Dissonant Raccoons',
+  'Sam':       'Furniture Riots',
+  'Morgan':    'Quantum Breakfast Club',
+  'Rowan':     'Velvet Catastrophe',
+  'Casey':     'Soggy Algorithm',
+  'Sentinel':  'Void Warranty',
+  'Aegis':     'Static Owl Convention',
+  'Flint':     'Chronic Nap Emergency',
+  'Veil':      'The Magnificent Pancake Disaster',
+  'Lyric':     'Gaslight Planetarium',
+  'Canvas':    'The Existential Salamanders',
+  'Reverie':   'Screaming Toaster Manifesto',
+  'Fable':     'Velvet Catastrophe',
+  'Sonnet':    'Gaslight Planetarium',
+  'Whimsy':    'The Dissonant Raccoons',
+  'Solace':    'Soggy Algorithm',
+  'Haven':     'Quantum Breakfast Club',
+  'Cipher':    'Void Warranty',
+  'Wander':    'Furniture Riots',
+  'Rune':      'Static Owl Convention',
+  'Echo':      'The Magnificent Pancake Disaster',
+  'River':     'Chronic Nap Emergency',
+  'Sage':      'The Existential Salamanders',
+  'Mist':      'Screaming Toaster Manifesto',
+  'Nexus':     'Quantum Breakfast Club',
+}
+
+for (const [name, band] of Object.entries(assignments)) {
+  const row = db.prepare('SELECT id FROM avatars WHERE name = ?').get(name)
+  if (row) insertFieldValue.run(row.id, bandField, band)
+}
+
+// ── Avatar fields: Age, Strength, Dexterity, BattingAverage ──────────────────
+
+function rand(lo, hi) { return Math.floor(Math.random() * (hi - lo + 1)) + lo }
+
+const insertField = db.prepare(
+  'INSERT INTO avatar_fields (name, field_type, list_values, sort_order) VALUES (?, ?, ?, ?)'
+)
+
+const ageField  = insertField.run('Age',            'intRange', null, 1).lastInsertRowid
+const strField  = insertField.run('Strength',       'integer',  null, 2).lastInsertRowid
+const dexField  = insertField.run('Dexterity',      'integer',  null, 3).lastInsertRowid
+const batField  = insertField.run('Batting Average','integer',  null, 4).lastInsertRowid
+
+// Assign to all avatars
+const allAvatars = db.prepare('SELECT id FROM avatars').all()
+
+// A few avatars get unusual age ranges; the rest are typical 20-30s
+const unusualAges = {
+  1: [16, 19],   // younger
+  2: [35, 45],   // older
+  3: [8, 12],    // little
+  4: [50, 65],   // elder
+  5: [14, 17],   // teen
+}
+let unusualIdx = 0
+const unusualIds = new Set()
+
+for (const { id } of allAvatars) {
+  let lo, hi
+  if (unusualIdx < Object.keys(unusualAges).length && rand(1, 5) === 1 && !unusualIds.has(id)) {
+    const entry = Object.values(unusualAges)[unusualIdx++]
+    lo = entry[0]; hi = entry[1]
+    unusualIds.add(id)
+  } else {
+    lo = rand(18, 28)
+    hi = lo + rand(0, 5)
+  }
+  insertFieldValue.run(id, ageField, `${lo}-${hi}`)
+  insertFieldValue.run(id, strField, String(rand(10, 20)))
+  insertFieldValue.run(id, dexField, String(rand(10, 20)))
+  insertFieldValue.run(id, batField, String(rand(100, 300)))
+}
 
 // ── Done ─────────────────────────────────────────────────────────────────────
 
