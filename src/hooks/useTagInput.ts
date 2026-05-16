@@ -34,7 +34,7 @@ async function loadTagSuggestions(prefix: string): Promise<TagSuggestion[]> {
     ...dbTags.map(t => ({ name: t.name, display_name: t.display_name, isChannel: false })),
     ...channelSuggs,
     ...scratchSugg,
-  ].slice(0, 10)
+  ].slice(0, 20)
 }
 
 async function loadAvatarSuggestions(prefix: string): Promise<TagSuggestion[]> {
@@ -45,7 +45,7 @@ async function loadAvatarSuggestions(prefix: string): Promise<TagSuggestion[]> {
       a.name.toLowerCase().startsWith(lower) ||
       (a.icon_letters != null && a.icon_letters.toLowerCase().startsWith(lower))
     ))
-    .slice(0, 10)
+    .slice(0, 20)
     .map(a => ({ name: a.name.toLowerCase(), display_name: a.name, isChannel: false, color: a.color }))
 }
 

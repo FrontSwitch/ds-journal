@@ -40,11 +40,13 @@ function positionEl(el: HTMLElement, props: SuggestionProps) {
 interface MentionListProps extends SuggestionProps {
   items: Avatar[]
   selectedIndex: number
+  onDismiss: () => void
 }
 
-function MentionList({ items, command, selectedIndex }: MentionListProps) {
+function MentionList({ items, command, selectedIndex, onDismiss }: MentionListProps) {
   return (
     <div className="page-mention-list">
+      <button className="page-mention-dismiss" onClick={onDismiss} aria-label="Dismiss">×</button>
       {items.length === 0
         ? <div className="page-mention-empty">No avatars</div>
         : items.map((a, i) => (
@@ -68,14 +70,20 @@ function makeMentionRender() {
     let selectedIndex = 0
     let currentItems: Avatar[] = []
     let currentCommand: SuggestionProps['command'] | null = null
+    let storedEditor: SuggestionProps['editor'] | null = null
+
+    function dismiss() {
+      storedEditor?.view.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
+    }
 
     return {
       onStart(props: SuggestionProps) {
         currentItems = props.items as Avatar[]
         currentCommand = props.command
+        storedEditor = props.editor
         selectedIndex = 0
         component = new ReactRenderer(MentionList, {
-          props: { ...props, selectedIndex },
+          props: { ...props, selectedIndex, onDismiss: dismiss },
           editor: props.editor,
         })
         const el = component.element as HTMLElement
@@ -88,7 +96,7 @@ function makeMentionRender() {
         currentItems = props.items as Avatar[]
         currentCommand = props.command
         selectedIndex = 0
-        component.updateProps({ ...props, selectedIndex })
+        component.updateProps({ ...props, selectedIndex, onDismiss: dismiss })
         positionEl(component.element as HTMLElement, props)
       },
       onKeyDown({ event }: SuggestionKeyDownProps) {
@@ -126,11 +134,13 @@ interface HashItem { name: string; display_name: string; isChannel: boolean; col
 interface HashListProps extends SuggestionProps {
   items: HashItem[]
   selectedIndex: number
+  onDismiss: () => void
 }
 
-function HashList({ items, command, selectedIndex }: HashListProps) {
+function HashList({ items, command, selectedIndex, onDismiss }: HashListProps) {
   return (
     <div className="page-mention-list">
+      <button className="page-mention-dismiss" onClick={onDismiss} aria-label="Dismiss">×</button>
       {items.length === 0
         ? <div className="page-mention-empty">No tags</div>
         : items.map((s, i) => (
@@ -172,14 +182,20 @@ function makeHashRender() {
     let selectedIndex = 0
     let currentItems: HashItem[] = []
     let currentCommand: SuggestionProps['command'] | null = null
+    let storedEditor: SuggestionProps['editor'] | null = null
+
+    function dismiss() {
+      storedEditor?.view.dom.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
+    }
 
     return {
       onStart(props: SuggestionProps) {
         currentItems = props.items as HashItem[]
         currentCommand = props.command
+        storedEditor = props.editor
         selectedIndex = 0
         component = new ReactRenderer(HashList, {
-          props: { ...props, selectedIndex },
+          props: { ...props, selectedIndex, onDismiss: dismiss },
           editor: props.editor,
         })
         const el = component.element as HTMLElement
@@ -192,7 +208,7 @@ function makeHashRender() {
         currentItems = props.items as HashItem[]
         currentCommand = props.command
         selectedIndex = 0
-        component.updateProps({ ...props, selectedIndex })
+        component.updateProps({ ...props, selectedIndex, onDismiss: dismiss })
         positionEl(component.element as HTMLElement, props)
       },
       onKeyDown({ event }: SuggestionKeyDownProps) {
@@ -242,7 +258,7 @@ function makeHashtagExtension() {
               .insertContent(`#${props.label} `)
               .run()
           },
-          items: ({ query }: { query: string }) => loadHashSuggestions(query),
+          items: ({ query }: { query: string }) => query ? loadHashSuggestions(query) : Promise.resolve([]),
           render: makeHashRender(),
         }),
       ]
@@ -267,7 +283,7 @@ export function PageEditor({ channelId, avatars, selectedAvatar, onPublish, onBa
         HTMLAttributes: { class: 'page-mention-chip' },
         suggestion: {
           items: ({ query }: { query: string }) =>
-            avatars.filter(a => a.name.toLowerCase().startsWith(query.toLowerCase())).slice(0, 8),
+            query ? avatars.filter(a => !isHidden(a.hidden) && a.name.toLowerCase().startsWith(query.toLowerCase())).slice(0, 10) : [],
           render: makeMentionRender(),
         },
       }),

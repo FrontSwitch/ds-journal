@@ -164,9 +164,14 @@ db.exec(`
 const insertGroup = db.prepare(
   'INSERT INTO avatar_groups (name, description, color, sort_order) VALUES (?, ?, ?, ?)'
 )
-const groupCore       = insertGroup.run('Core',       'Primary fronters',     '#89b4fa', 0).lastInsertRowid
-const groupProtectors = insertGroup.run('Protectors', 'Protective alters',    '#f38ba8', 1).lastInsertRowid
-const groupLittles    = insertGroup.run('Littles',    'Younger parts',        '#f9e2af', 2).lastInsertRowid
+const groupCore        = insertGroup.run('Core',        'Primary fronters',          '#89b4fa', 0).lastInsertRowid
+const groupProtectors  = insertGroup.run('Protectors',  'Protective alters',         '#f38ba8', 1).lastInsertRowid
+const groupLittles     = insertGroup.run('Littles',     'Younger parts',             '#f9e2af', 2).lastInsertRowid
+const groupCreatives   = insertGroup.run('Creatives',   'Artists and storytellers',  '#cba6f7', 3).lastInsertRowid
+const groupCaretakers  = insertGroup.run('Caretakers',  'Nurturing and support',     '#a6e3a1', 4).lastInsertRowid
+const groupSeekers     = insertGroup.run('Seekers',     'Curious and exploratory',   '#fab387', 5).lastInsertRowid
+const groupAncients    = insertGroup.run('Ancients',    'Older parts and memories',  '#6c7086', 6).lastInsertRowid
+const groupEdge        = insertGroup.run('Edge',        'Shadow and boundary work',  '#f38ba8', 7).lastInsertRowid
 
 // ── Avatars ───────────────────────────────────────────────────────────────────
 
@@ -179,26 +184,120 @@ const insertMember = db.prepare(
 
 function img(name) { return `builtin://avatars/kenney-animal-pack/${name}.png` }
 
-function avatar(name, color, pronouns, group, order, animal) {
-  const id = insertAvatar.run(name, color, pronouns, animal ? img(animal) : null, order).lastInsertRowid
+let _avatarOrder = 0
+function avatar(name, color, pronouns, group, animal) {
+  const id = insertAvatar.run(name, color, pronouns, animal ? img(animal) : null, _avatarOrder++).lastInsertRowid
   if (group) insertMember.run(id, group)
   return id
 }
 
-// Core (3)
-avatar('Alex',     '#89b4fa', 'they/them', groupCore,       0, 'owl')
-avatar('Jamie',    '#a6e3a1', 'she/her',   groupCore,       1, 'rabbit')
-avatar('Sam',      '#cba6f7', 'he/him',    groupCore,       2, null)
-// Protectors (2)
-avatar('Sentinel', '#f38ba8', 'they/them', groupProtectors, 3, 'bear')
-avatar('Ward',     '#fab387', 'he/him',    groupProtectors, 4, null)
-// Littles (3)
-avatar('Pip',      '#f9e2af', 'she/her',   groupLittles,    5, 'duck')
-avatar('Sunny',    '#ffe0a0', 'they/them', groupLittles,    6, null)
-avatar('Dot',      '#89dceb', 'she/her',   groupLittles,    7, 'penguin')
-// Ungrouped (2)
-avatar('Echo',     '#cdd6f4', null,        null,            8, null)
-avatar('River',    '#b4befe', 'they/them', null,            9, 'narwhal')
+// Core (8)
+avatar('Alex',     '#89b4fa', 'they/them', groupCore,       'owl')
+avatar('Jamie',    '#a6e3a1', 'she/her',   groupCore,       'rabbit')
+avatar('Sam',      '#cba6f7', 'he/him',    groupCore,       null)
+avatar('Morgan',   '#74c7ec', 'they/them', groupCore,       'dolphin')
+avatar('Rowan',    '#89dceb', 'she/her',   groupCore,       null)
+avatar('Casey',    '#94e2d5', 'he/him',    groupCore,       'parrot')
+avatar('Avery',    '#a6e3a1', 'they/them', groupCore,       null)
+avatar('Quinn',    '#b4befe', 'any/all',   groupCore,       'penguin')
+
+// Protectors (10)
+avatar('Sentinel', '#f38ba8', 'they/them', groupProtectors, 'bear')
+avatar('Ward',     '#fab387', 'he/him',    groupProtectors, null)
+avatar('Aegis',    '#f38ba8', 'she/her',   groupProtectors, 'wolf')
+avatar('Bastion',  '#eba0ac', 'he/him',    groupProtectors, null)
+avatar('Flint',    '#e64553', 'they/them', groupProtectors, 'fox')
+avatar('Rampart',  '#f38ba8', 'he/him',    groupProtectors, null)
+avatar('Veil',     '#cba6f7', 'she/her',   groupProtectors, 'owl')
+avatar('Warden',   '#fab387', 'they/them', groupProtectors, null)
+avatar('Bulwark',  '#f38ba8', 'he/him',    groupProtectors, 'bear')
+avatar('Shield',   '#eba0ac', 'they/them', groupProtectors, null)
+
+// Littles (12)
+avatar('Pip',      '#f9e2af', 'she/her',   groupLittles,    'duck')
+avatar('Sunny',    '#ffe0a0', 'they/them', groupLittles,    null)
+avatar('Dot',      '#89dceb', 'she/her',   groupLittles,    'penguin')
+avatar('Boo',      '#f9e2af', 'she/her',   groupLittles,    'rabbit')
+avatar('Nibbles',  '#fab387', 'they/them', groupLittles,    null)
+avatar('Sprout',   '#a6e3a1', 'he/him',    groupLittles,    'frog')
+avatar('Pudding',  '#f9e2af', 'she/her',   groupLittles,    null)
+avatar('Clover',   '#a6e3a1', 'they/them', groupLittles,    'deer')
+avatar('Pebble',   '#89dceb', 'she/her',   groupLittles,    null)
+avatar('Acorn',    '#fab387', 'he/him',    groupLittles,    'squirrel')
+avatar('Wisp',     '#cba6f7', 'they/them', groupLittles,    null)
+avatar('Flicker',  '#f9e2af', 'she/her',   groupLittles,    'firefly')
+
+// Creatives (12)
+avatar('Lyric',    '#cba6f7', 'she/her',   groupCreatives,  null)
+avatar('Canvas',   '#89b4fa', 'they/them', groupCreatives,  null)
+avatar('Reverie',  '#f5c2e7', 'she/her',   groupCreatives,  'butterfly')
+avatar('Mosaic',   '#cba6f7', 'any/all',   groupCreatives,  null)
+avatar('Fable',    '#f5c2e7', 'she/her',   groupCreatives,  null)
+avatar('Prism',    '#89b4fa', 'they/them', groupCreatives,  null)
+avatar('Lore',     '#cba6f7', 'he/him',    groupCreatives,  null)
+avatar('Sonnet',   '#f5c2e7', 'she/her',   groupCreatives,  null)
+avatar('Palette',  '#89b4fa', 'they/them', groupCreatives,  null)
+avatar('Whimsy',   '#cba6f7', 'she/her',   groupCreatives,  null)
+avatar('Stanza',   '#f5c2e7', 'any/all',   groupCreatives,  null)
+avatar('Myth',     '#89b4fa', 'they/them', groupCreatives,  null)
+
+// Caretakers (10)
+avatar('Solace',   '#a6e3a1', 'she/her',   groupCaretakers, null)
+avatar('Haven',    '#94e2d5', 'they/them', groupCaretakers, null)
+avatar('Tender',   '#a6e3a1', 'she/her',   groupCaretakers, 'deer')
+avatar('Bloom',    '#94e2d5', 'they/them', groupCaretakers, null)
+avatar('Balm',     '#a6e3a1', 'she/her',   groupCaretakers, null)
+avatar('Nurturer', '#94e2d5', 'they/them', groupCaretakers, null)
+avatar('Anchor',   '#a6e3a1', 'he/him',    groupCaretakers, null)
+avatar('Harbor',   '#94e2d5', 'she/her',   groupCaretakers, null)
+avatar('Comfort',  '#a6e3a1', 'they/them', groupCaretakers, null)
+avatar('Grounded', '#94e2d5', 'he/him',    groupCaretakers, null)
+
+// Seekers (10)
+avatar('Cipher',   '#fab387', 'they/them', groupSeekers,    null)
+avatar('Wander',   '#f9e2af', 'she/her',   groupSeekers,    null)
+avatar('Rune',     '#fab387', 'they/them', groupSeekers,    null)
+avatar('Drift',    '#f9e2af', 'he/him',    groupSeekers,    null)
+avatar('Riddle',   '#fab387', 'they/them', groupSeekers,    null)
+avatar('Trace',    '#f9e2af', 'she/her',   groupSeekers,    null)
+avatar('Quill',    '#fab387', 'they/them', groupSeekers,    null)
+avatar('Spark',    '#f9e2af', 'he/him',    groupSeekers,    null)
+avatar('Flint',    '#fab387', 'they/them', groupSeekers,    null)
+avatar('Current',  '#f9e2af', 'she/her',   groupSeekers,    null)
+
+// Ancients (8)
+avatar('Elder',    '#6c7086', 'they/them', groupAncients,   null)
+avatar('Archive',  '#585b70', 'she/her',   groupAncients,   null)
+avatar('Remnant',  '#6c7086', 'he/him',    groupAncients,   null)
+avatar('Vestige',  '#585b70', 'they/them', groupAncients,   null)
+avatar('Chronicle','#6c7086', 'she/her',   groupAncients,   null)
+avatar('Epoch',    '#585b70', 'they/them', groupAncients,   null)
+avatar('Relic',    '#6c7086', 'he/him',    groupAncients,   null)
+avatar('Memoria',  '#585b70', 'she/her',   groupAncients,   null)
+
+// Edge (8)
+avatar('Shade',    '#313244', 'they/them', groupEdge,       null)
+avatar('Thorn',    '#45475a', 'she/her',   groupEdge,       null)
+avatar('Fracture', '#313244', 'they/them', groupEdge,       null)
+avatar('Hollow',   '#45475a', 'he/him',    groupEdge,       null)
+avatar('Void',     '#313244', 'they/them', groupEdge,       null)
+avatar('Ashen',    '#45475a', 'she/her',   groupEdge,       null)
+avatar('Rift',     '#313244', 'they/them', groupEdge,       null)
+avatar('Ember',    '#45475a', 'he/him',    groupEdge,       null)
+
+// Ungrouped (12)
+avatar('Echo',     '#cdd6f4', null,        null,            null)
+avatar('River',    '#b4befe', 'they/them', null,            'narwhal')
+avatar('Sage',     '#a6e3a1', 'she/her',   null,            null)
+avatar('Mist',     '#89dceb', 'they/them', null,            null)
+avatar('Vale',     '#cba6f7', 'she/her',   null,            null)
+avatar('Stone',    '#6c7086', 'he/him',    null,            null)
+avatar('Cinder',   '#fab387', 'they/them', null,            null)
+avatar('Aura',     '#f5c2e7', 'she/her',   null,            null)
+avatar('Nexus',    '#89b4fa', 'they/them', null,            null)
+avatar('Axis',     '#94e2d5', 'he/him',    null,            null)
+avatar('Lumen',    '#f9e2af', 'they/them', null,            null)
+avatar('Vex',      '#f38ba8', 'they/them', null,            null)
 
 // ── Folders + channels ────────────────────────────────────────────────────────
 

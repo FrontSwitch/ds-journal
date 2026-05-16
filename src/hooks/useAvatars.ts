@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { getAvatars, getAvatarGroups, getAllGroupMembers, getChannelActivityAvatarIds, getAvatarFields, getAllAvatarFieldValues } from '../db/avatars'
+import { getAvatars, getAvatarGroups, getAllGroupMembers, getChannelActivityAvatarIds, getAvatarFields, getAllAvatarFieldValues, getAvatarImagesMap } from '../db/avatars'
 import type { Avatar, AvatarField, AvatarFieldValue, AvatarGroup } from '../types'
 
 export interface GroupWithMembers {
@@ -14,11 +14,12 @@ export function useAvatars(selectedChannelId: number | null) {
   const [suspects, setSuspects] = useState<Avatar[]>([])
   const [fields, setFields] = useState<AvatarField[]>([])
   const [fieldValues, setFieldValues] = useState<AvatarFieldValue[]>([])
+  const [fieldValuesLoaded, setFieldValuesLoaded] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
-    const [allAvatars, allGroups, allMembers, allFields, allValues] = await Promise.all([
-      getAvatars(), getAvatarGroups(), getAllGroupMembers(), getAvatarFields(), getAllAvatarFieldValues(),
+    const [allAvatars, allGroups, allMembers, allFields] = await Promise.all([
+      getAvatars(), getAvatarGroups(), getAllGroupMembers(), getAvatarFields(),
     ])
 
     // build groups with members
@@ -48,11 +49,29 @@ export function useAvatars(selectedChannelId: number | null) {
     setUngrouped(ungroupedAvatars)
     setSuspects(suspectAvatars)
     setFields(allFields)
-    setFieldValues(allValues)
+    setFieldValuesLoaded(false)
     setLoading(false)
+
+    // Background: load image_data for avatars that have one (single batch query)
+    getAvatarImagesMap().then(imageMap => {
+      if (imageMap.size === 0) return
+      const merge = (a: Avatar): Avatar => imageMap.has(a.id) ? { ...a, image_data: imageMap.get(a.id) } : a
+      setAvatars(prev => prev.map(merge))
+      setGroups(prev => prev.map(gwm => ({ ...gwm, avatars: gwm.avatars.map(merge) })))
+      setUngrouped(prev => prev.map(merge))
+      setSuspects(prev => prev.map(merge))
+    })
   }, [selectedChannelId])
+
+  // Load all field values on demand (used by avatar panel field filter)
+  const loadFieldValues = useCallback(async () => {
+    if (fieldValuesLoaded) return
+    const vals = await getAllAvatarFieldValues()
+    setFieldValues(vals)
+    setFieldValuesLoaded(true)
+  }, [fieldValuesLoaded])
 
   useEffect(() => { load() }, [load])
 
-  return { avatars, groups, ungrouped, suspects, fields, fieldValues, loading, reload: load }
+  return { avatars, groups, ungrouped, suspects, fields, fieldValues, fieldValuesLoaded, loading, reload: load, loadFieldValues }
 }

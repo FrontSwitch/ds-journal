@@ -13,6 +13,22 @@ export * from './sync-events'
 export * from './sync-peers'
 export * from './sync-apply'
 
+// --- Chunked apply (prevents long event-loop blocks on large first syncs) ---
+
+const SYNC_CHUNK_SIZE = 50
+
+async function applyEventsInChunks(events: SyncEvent[], peerDeviceId: string): Promise<void> {
+  if (events.length <= SYNC_CHUNK_SIZE) {
+    await applyRemoteEvents(events, peerDeviceId)
+    return
+  }
+  // Pre-sort so snapshot events (ts=0) always precede message events across chunks
+  const sorted = [...events].sort((a, b) => a.timestamp - b.timestamp)
+  for (let i = 0; i < sorted.length; i += SYNC_CHUNK_SIZE) {
+    await applyRemoteEvents(sorted.slice(i, i + SYNC_CHUNK_SIZE), peerDeviceId)
+  }
+}
+
 // --- High-level sync orchestration ---
 
 /** Handle an incoming sync request from a peer (called by App.tsx dsj-sync-request handler). */
@@ -22,7 +38,7 @@ export async function handleSyncRequest(
   events: SyncEvent[],
   coldSync: boolean = false
 ): Promise<{ events: SyncEvent[], server_time: number }> {
-  await applyRemoteEvents(events, peerDeviceId)
+  await applyEventsInChunks(events, peerDeviceId)
 
   const messageDays = await getMessageDays()
   const cutoffMs = messageDays > 0
@@ -104,7 +120,7 @@ export async function syncNow(): Promise<{ sent: number, received: number, peers
           myEvents,
         )
       }
-      await applyRemoteEvents(result.events, peer.device_id)
+      await applyEventsInChunks(result.events, peer.device_id)
       const realReceived = result.events.filter(e => e.device_counter !== -1)
       const theirMaxCounter = realReceived.length > 0
         ? Math.max(...realReceived.map(e => e.device_counter))

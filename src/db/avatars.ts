@@ -2,9 +2,41 @@ import { getDb, setSortOrders } from './index'
 import { logCreate, logUpdate, logUpdateById, logDelete, getEntityId } from './sync'
 import type { Avatar, AvatarField, AvatarFieldType, AvatarFieldValue, AvatarGroup, AvatarNote } from '../types'
 
+// Module-level cache so individual lookups don't re-query after the batch load
+const _imageCache = new Map<number, string | null>()
+
 export async function getAvatars(): Promise<Avatar[]> {
   const db = await getDb()
-  return db.select<Avatar[]>('SELECT * FROM avatars ORDER BY sort_order, name')
+  // Excludes image_data — fetched separately via getAvatarImagesMap()
+  return db.select<Avatar[]>(
+    'SELECT id, name, color, image_path, description, pronouns, hidden, icon_letters, sort_order, created_at, entity_id FROM avatars ORDER BY name'
+  )
+}
+
+// One query for all non-null images; populates the cache as a side effect
+export async function getAvatarImagesMap(): Promise<Map<number, string | null>> {
+  const db = await getDb()
+  const rows = await db.select<{ id: number; image_data: string | null }[]>(
+    'SELECT id, image_data FROM avatars WHERE image_data IS NOT NULL'
+  )
+  const map = new Map<number, string | null>()
+  for (const r of rows) { map.set(r.id, r.image_data); _imageCache.set(r.id, r.image_data) }
+  return map
+}
+
+export async function getAvatarImageData(id: number): Promise<string | null> {
+  if (_imageCache.has(id)) return _imageCache.get(id)!
+  const db = await getDb()
+  const rows = await db.select<{ image_data: string | null }[]>(
+    'SELECT image_data FROM avatars WHERE id = ?', [id]
+  )
+  const val = rows[0]?.image_data ?? null
+  _imageCache.set(id, val)
+  return val
+}
+
+export function invalidateImageCache(id: number): void {
+  _imageCache.delete(id)
 }
 
 export async function getAvatarGroups(): Promise<AvatarGroup[]> {
@@ -60,6 +92,7 @@ export async function setAvatarImageData(id: number, imageData: string | null): 
   const db = await getDb()
   await db.execute('UPDATE avatars SET image_data = ? WHERE id = ?', [imageData, id])
   await logUpdateById('avatars', id, { image_data: imageData })
+  invalidateImageCache(id)
 }
 
 export async function deleteAvatar(id: number): Promise<void> {

@@ -1,13 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAvatars } from '../../hooks/useAvatars'
 import { useAppStore } from '../../store/app'
-import { ALL_MESSAGES_ID, getInitials, isHidden } from '../../types'
+import { ALL_MESSAGES_ID, buildInitialsMap, isHidden } from '../../types'
 import { AvatarIcon } from './AvatarIcon'
 import type { Avatar, AvatarField, AvatarFieldValue, AvatarNote } from '../../types'
 import { t } from '../../i18n'
 import { parseIntRange, intRangesOverlap, formatIntRange } from '../../lib/avatarFieldUtils'
 import { readableColor } from '../../lib/colorUtils'
-import { getAvatarNotes, createAvatarNote, updateAvatarNote, deleteAvatarNote } from '../../db/avatars'
+import { getAvatarNotes, createAvatarNote, updateAvatarNote, deleteAvatarNote, getAvatarFieldValues } from '../../db/avatars'
 import { getCurrentFront, enterFront, exitFront } from '../../db/front-log'
 import './AvatarPanel.css'
 
@@ -24,16 +24,16 @@ interface Props {
   autoClose?: boolean
 }
 
-function AvatarInfoPopup({ avatar, fields, fieldValues, avatars, selectedAvatarId, onClose, initialView }: {
+function AvatarInfoPopup({ avatar, fields, avatars, selectedAvatarId, onClose, initialView }: {
   avatar: Avatar
   fields: AvatarField[]
-  fieldValues: AvatarFieldValue[]
   avatars: Avatar[]
   selectedAvatarId: number | null
   onClose: () => void
   initialView?: 'edit'
 }) {
-  const myValues = fieldValues.filter(v => v.avatar_id === avatar.id)
+  const [myValues, setMyValues] = useState<AvatarFieldValue[]>([])
+  useEffect(() => { getAvatarFieldValues(avatar.id).then(setMyValues) }, [avatar.id])
   const valueMap: Record<number, string> = {}
   for (const v of myValues) valueMap[v.field_id] = v.value
   const filledFields = fields.filter(f => valueMap[f.id])
@@ -248,7 +248,7 @@ function AvatarInfoPopup({ avatar, fields, fieldValues, avatars, selectedAvatarI
       <div className="avatar-info-popup" onClick={e => e.stopPropagation()}>
         <div className="avatar-info-header">
           <div className="avatar-info-icon" style={{ background: avatar.color }}>
-            {getInitials(avatar.name, [avatar.name])}
+            {avatar.icon_letters || avatar.name[0]?.toUpperCase() || '?'}
           </div>
           <div className="avatar-info-name-block">
             <span className="avatar-info-name">{avatar.name}</span>
@@ -310,6 +310,7 @@ interface ContextMenu { avatar: Avatar; x: number; y: number }
 
 export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
+  const [userToggledAll, setUserToggledAll] = useState(false)
   const [filter, setFilter] = useState('')
   const [fieldFilterId, setFieldFilterId] = useState<number | null>(null)
   const [fieldFilterValue, setFieldFilterValue] = useState('')
@@ -324,16 +325,29 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
     pendingNewNoteAvatarId, setPendingNewNoteAvatarId,
     setCurrentFront,
   } = useAppStore()
-  const { groups, ungrouped, suspects, loading, avatars, fields, fieldValues } = useAvatars(channelId)
+  const { groups, ungrouped, suspects, loading, avatars, fields, fieldValues, fieldValuesLoaded, loadFieldValues } = useAvatars(channelId)
 
   const wide = avatarPanelMode === 'full'
   const isAllMessages = channelId === ALL_MESSAGES_ID
-  const allNames = avatars.map(a => a.name)
+  const initialsMap = useMemo(() => buildInitialsMap(avatars), [avatars])
   const selectedAvatar = selectedAvatarId != null ? avatars.find(a => a.id === selectedAvatarId) ?? null : null
 
   useEffect(() => {
     document.querySelector('.app-layout')?.classList.toggle('wide-avatars', wide)
   }, [wide])
+
+  // Auto-collapse all groups on first load when avatar count exceeds threshold
+  useEffect(() => {
+    if (loading || userToggledAll) return
+    const visibleCount = avatars.filter(a => !isHidden(a.hidden)).length
+    if (visibleCount > 25) {
+      const allKeys = [
+        ...groups.map(g => String(g.group.id)),
+        '__suspects', '__ungrouped',
+      ]
+      setCollapsed(Object.fromEntries(allKeys.map(k => [k, true])))
+    }
+  }, [loading])
 
   useEffect(() => {
     if (!contextMenu) return
@@ -370,6 +384,15 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
 
   function toggleCollapse(key: string) {
     setCollapsed(c => ({ ...c, [key]: !c[key] }))
+  }
+
+  const allGroupKeys = [...groups.map(g => String(g.group.id)), '__suspects', '__ungrouped']
+  const anyExpanded = allGroupKeys.some(k => !collapsed[k])
+
+  function toggleAllCollapse() {
+    const next = anyExpanded
+    setCollapsed(Object.fromEntries(allGroupKeys.map(k => [k, next])))
+    setUserToggledAll(true)
   }
 
   function handleAvatarClick(avatar: Avatar) {
@@ -448,7 +471,7 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
           icon_letters={avatar.icon_letters}
           name={avatar.name}
           color={avatar.color}
-          allNames={allNames}
+          initials={initialsMap.get(avatar.id)}
           size={wide ? 28 : undefined}
         />
         {wide && (
@@ -498,6 +521,8 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
 
   const nameActive = filter.trim().length > 0
   const fieldActive = fieldFilterId !== null && fieldFilterValue.trim().length > 0
+  // Load all field values the first time the field filter is used
+  useEffect(() => { if (fieldActive && !fieldValuesLoaded) loadFieldValues() }, [fieldActive])
   const filtered = (nameActive || fieldActive) ? (() => {
     let result = avatars.filter(a => !isHidden(a.hidden))
     if (nameActive) {
@@ -548,7 +573,6 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
           key={infoAvatar.id}
           avatar={infoAvatar}
           fields={fields}
-          fieldValues={fieldValues}
           avatars={avatars}
           selectedAvatarId={selectedAvatarId}
           initialView={infoNewNote ? 'edit' : undefined}
@@ -571,7 +595,7 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
                   icon_letters={selectedAvatar.icon_letters}
                   name={selectedAvatar.name}
                   color={selectedAvatar.color}
-                  allNames={allNames}
+                  initials={initialsMap.get(selectedAvatar.id)}
                   size={16}
                 />
                 {' '}
@@ -601,18 +625,25 @@ export default function AvatarPanel({ channelId, onClose, autoClose }: Props) {
       </div>
 
       <div className="panel-filter">
-        <input
-          value={filter}
-          onChange={e => setFilter(e.target.value)}
-          placeholder={t('avatarPanel.filterPlaceholder')}
-          className="filter-input"
-          onKeyDown={e => {
-            if (e.key === 'Tab') {
-              e.preventDefault()
-              document.querySelector<HTMLTextAreaElement>('.chat-panel textarea')?.focus()
-            }
-          }}
-        />
+        <div className="panel-filter-row">
+          <input
+            value={filter}
+            onChange={e => setFilter(e.target.value)}
+            placeholder={t('avatarPanel.filterPlaceholder')}
+            className="filter-input"
+            onKeyDown={e => {
+              if (e.key === 'Tab') {
+                e.preventDefault()
+                document.querySelector<HTMLTextAreaElement>('.chat-panel textarea')?.focus()
+              }
+            }}
+          />
+          {!filtered && (
+            <button className="collapse-all-btn" onClick={toggleAllCollapse} title={anyExpanded ? t('avatarPanel.collapseAll') : t('avatarPanel.expandAll')}>
+              {anyExpanded ? '⊟' : '⊞'}
+            </button>
+          )}
+        </div>
         {fields.length > 0 && (
           <div className="field-filter-row">
             <select

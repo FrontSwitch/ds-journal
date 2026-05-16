@@ -216,7 +216,22 @@
   min-width: 140px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.4);
   z-index: 1000;
+  display: flex;
+  flex-direction: column;
 }
+
+.page-mention-dismiss {
+  align-self: flex-end;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 6px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+.page-mention-dismiss:hover { color: var(--text); background: var(--bg-hover); }
 
 .page-mention-item {
   display: flex;

@@ -9,6 +9,49 @@ general:
   ?
   
 
+## Scaling bugs
+❯ anywhere you would anticipate 100+ avatars causing issues?                                                      
+                                                             
+⏺ A few spots stand out:                                                                                          
+                                         
+  getInitials(name, allNames) — called per-avatar in rendered lists, passing the full avatar array each time.     
+  That's O(n²) across a render of 100+ avatars. Not a crash, but measurable jank on every re-render.
+                                                                                                                  
+  image_data TEXT (base64 PNG on avatars table) — useAvatars loads all avatars in one query, pulling every base64 
+  image into JS memory at once. 100 avatars with images could easily be 50–100 MB held in the Zustand store.
+                                                                                                                  
+  Avatar panel + EditAvatars — both render the full list with no virtualization. At 100+, DOM pressure becomes    
+  noticeable, especially with images.
+                                                                                                                  
+  Mention autocomplete — the @ dropdown shows all avatars. At 100+ it's still functional but the UX degrades      
+  (you're scrolling a long list before typing filters it). Not a bug, just friction.
+                                                                                                                  
+  useAvatars loading avatar_field_values — if you also have many avatar fields, the cross-join result could be    
+  large. One row per (avatar × field) means 100 avatars × 10 fields = 1000 rows fetched on every channel change.
+                                                                                                                  
+  Sync payloads — first sync of a 100+-avatar system sends all avatar payloads at once. Probably fine, but worth  
+  knowing it's unbounded.
+                                                                                                                  
+  The worst practical one is the image_data memory issue — it would be worth lazy-loading images (fetch on demand 
+  rather than hydrating image_data into every avatar record). The getInitials O(n²) is worth memoizing if avatar
+  lists get that large.                                                                                           
+                                                            
+❯ I'd like to fix these. 25 is expected. 50 is big but not. 100 is likely outlier but let's setup the base        
+  seed:test to do 100. I want to be known as scale friendly. let's work out 100. then consider 500.               
+  Number for issues might help assuming that for comments.                                                        
+  1 getInitials() - would it be useful to have a dictionary or other faster lookup. x2 use cases. anywhere else   
+  we're walking avatars?                                                                                          
+  2 image_data. - let's make that data smarter. a text page with 500 images fails.                                
+  3 avatar panel - I don't want paging. help explain alternates.                                                  
+  3b EditAvatars - paging here is likely ok.                                                                      
+  4 @ autocomplete - for no first character filter... let's limit to 10 (or 20).                                  
+      what's smarter way? inside a channel - maybe the recent list. maybe we need a recent list shared.           
+      maybe N works.                                                                                              
+  4b same issue with #<tag>. limit of 20 is fine.                                                                 
+  5 avatar_field_values - where do they get used? feels like "info panel". I need to add some to test with.       
+    might be a flag for "fields loaded".                                                                          
+  6 sync payload - break that apart. pick a size 1-20 to send at once. 
+
 ## Peer to peer sync
 Peer to peer sync.
 ordering of events is per device, not global.

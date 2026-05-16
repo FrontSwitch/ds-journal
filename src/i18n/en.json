@@ -92,7 +92,9 @@
     "contextEdit": "Edit",
     "contextSetFront": "Set as Front",
     "contextAddFront": "Add to Front",
-    "contextRemoveFront": "Remove from Front"
+    "contextRemoveFront": "Remove from Front",
+    "collapseAll": "Collapse All",
+    "expandAll": "Expand All"
   },
   "avatarNotes": {
     "untitled": "(untitled)",

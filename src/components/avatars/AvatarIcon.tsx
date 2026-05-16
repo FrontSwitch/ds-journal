@@ -1,5 +1,5 @@
 import './AvatarIcon.css'
-import { assetUrl, getInitials } from '../../types'
+import { assetUrl } from '../../types'
 
 interface AvatarIconProps {
   image_data?: string | null
@@ -7,12 +7,12 @@ interface AvatarIconProps {
   icon_letters?: string | null
   name: string
   color?: string | null
-  allNames?: string[]
+  initials?: string   // precomputed by buildInitialsMap; falls back to name[0]
   size?: number
   className?: string
 }
 
-export function AvatarIcon({ image_data, image_path, icon_letters, name, color, allNames, size, className }: AvatarIconProps) {
+export function AvatarIcon({ image_data, image_path, icon_letters, name, color, initials, size, className }: AvatarIconProps) {
   const style: React.CSSProperties & { '--ai-size'?: string } = {
     background: color ?? 'var(--text-muted)',
   }
@@ -36,7 +36,7 @@ export function AvatarIcon({ image_data, image_path, icon_letters, name, color, 
   }
   return (
     <span className={cls} style={style}>
-      {icon_letters || (allNames ? getInitials(name, allNames) : name.charAt(0).toUpperCase())}
+      {icon_letters || initials || name.charAt(0).toUpperCase()}
     </span>
   )
 }

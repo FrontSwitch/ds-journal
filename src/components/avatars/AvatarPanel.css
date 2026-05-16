@@ -71,6 +71,29 @@
   flex-shrink: 0;
 }
 
+.panel-filter-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.panel-filter-row .filter-input {
+  flex: 1;
+}
+
+.collapse-all-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 2px 4px;
+  cursor: pointer;
+  border-radius: 3px;
+  line-height: 1;
+}
+.collapse-all-btn:hover { color: var(--text); background: var(--bg-hover); }
+
 .filter-input {
   width: 100%;
   font-size: 12px;

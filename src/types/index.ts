@@ -28,7 +28,7 @@ export interface Avatar {
   name: string
   color: string
   image_path: string | null
-  image_data: string | null   // base64-encoded resized image for cross-device sync
+  image_data?: string | null   // base64 PNG; not loaded by getAvatars() — populated by useAvatars background pass
   description: string | null
   pronouns: string | null
   hidden: number
@@ -243,6 +243,21 @@ export function getInitials(name: string, allNames: string[]): string {
   const others = allNames.filter(n => n !== name && n[0]?.toUpperCase() === first)
   if (others.length > 0) return name.slice(0, 2).toUpperCase()
   return first
+}
+
+// O(n) version: build a Map<id, initials> from all avatars at once
+export function buildInitialsMap(avatars: { id: number; name: string }[]): Map<number, string> {
+  const letterCount = new Map<string, number>()
+  for (const a of avatars) {
+    const first = a.name[0]?.toUpperCase() ?? '?'
+    letterCount.set(first, (letterCount.get(first) ?? 0) + 1)
+  }
+  const map = new Map<number, string>()
+  for (const a of avatars) {
+    const first = a.name[0]?.toUpperCase() ?? '?'
+    map.set(a.id, (letterCount.get(first) ?? 0) > 1 ? a.name.slice(0, 2).toUpperCase() : first)
+  }
+  return map
 }
 
 // --- Sync types ---

@@ -37,10 +37,10 @@ import {
   getAvatars, getAvatarGroups, getAvatarGroupsForAvatar,
   createAvatar, updateAvatar, deleteAvatar, setAvatarGroups,
   getAvatarFields, getAvatarFieldValues, setAvatarFieldValues,
-  setAvatarImageData,
+  setAvatarImageData, getAvatarImageData,
 } from '../../db/avatars'
 import type { Avatar, AvatarField, AvatarGroup } from '../../types'
-import { assetUrl, isHidden } from '../../types'
+import { assetUrl, buildInitialsMap, isHidden } from '../../types'
 import { AvatarIcon } from '../avatars/AvatarIcon'
 import { t } from '../../i18n'
 
@@ -64,6 +64,7 @@ export default function EditAvatars({ onClose, initialAvatarId }: Props) {
   const [importingImage, setImportingImage] = useState(false)
   const [imageMaxSize, setImageMaxSize] = useState(300)
   const builtinPacks = useMemo(() => getBuiltinPacks(), [])
+  const initialsMap = useMemo(() => buildInitialsMap(avatars), [avatars])
   const [description, setDescription] = useState('')
   const [pronouns, setPronouns] = useState('')
   const [hidden, setHidden] = useState(false)
@@ -87,15 +88,17 @@ export default function EditAvatars({ onClose, initialAvatarId }: Props) {
     setName(avatar.name)
     setColor(avatar.color)
     setImagePath(avatar.image_path ?? '')
-    setHasImageData(!!avatar.image_data)
+    setHasImageData(false) // will update below
     setDescription(avatar.description ?? '')
     setPronouns(avatar.pronouns ?? '')
     setHidden(isHidden(avatar.hidden))
     setIconLetters(avatar.icon_letters ?? '')
-    const [gIds, vals] = await Promise.all([
+    const [gIds, vals, imgData] = await Promise.all([
       getAvatarGroupsForAvatar(avatar.id),
       getAvatarFieldValues(avatar.id),
+      getAvatarImageData(avatar.id),
     ])
+    setHasImageData(!!imgData)
     setSelectedGroups(gIds)
     const fvMap: Record<number, string> = {}
     for (const v of vals) fvMap[v.field_id] = v.value
@@ -228,12 +231,11 @@ export default function EditAvatars({ onClose, initialAvatarId }: Props) {
                   onClick={() => selectAvatar(a)}
                 >
                   <AvatarIcon
-                    image_data={a.image_data}
                     image_path={a.image_path}
                     icon_letters={a.icon_letters}
                     name={a.name}
                     color={a.color}
-                    allNames={avatars.map(x => x.name)}
+                    initials={initialsMap.get(a.id)}
                     size={24}
                   />
                   {a.name}
