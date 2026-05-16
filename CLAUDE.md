@@ -333,13 +333,17 @@ SP JSON maps: members→avatars, groups→avatar_groups, chatCategory→folders,
 ## Testing
 
 ```bash
-npm test                       # Vitest: 314 tests — pure, mock-DB, and real-SQLite sync integration tests (~1.5s)
+npm test                       # Vitest: 390 tests — pure, mock-DB, and real-SQLite sync integration tests (~1.8s)
 npm run test:watch             # watch mode
 cd src-tauri && cargo test     # Rust tests (~8s, includes Argon2 KDF)
 node scripts/check-i18n.cjs   # i18n completeness check
 ```
 
 **Sync tests** (`src/db/sync-events.test.ts`, `src/db/sync-apply.test.ts`) cover three tiers: pure helpers (safeCol, sanitizePayload), mock-DB tests for every `applyRemoteEvents` path (create/update/delete, LWW conflict, dedup, cold-sync sentinel), and real-SQLite integration tests via `better-sqlite3` (two-device sync, first-sync merge, conflict detection, message FK resolution). Sync functions accept `injectedDb?: NativeDb` — pass a real or mock DB directly, no module mocking needed.
+
+**Bot engine tests** (`src/lib/botEngine.test.ts`) cover `distillTone` (recency weighting, clamping, volatility) and `matchBot` (pattern match, priority, tag boost, required/excluded, all six tone filters, multi-sentence tag collection, chance gating).
+
+**PluralKit import tests** (`src/lib/importPK.test.ts`) cover `parsePKData`, `previewPK`, and `runPKImport` (member insert/skip/dry-run, display_name preference, color fallback, uuid alias, group create/reuse/warning, switch sorting, duration math, single/co-session text format, channel creation). Uses `vi.mock('../db/index')` with a sequenced mock DB.
 
 See `docs/testing.md` for full details: test structure, mock patterns, RTL gotchas, manual testing cheat sheet.
 

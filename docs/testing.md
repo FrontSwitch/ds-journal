@@ -15,7 +15,7 @@ cd src-tauri && cargo test   # Rust unit tests (~8s, includes Argon2 KDF)
 
 ## TypeScript tests (Vitest)
 
-**314 tests across 17 files.**
+**390 tests across 19 files.**
 
 ### Setup
 
@@ -54,6 +54,8 @@ cd src-tauri && cargo test   # Rust unit tests (~8s, includes Argon2 KDF)
 | `nudge.test.ts` | `shouldShowNudge`, `snoozeNudge`, `dismissNudge` — exponential backoff, localStorage state |
 | `importSpJson.test.ts` | `normalizeColor`, `spTsToSql`, `buildMemberDescription`, `buildFrontHistoryText`, `buildNoteText`, `buildBoardText`, `frontHistoryMemberId` |
 | `importUtils.test.ts` | Shared import transform helpers |
+| `importPK.test.ts` | `parsePKData`, `previewPK`, `runPKImport` — member insert/skip/dry-run, display_name preference, color fallback, uuid alias, group create/reuse/warning, switch sorting, duration math, single/co-session text format, Front Log channel creation. Uses `vi.mock('../db/index')` with a sequenced mock DB. |
+| `botEngine.test.ts` | `distillTone` (recency weighting, clamping, volatility calculation) and `matchBot` (pattern match, priority, tag boost +5, required/excluded tag logic, all six tone range filters, multi-sentence collection with tag dedup, chance/Math.random gating) |
 
 ### React component tests (`src/components/security/__tests__/`)
 
@@ -133,6 +135,8 @@ Note: Argon2id tests are intentionally slow (KDF tuned for security). `cargo tes
 - **`buildStructureSnapshot`** — reads 10+ tables for cold-sync; tested implicitly by running two-device sync manually (`npm run dev:test` + `npm run dev:test2`).
 - **`syncNow` / `handleSyncRequest` orchestration** — high-level sync coordination in `sync.ts`; depends on Tauri `invoke` and real peer transport. Test manually.
 - **Tauri commands end-to-end** — the Rust commands (`db_setup_encryption`, `db_open_passphrase`, etc.) require a real SQLCipher DB. Test manually with `npm run dev:test`.
+- **`getBotConfig` / `listBotNames`** — depend on `import.meta.glob` loading real rule files; covered by `botEngine.test.ts` at the logic layer (`matchBot`, `distillTone`). The registry wiring is exercised by running the bot in the app.
+- **SP importer `runSPImport`** — DB-bound orchestration, same pattern as `runPKImport`. The pure transform helpers (`spTsToSql`, `buildMemberDescription`, etc.) are fully tested.
 
 ## Manual testing cheat sheet
 
