@@ -358,12 +358,6 @@
   gap: 6px;
 }
 
-.sidebar-front-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
 
 .sidebar-front-name {
   font-size: 12px;
@@ -374,6 +368,32 @@
   font-size: 10px;
   color: var(--text-muted);
   opacity: 0.65;
+  flex: 1;
+}
+
+.sidebar-front-remove {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 1px 5px;
+  margin-left: auto;
+  border-radius: 3px;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.sidebar-front-remove:hover {
+  background: var(--bg-hover);
+  color: var(--color-danger);
+  border-color: var(--border);
+}
+
+.sidebar-front-add {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .sidebar-front-empty {

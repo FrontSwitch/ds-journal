@@ -6,6 +6,7 @@ import type { Channel, Folder } from '../../types'
 import { ALL_MESSAGES_ID, SCRATCH_ID, ALBUM_ID, isHidden } from '../../types'
 import { getCurrentFront, enterFront, exitFront, clearFront } from '../../db/front-log'
 import { useAvatars } from '../../hooks/useAvatars'
+import { AvatarIcon } from '../avatars/AvatarIcon'
 import About, { type Tab as AboutTab } from '../about/About'
 import { isTauri } from '../../native/platform'
 import { getSyncPeers, syncNow } from '../../db/sync'
@@ -343,14 +344,16 @@ export default function Sidebar({ onClose }: Props = {}) {
         const noFront = currentFront.length === 0
         const noSelected = !selectedAvatarId
         const selectedInFront = selectedAvatarId ? currentFront.some(s => s.avatar_id === selectedAvatarId) : false
+        const selectedAv = selectedAvatarId ? avatars.find(a => a.id === selectedAvatarId) : null
         return (
           <div className="sidebar-front-bar">
             <div className="sidebar-front-header">
               <span className="sidebar-front-title">Front</span>
               <span className="sidebar-front-actions">
                 <button className="sidebar-front-btn" title="Set as sole fronter" disabled={noSelected} onClick={() => selectedAvatarId && handleSetFront(selectedAvatarId)}>set</button>
-                <button className="sidebar-front-btn" title="Add to front" disabled={noSelected || selectedInFront} onClick={() => selectedAvatarId && handleAddFront(selectedAvatarId)}>+</button>
-                <button className="sidebar-front-btn" title="Remove from front" disabled={noSelected || noFront || !selectedInFront} onClick={() => selectedAvatarId && handleRemoveFront(selectedAvatarId)}>−</button>
+                <button className="sidebar-front-btn sidebar-front-add" title="Add to front" disabled={noSelected || selectedInFront} onClick={() => selectedAvatarId && handleAddFront(selectedAvatarId)}>
+                  add{selectedAv && <AvatarIcon name={selectedAv.name} color={selectedAv.color} image_data={selectedAv.image_data} image_path={selectedAv.image_path} icon_letters={selectedAv.icon_letters} size={14} />}
+                </button>
                 <button className="sidebar-front-btn sidebar-front-clear" title="Clear all fronters" disabled={noFront} onClick={handleClearFront}>clear</button>
               </span>
             </div>
@@ -362,9 +365,10 @@ export default function Sidebar({ onClose }: Props = {}) {
                 if (!av) return null
                 return (
                   <span key={session.id} className="sidebar-front-avatar">
-                    <span className="sidebar-front-dot" style={{ background: av.color }} />
+                    <AvatarIcon name={av.name} color={av.color} image_data={av.image_data} image_path={av.image_path} icon_letters={av.icon_letters} size={16} />
                     <span className="sidebar-front-name">{av.name}</span>
                     <span className="sidebar-front-since">since {sinceLabel(session.entered_at)}</span>
+                    <button className="sidebar-front-remove" title="Remove from front" onClick={() => handleRemoveFront(session.avatar_id)}>remove</button>
                   </span>
                 )
               })}
