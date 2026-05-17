@@ -27,6 +27,7 @@ import FrontLogReport from '../front-log/FrontLogReport'
 import TagAutocomplete from './TagAutocomplete'
 import SlashAutocomplete from './SlashAutocomplete'
 import { PageEditor } from './PageEditor'
+import BlocksPanel from '../blocks/BlocksPanel'
 import EmojiAutocomplete from './EmojiAutocomplete'
 import { useSlashInput, SETTINGS_PAGES } from '../../hooks/useSlashInput'
 import { TAROT_DECK } from '../../data/tarot'
@@ -118,6 +119,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
     goalReached?: boolean
   }
   const [pageEditorOpen, setPageEditorOpen] = useState(false)
+  const [blocksOpen, setBlocksOpen] = useState(false)
   const [writeSession, setWriteSession] = useState<WriteSession | null>(null)
   const [writeTick, setWriteTick] = useState(0)
   const writeSessionRef = useRef<WriteSession | null>(null)
@@ -612,6 +614,11 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         setText('')
         break
       }
+      case 'blocks': {
+        setBlocksOpen(true)
+        setText('')
+        break
+      }
       default:
         setCmdError(`Unknown command: /${cmd}`)
     }
@@ -1022,6 +1029,8 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
           })() : undefined}
         />
       )}
+
+      {blocksOpen && <BlocksPanel onClose={() => setBlocksOpen(false)} />}
 
       <div
         className={`message-list${isScratch ? ' log-view' : ''}${!isScratch && viewMode === 'compact' ? ' compact' : ''}${!isScratch && viewMode === 'log' ? ' log-view' : ''}${pageEditorOpen ? ' hidden' : ''}`}
