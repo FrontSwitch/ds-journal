@@ -8,6 +8,11 @@ export type BlocksState = {
   highScore: number
   level: number
   lines: number
+  doubles: number
+  triples: number
+  tetrises: number
+  zenMode: boolean
+  zenSlowed: boolean
   status: 'idle' | 'playing' | 'paused' | 'over'
 }
 
@@ -117,6 +122,13 @@ const LOCK_RESET_MAX = 15
 
 const HIGH_SCORE_KEY = 'dsj-blocks-highscore'
 
+// ms per gravity drop by speed (1-10); speed=5 ≈ half of normal level-1 speed
+const ZEN_DROP_INTERVALS = [3200, 2800, 2400, 2200, 2000, 1700, 1400, 1100, 800, 500]
+
+// Stack threshold rows (0-indexed from top): top row that counts as the threshold
+const THRESH_80 = Math.floor(BOARD_H * 0.20)   // row 4  → stack 80% full
+const THRESH_100 = 0                             // row 0  → stack 100% full
+
 // Level speed table: ms per gravity drop
 function dropInterval(level: number): number {
   // Formula approximates Tetris guideline
@@ -147,6 +159,11 @@ interface ActivePiece {
   y: number
 }
 
+export interface BlocksOptions {
+  zenMode?: boolean
+  zenSpeed?: number  // 1-10, default 5
+}
+
 export class BlocksGame {
   private canvas: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
@@ -161,6 +178,18 @@ export class BlocksGame {
   private lines = 0
   private status: BlocksState['status'] = 'idle'
 
+  // Zen mode state
+  readonly zenMode: boolean
+  private zenSpeed: number
+  private zenBaseInterval: number
+  private zenCurrentInterval: number
+  private zenSlowed = false
+  private doubles = 0
+  private triples = 0
+  private tetrises = 0
+  private reliefFadeRow: number | null = null
+  private reliefFadeAlpha = 1
+
   private lastDrop = 0
   private lockTimer: ReturnType<typeof setTimeout> | null = null
   private lockResets = 0
@@ -172,13 +201,18 @@ export class BlocksGame {
   // Touch tracking
   private touchStart: { x: number; y: number; t: number } | null = null
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, options: BlocksOptions = {}) {
     this.canvas = canvas
     const ctx = canvas.getContext('2d')
     if (!ctx) throw new Error('No 2d context')
     this.ctx = ctx
     this.canvas.width = BOARD_W * BLOCK + 120  // board + sidebar
     this.canvas.height = BOARD_H * BLOCK
+
+    this.zenMode = options.zenMode ?? false
+    this.zenSpeed = Math.max(1, Math.min(10, options.zenSpeed ?? 5))
+    this.zenBaseInterval = ZEN_DROP_INTERVALS[this.zenSpeed - 1]
+    this.zenCurrentInterval = this.zenBaseInterval
 
     this.bindKeys()
     this.bindTouch()
@@ -195,6 +229,11 @@ export class BlocksGame {
       highScore: this.highScore,
       level: this.level,
       lines: this.lines,
+      doubles: this.doubles,
+      triples: this.triples,
+      tetrises: this.tetrises,
+      zenMode: this.zenMode,
+      zenSlowed: this.zenSlowed,
       status: this.status,
     })
   }
@@ -210,6 +249,13 @@ export class BlocksGame {
     this.next = [...randomBag(), ...randomBag()]
     this.active = null
     this.status = 'playing'
+    this.doubles = 0
+    this.triples = 0
+    this.tetrises = 0
+    this.zenCurrentInterval = this.zenBaseInterval
+    this.zenSlowed = false
+    this.reliefFadeRow = null
+    this.reliefFadeAlpha = 1
     this.spawnPiece()
     this.lastDrop = performance.now()
     this.emit()
@@ -252,7 +298,7 @@ export class BlocksGame {
 
   private loop = (now: number) => {
     if (this.status !== 'playing') return
-    const interval = dropInterval(this.level)
+    const interval = this.zenMode ? this.zenCurrentInterval : dropInterval(this.level)
     if (now - this.lastDrop >= interval) {
       this.gravity()
       this.lastDrop = now
@@ -278,7 +324,12 @@ export class BlocksGame {
     if (this.next.length < 7) this.next.push(...randomBag())
     this.active = { type, rot: 0, x: 3, y: 0 }
     if (!this.canPlace(this.active)) {
-      this.gameOver()
+      if (this.zenMode) {
+        // Should be caught by threshold check in zenLockPiece, but safety net
+        this.active = null
+      } else {
+        this.gameOver()
+      }
     }
   }
 
@@ -352,6 +403,111 @@ export class BlocksGame {
     this.emit()
   }
 
+  // Zen variant: tracks clears, handles zenSlowed recovery on tetris
+  private zenClearLines(): number {
+    let cleared = 0
+    for (let y = BOARD_H - 1; y >= 0; y--) {
+      if (this.board[y].every(c => c !== 0)) {
+        this.board.splice(y, 1)
+        this.board.unshift(Array(BOARD_W).fill(0))
+        cleared++
+        y++
+      }
+    }
+    if (cleared > 0) {
+      this.lines += cleared
+      if (cleared === 2) this.doubles++
+      else if (cleared === 3) this.triples++
+      else if (cleared >= 4) {
+        this.tetrises++
+        if (this.zenSlowed) {
+          // Recovery: reset to initial drop speed
+          this.zenCurrentInterval = this.zenBaseInterval
+          this.zenSlowed = false
+        }
+      }
+      this.sounds.lineClear(Math.min(cleared, 4) as 1 | 2 | 3 | 4)
+    }
+    this.emit()
+    return cleared
+  }
+
+  // Returns the highest row index (0=top) that has any filled cell, or BOARD_H if empty
+  private getStackHighRow(): number {
+    for (let y = 0; y < BOARD_H; y++) {
+      if (this.board[y].some(c => c !== 0)) return y
+    }
+    return BOARD_H
+  }
+
+  // Animated bottom-up wipe for zen relief — pauses the drop loop while running
+  private async runZenRelief(numRows: number): Promise<void> {
+    cancelAnimationFrame(this.rafId)
+    this.cancelLock()
+
+    const delay = (ms: number) => new Promise<void>(r => setTimeout(r, ms))
+    const FADE_STEPS = 6
+    const FADE_STEP_MS = 25   // 150ms total fade per row
+    const ROW_GAP_MS = 70     // gap between rows
+
+    for (let i = 0; i < numRows; i++) {
+      // Fade the current bottom row (after previous removals it's always index BOARD_H-1)
+      for (let step = FADE_STEPS - 1; step >= 0; step--) {
+        this.reliefFadeRow = BOARD_H - 1
+        this.reliefFadeAlpha = step / (FADE_STEPS - 1)
+        this.draw()
+        await delay(FADE_STEP_MS)
+      }
+      // Remove it and shift everything down
+      this.reliefFadeRow = null
+      this.board.splice(BOARD_H - 1, 1)
+      this.board.unshift(Array(BOARD_W).fill(0))
+      this.draw()
+      if (i < numRows - 1) await delay(ROW_GAP_MS)
+    }
+
+    this.reliefFadeRow = null
+    this.reliefFadeAlpha = 1
+  }
+
+  // Zen-mode lock: clears lines, checks thresholds, runs relief animation, then spawns next
+  private async zenLockPiece() {
+    if (!this.active) return
+    const p = this.active
+    const cells = this.getCells(p.type, p.rot)
+    for (const [cx, cy] of cells) {
+      const ny = p.y + cy
+      const nx = p.x + cx
+      if (ny >= 0) this.board[ny][nx] = p.type
+    }
+    this.sounds.lock()
+    this.zenClearLines()
+    this.active = null
+    this.lockResets = 0
+
+    const highRow = this.getStackHighRow()
+
+    if (highRow <= THRESH_100) {
+      // 100% relief: clear 8 rows, slow drop speed by 75% (compounding)
+      await this.runZenRelief(8)
+      this.zenCurrentInterval = this.zenCurrentInterval / 0.75
+      this.zenSlowed = true
+      this.emit()
+    } else if (highRow <= THRESH_80) {
+      // 80% relief: clear 4 rows
+      await this.runZenRelief(4)
+      this.emit()
+    }
+
+    if (this.status !== 'playing') return
+    this.spawnPiece()
+    if (this.status === 'playing') {
+      this.lastDrop = performance.now()
+      this.rafId = requestAnimationFrame(this.loop)
+      this.draw()
+    }
+  }
+
   private gameOver() {
     this.updateHighScore()
     this.status = 'over'
@@ -367,8 +523,12 @@ export class BlocksGame {
     if (this.lockTimer !== null) return
     this.lockTimer = setTimeout(() => {
       this.lockTimer = null
-      this.lockPiece()
-      if (this.status === 'playing') this.draw()
+      if (this.zenMode) {
+        this.zenLockPiece()
+      } else {
+        this.lockPiece()
+        if (this.status === 'playing') this.draw()
+      }
     }, LOCK_DELAY_MS)
   }
 
@@ -407,8 +567,10 @@ export class BlocksGame {
     if (this.canMove(this.active, 0, 1)) {
       this.active.y++
       this.lastDrop = performance.now()
-      this.score += 1
-      this.updateHighScore()
+      if (!this.zenMode) {
+        this.score += 1
+        this.updateHighScore()
+      }
       this.sounds.softDrop()
       this.draw()
     }
@@ -421,13 +583,19 @@ export class BlocksGame {
       this.active.y++
       dropped++
     }
-    this.score += dropped * 2
-    this.updateHighScore()
+    if (!this.zenMode) {
+      this.score += dropped * 2
+      this.updateHighScore()
+    }
     this.sounds.hardDrop()
     this.cancelLock()
-    this.lockPiece()
-    this.draw()
-    this.emit()
+    if (this.zenMode) {
+      this.zenLockPiece()
+    } else {
+      this.lockPiece()
+      this.draw()
+      this.emit()
+    }
   }
 
   rotateCW()  { this.rotate(1) }
@@ -478,7 +646,8 @@ export class BlocksGame {
     for (let y = 0; y < BOARD_H; y++) {
       for (let x = 0; x < BOARD_W; x++) {
         const c = this.board[y][x]
-        this.drawBlock(x * BLOCK, y * BLOCK, BLOCK, c, 1)
+        const alpha = (y === this.reliefFadeRow) ? this.reliefFadeAlpha : 1
+        this.drawBlock(x * BLOCK, y * BLOCK, BLOCK, c, alpha)
       }
     }
 
@@ -520,7 +689,19 @@ export class BlocksGame {
     ctx.fillStyle = 'rgba(255,255,255,0.5)'
     let sy = 16
 
+    // Zen label
+    if (this.zenMode) {
+      ctx.fillStyle = '#cba6f7'
+      ctx.font = 'bold 11px monospace'
+      ctx.fillText('ZEN', sideX, sy); sy += 14
+      ctx.font = '11px monospace'
+      ctx.fillStyle = 'rgba(255,255,255,0.35)'
+      ctx.fillText(`spd ${this.zenSpeed}`, sideX, sy); sy += 18
+    }
+
     // Next pieces (show 3)
+    ctx.fillStyle = 'rgba(255,255,255,0.5)'
+    ctx.font = '11px monospace'
     ctx.fillText('NEXT', sideX, sy); sy += 14
     for (let i = 0; i < Math.min(3, this.next.length); i++) {
       sy = this.drawPreview(this.next[i], sideX, sy) + 4
@@ -539,7 +720,7 @@ export class BlocksGame {
     } else if (this.status === 'over') {
       this.drawOverlay('GAME OVER', 'Space to restart')
     } else if (this.status === 'idle') {
-      this.drawOverlay('BLOCKS', 'Space to start')
+      this.drawOverlay(this.zenMode ? 'ZEN BLOCKS' : 'BLOCKS', 'Space to start')
     }
   }
 

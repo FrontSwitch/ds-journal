@@ -120,6 +120,8 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
   }
   const [pageEditorOpen, setPageEditorOpen] = useState(false)
   const [blocksOpen, setBlocksOpen] = useState(false)
+  const [blocksZen, setBlocksZen] = useState(false)
+  const [blocksZenSpeed, setBlocksZenSpeed] = useState(5)
   const [writeSession, setWriteSession] = useState<WriteSession | null>(null)
   const [writeTick, setWriteTick] = useState(0)
   const writeSessionRef = useRef<WriteSession | null>(null)
@@ -615,6 +617,17 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         break
       }
       case 'blocks': {
+        const parts = args.trim().split(/\s+/)
+        const sub = parts[0]?.toLowerCase()
+        if (sub === 'zen') {
+          const speedArg = parseInt(parts[1] ?? '', 10)
+          const speed = !isNaN(speedArg) && speedArg >= 1 && speedArg <= 10 ? speedArg : 5
+          setBlocksZen(true)
+          setBlocksZenSpeed(speed)
+        } else {
+          setBlocksZen(false)
+          setBlocksZenSpeed(5)
+        }
         setBlocksOpen(true)
         setText('')
         break
@@ -1030,7 +1043,7 @@ export default function ChatPanel({ channelId, avatarFilter }: Props) {
         />
       )}
 
-      {blocksOpen && <BlocksPanel onClose={() => setBlocksOpen(false)} />}
+      {blocksOpen && <BlocksPanel onClose={() => setBlocksOpen(false)} zenMode={blocksZen} zenSpeed={blocksZenSpeed} />}
 
       <div
         className={`message-list${isScratch ? ' log-view' : ''}${!isScratch && viewMode === 'compact' ? ' compact' : ''}${!isScratch && viewMode === 'log' ? ' log-view' : ''}${pageEditorOpen ? ' hidden' : ''}`}

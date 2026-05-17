@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
-import { BlocksGame, type BlocksState } from './BlocksGame'
+import { BlocksGame, type BlocksState, type BlocksOptions } from './BlocksGame'
 import './BlocksPanel.css'
 
 interface Props {
   onClose: () => void
+  zenMode?: boolean
+  zenSpeed?: number
 }
 
-export default function BlocksPanel({ onClose }: Props) {
+export default function BlocksPanel({ onClose, zenMode, zenSpeed }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const gameRef = useRef<BlocksGame | null>(null)
   const [state, setState] = useState<BlocksState>({
@@ -14,13 +16,19 @@ export default function BlocksPanel({ onClose }: Props) {
     highScore: 0,
     level: 1,
     lines: 0,
+    doubles: 0,
+    triples: 0,
+    tetrises: 0,
+    zenMode: zenMode ?? false,
+    zenSlowed: false,
     status: 'idle',
   })
   const [muted, setMuted] = useState(() => localStorage.getItem('dsj-blocks-muted') === '1')
 
   useEffect(() => {
     if (!canvasRef.current) return
-    const game = new BlocksGame(canvasRef.current)
+    const opts: BlocksOptions = { zenMode, zenSpeed }
+    const game = new BlocksGame(canvasRef.current, opts)
     game.setOnStateChange(setState)
     game.drawIdle()
     gameRef.current = game
@@ -63,22 +71,49 @@ export default function BlocksPanel({ onClose }: Props) {
       <div className="blocks-panel">
         <div className="blocks-header">
           <div className="blocks-scores">
-            <div className="blocks-score-item">
-              <span className="blocks-score-label">SCORE</span>
-              <span className="blocks-score-value">{scoreStr}</span>
-            </div>
-            <div className="blocks-score-item">
-              <span className="blocks-score-label">BEST</span>
-              <span className="blocks-score-value hi">{hiStr}</span>
-            </div>
-            <div className="blocks-score-item">
-              <span className="blocks-score-label">LEVEL</span>
-              <span className="blocks-score-value">{state.level}</span>
-            </div>
-            <div className="blocks-score-item">
-              <span className="blocks-score-label">LINES</span>
-              <span className="blocks-score-value">{state.lines}</span>
-            </div>
+            {state.zenMode ? (
+              <>
+                <div className="blocks-score-item">
+                  <span className="blocks-score-label zen-label">ZEN</span>
+                  <span className="blocks-score-value zen-mode">{state.zenSlowed ? 'SLOW' : `spd ${zenSpeed ?? 5}`}</span>
+                </div>
+                <div className="blocks-score-item">
+                  <span className="blocks-score-label">LINES</span>
+                  <span className="blocks-score-value">{state.lines}</span>
+                </div>
+                <div className="blocks-score-item">
+                  <span className="blocks-score-label">2×</span>
+                  <span className="blocks-score-value">{state.doubles}</span>
+                </div>
+                <div className="blocks-score-item">
+                  <span className="blocks-score-label">3×</span>
+                  <span className="blocks-score-value">{state.triples}</span>
+                </div>
+                <div className="blocks-score-item">
+                  <span className="blocks-score-label">4×</span>
+                  <span className="blocks-score-value tetris">{state.tetrises}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="blocks-score-item">
+                  <span className="blocks-score-label">SCORE</span>
+                  <span className="blocks-score-value">{scoreStr}</span>
+                </div>
+                <div className="blocks-score-item">
+                  <span className="blocks-score-label">BEST</span>
+                  <span className="blocks-score-value hi">{hiStr}</span>
+                </div>
+                <div className="blocks-score-item">
+                  <span className="blocks-score-label">LEVEL</span>
+                  <span className="blocks-score-value">{state.level}</span>
+                </div>
+                <div className="blocks-score-item">
+                  <span className="blocks-score-label">LINES</span>
+                  <span className="blocks-score-value">{state.lines}</span>
+                </div>
+              </>
+            )}
           </div>
           <div className="blocks-header-actions">
             <button className="blocks-mute" onClick={handleMute} title={muted ? 'Unmute' : 'Mute'}>

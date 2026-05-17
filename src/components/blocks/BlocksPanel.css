@@ -60,6 +60,18 @@
   color: var(--accent);
 }
 
+.blocks-score-value.zen-mode {
+  color: #cba6f7;
+}
+
+.blocks-score-label.zen-label {
+  color: #cba6f7;
+}
+
+.blocks-score-value.tetris {
+  color: #f9e2af;
+}
+
 .blocks-header-actions {
   display: flex;
   align-items: center;
