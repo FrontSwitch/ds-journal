@@ -42,6 +42,7 @@ pub fn run() {
             sync_server::sync_update_peer_cache,
             sync_server::sync_remove_peer,
             sync_server::sync_restart_on_port,
+            sync_server::sync_stop_server,
             sync_server::sync_send_to_peer,
         ])
         .setup(|app| {
@@ -143,12 +144,8 @@ pub fn run() {
                 });
             }
 
-            // ── Sync HTTP server ──────────────────────────────────────────
-            {
-                let shared = app.state::<Arc<sync_server::SyncShared>>().inner().clone();
-                let actual_port = sync_server::start_sync_server(shared, app.handle().clone(), 0);
-                println!("[sync] HTTP server listening on port {actual_port}");
-            }
+            // Sync HTTP server intentionally not started here.
+            // It starts only when the user enables sync in Settings → Sync.
 
             Ok(())
         })

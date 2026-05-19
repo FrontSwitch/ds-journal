@@ -11,6 +11,7 @@ import type { SyncPeer, DeviceType, SyncConflict } from '../../types'
 import {
   getAutoBackup, setAutoBackup as saveAutoBackup,
   getMessageDays, setMessageDays as saveMessageDays,
+  startSyncServer, stopSyncServer,
 } from '../../db/sync'
 
 interface Props { onClose: () => void }
@@ -80,7 +81,6 @@ export default function Sync({ onClose }: Props) {
     getSyncPort().then(p => setPreferredPort(p))
     getAutoBackup().then(setAutoBackupState)
     getMessageDays().then(d => { setMessageDaysState(d); setCustomDaysInput(d > 0 ? String(d) : '30') })
-
     if (!isTauri()) return
     import('@tauri-apps/api/core').then(({ invoke }) => {
       invoke<ServerInfo>('sync_get_server_info').then(setInfo).catch(console.warn)
@@ -91,6 +91,18 @@ export default function Sync({ onClose }: Props) {
     })
     return () => { unlisten?.() }
   }, [])
+
+  async function handleStartServer() {
+    await startSyncServer()
+    if (!isTauri()) return
+    const { invoke } = await import('@tauri-apps/api/core')
+    invoke<ServerInfo>('sync_get_server_info').then(setInfo).catch(console.warn)
+  }
+
+  async function handleStopServer() {
+    await stopSyncServer()
+    setInfo(null)
+  }
 
   async function handleSaveDeviceName() {
     await setDeviceName(deviceName.trim())
@@ -134,6 +146,9 @@ export default function Sync({ onClose }: Props) {
 
   async function handleGenerateCode() {
     if (!isTauri()) return
+    if (!serverRunning) {
+      await handleStartServer()
+    }
     const { invoke } = await import('@tauri-apps/api/core')
     const code = await invoke<string>('sync_generate_pair_code')
     setPairCode(code)
@@ -223,6 +238,7 @@ export default function Sync({ onClose }: Props) {
   }
 
   const trustedPeerCount = peers.filter(p => p.trusted).length
+  const serverRunning = (info?.port ?? 0) > 0
 
   return (
     <>
@@ -331,36 +347,51 @@ export default function Sync({ onClose }: Props) {
             </div>
             <div className="muted" style={{ fontSize: 11 }}>{t('sync.policyDaysHint')}</div>
 
-            <div className="sync-device-meta">
-              <span className="muted">{t('sync.deviceId')}</span>
-              <code>{info ? abbrev(info.device_id) : '…'}</code>
-              <span className="muted">{t('sync.addressLabel')}</span>
-              <code>{info ? `${info.local_ip}` : t('sync.notAvailable')}</code>
-              <span className="muted">{t('sync.portLabel')}</span>
-              {editingPort ? (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <input
-                    className="field-input"
-                    style={{ width: 80, padding: '2px 6px', fontSize: 12 }}
-                    value={portInput}
-                    onChange={e => setPortInput(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') handleSavePort(); if (e.key === 'Escape') setEditingPort(false) }}
-                    placeholder={t('sync.portRandom')}
-                    autoFocus
-                  />
-                  <button className="inline-btn" onClick={handleSavePort}>{t('sync.portSave')}</button>
-                  <button className="inline-btn" onClick={handleRandomPort}>{t('sync.portPickRandom')}</button>
-                  <button className="inline-btn" onClick={() => setEditingPort(false)}>{t('sync.portCancel')}</button>
-                </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {serverRunning ? (
+                <button className="save-btn" style={{ marginBottom: 0, background: 'var(--bg-hover)', color: 'var(--text)' }} onClick={handleStopServer}>
+                  {t('sync.serverStop')}
+                </button>
               ) : (
-                <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <code>{info?.port ?? '…'}</code>
-                  <button className="inline-btn" onClick={() => { setPortInput(preferredPort === 0 ? '' : String(preferredPort)); setEditingPort(true) }}>
-                    {t('sync.changeType')}
-                  </button>
-                </span>
+                <button className="save-btn" style={{ marginBottom: 0 }} onClick={handleStartServer}>
+                  {t('sync.serverStart')}
+                </button>
               )}
+              {serverRunning && <span className="muted" style={{ fontSize: 12 }}>{t('sync.serverRunningOn', { port: String(info!.port) })}</span>}
             </div>
+
+            {serverRunning && (
+              <div className="sync-device-meta">
+                <span className="muted">{t('sync.deviceId')}</span>
+                <code>{info ? abbrev(info.device_id) : '…'}</code>
+                <span className="muted">{t('sync.addressLabel')}</span>
+                <code>{info ? `${info.local_ip}` : t('sync.notAvailable')}</code>
+                <span className="muted">{t('sync.portLabel')}</span>
+                {editingPort ? (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <input
+                      className="field-input"
+                      style={{ width: 80, padding: '2px 6px', fontSize: 12 }}
+                      value={portInput}
+                      onChange={e => setPortInput(e.target.value)}
+                      onKeyDown={e => { if (e.key === 'Enter') handleSavePort(); if (e.key === 'Escape') setEditingPort(false) }}
+                      placeholder={t('sync.portRandom')}
+                      autoFocus
+                    />
+                    <button className="inline-btn" onClick={handleSavePort}>{t('sync.portSave')}</button>
+                    <button className="inline-btn" onClick={handleRandomPort}>{t('sync.portPickRandom')}</button>
+                    <button className="inline-btn" onClick={() => setEditingPort(false)}>{t('sync.portCancel')}</button>
+                  </span>
+                ) : (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <code>{info?.port ?? '…'}</code>
+                    <button className="inline-btn" onClick={() => { setPortInput(preferredPort === 0 ? '' : String(preferredPort)); setEditingPort(true) }}>
+                      {t('sync.changeType')}
+                    </button>
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Paired devices */}

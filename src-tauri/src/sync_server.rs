@@ -477,6 +477,19 @@ pub(crate) async fn sync_restart_on_port(
     Ok(actual)
 }
 
+/// Stop the sync server. Called when the user disables the sync server in Settings.
+#[tauri::command]
+pub(crate) async fn sync_stop_server(
+    shared: State<'_, Arc<SyncShared>>,
+) -> Result<(), String> {
+    if let Some(task) = shared.server_task.lock().unwrap().take() {
+        task.abort();
+    }
+    *shared.port.lock().unwrap() = 0;
+    println!("[sync] HTTP server stopped");
+    Ok(())
+}
+
 #[derive(serde::Serialize)]
 pub(crate) struct SyncSendResult {
     events: Vec<SyncEventRaw>,

@@ -64,8 +64,7 @@ export async function initSyncCtx(): Promise<void> {
     for (const p of peers) {
       await invoke('sync_update_peer_cache', { deviceId: p.device_id, peerCode: p.peer_code })
     }
-    // Apply stored preferred port (starts on random; restart to preferred port if set)
-    await applyPreferredPort()
+    // Server is not started automatically — user must start it via Settings → Sync.
   }
 }
 
@@ -113,6 +112,21 @@ export async function getAutoBackup(): Promise<boolean> {
 
 export async function setAutoBackup(enabled: boolean): Promise<void> {
   await setDeviceConfig('sync_auto_backup', enabled ? 'true' : 'false')
+}
+
+// --- Sync server (session-only; not persisted) ---
+
+/** Start the sync server for this session. Returns the actual port bound. */
+export async function startSyncServer(): Promise<number> {
+  return applyPreferredPort()
+}
+
+/** Stop the sync server for this session. */
+export async function stopSyncServer(): Promise<void> {
+  if (isTauri()) {
+    const { invoke } = await import('@tauri-apps/api/core')
+    await invoke('sync_stop_server')
+  }
 }
 
 // --- Sync port (stored in device_config; 0 = random) ---
