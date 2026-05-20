@@ -308,7 +308,7 @@ describe('runPKImport — switches', () => {
     const insert = db.execute.mock.calls.find((c: unknown[]) =>
       (c[0] as string).includes('INSERT INTO messages')
     )
-    expect(insert[1][2]).toBe('|front:session|0|')
+    expect(insert![1][2]).toBe('|front:session|0|')
   })
 
   it('formats multi-member switch as co-session with names', async () => {
@@ -324,7 +324,7 @@ describe('runPKImport — switches', () => {
     const insert = db.execute.mock.calls.find((c: unknown[]) =>
       (c[0] as string).includes('INSERT INTO messages')
     )
-    expect(insert[1][2]).toBe('|front:co-session|0|Alex|River|')
+    expect(insert![1][2]).toBe('|front:co-session|0|Alex|River|')
   })
 
   it('uses display_name in co-session text when available', async () => {
@@ -340,7 +340,7 @@ describe('runPKImport — switches', () => {
     const insert = db.execute.mock.calls.find((c: unknown[]) =>
       (c[0] as string).includes('INSERT INTO messages')
     )
-    expect(insert[1][2]).toContain('Alexandra')
+    expect(insert![1][2]).toContain('Alexandra')
   })
 
   it('skips switches when skipSwitches=true', async () => {

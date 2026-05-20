@@ -13,7 +13,7 @@ import {
 
 function makeMockDb(selectSequence: unknown[][] = [], executeResult = { lastInsertId: 0 }) {
   const db = {
-    select: vi.fn<Parameters<NativeDb['select']>, ReturnType<NativeDb['select']>>(),
+    select: vi.fn<NativeDb['select']>(),
     execute: vi.fn().mockResolvedValue(executeResult),
   }
   for (const value of selectSequence) {

@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import type { NativeDb } from '../native/db'
 import { safeCol, sanitizePayload, applyRemoteEvents } from './sync-apply'
-import { logCreate, logUpdate, logDelete, getLocalEventsSince } from './sync-events'
+import { logCreate, getLocalEventsSince } from './sync-events'
 import { makeTestDb, makeEvent } from './sync-test-utils'
 
 // ============================================================
@@ -55,7 +55,7 @@ describe('sanitizePayload', () => {
 
 function makeMockDb(selectSequence: unknown[][], executeResult = { lastInsertId: 1 }) {
   const db = {
-    select: vi.fn<Parameters<NativeDb['select']>, ReturnType<NativeDb['select']>>(),
+    select: vi.fn<NativeDb['select']>(),
     execute: vi.fn().mockResolvedValue(executeResult),
   }
   for (const value of selectSequence) {
@@ -112,9 +112,9 @@ describe('applyRemoteEvents — create path', () => {
     await applyRemoteEvents([event], 'peer', db)
 
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const insertCall = executeCalls.find(([sql]: [string]) => sql.includes('INSERT OR IGNORE INTO avatars'))
+    const insertCall = executeCalls.find(([sql]) => sql.includes('INSERT OR IGNORE INTO avatars'))
     expect(insertCall).toBeDefined()
-    expect(insertCall[1]).toContain('eid-alex')  // entity_id in params
+    expect(insertCall![1]).toContain('eid-alex')  // entity_id in params
   })
 
   it('resolves _folder_eid FK before INSERT for channels', async () => {
@@ -135,9 +135,9 @@ describe('applyRemoteEvents — create path', () => {
     )
     // INSERT should include folder_id=42 (not the _folder_eid string)
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const insertCall = executeCalls.find(([sql]: [string]) => sql.includes('INSERT OR IGNORE INTO channels'))
+    const insertCall = executeCalls.find(([sql]) => sql.includes('INSERT OR IGNORE INTO channels'))
     expect(insertCall).toBeDefined()
-    expect(insertCall[1]).toContain(42)
+    expect(insertCall![1]).toContain(42)
   })
 
   it('inserts avatar group members after group is created', async () => {
@@ -155,7 +155,7 @@ describe('applyRemoteEvents — create path', () => {
     await applyRemoteEvents([event], 'peer', db)
 
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const memberInserts = executeCalls.filter(([sql]: [string]) =>
+    const memberInserts = executeCalls.filter(([sql]) =>
       sql.includes('INSERT OR IGNORE INTO avatar_group_members')
     )
     expect(memberInserts).toHaveLength(2)
@@ -176,10 +176,10 @@ describe('applyRemoteEvents — create path', () => {
     await applyRemoteEvents([event], 'peer', db)
 
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const logInsert = executeCalls.find(([sql]: [string]) => sql.includes('INSERT OR IGNORE INTO event_log'))
+    const logInsert = executeCalls.find(([sql]) => sql.includes('INSERT OR IGNORE INTO event_log'))
     expect(logInsert).toBeUndefined()
 
-    const entityInsert = executeCalls.find(([sql]: [string]) => sql.includes('INSERT OR IGNORE INTO avatars'))
+    const entityInsert = executeCalls.find(([sql]) => sql.includes('INSERT OR IGNORE INTO avatars'))
     expect(entityInsert).toBeDefined()
   })
 
@@ -196,9 +196,9 @@ describe('applyRemoteEvents — create path', () => {
     await applyRemoteEvents([event], 'peer', db)
 
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const logInsert = executeCalls.find(([sql]: [string]) => sql.includes('INSERT OR IGNORE INTO event_log'))
+    const logInsert = executeCalls.find(([sql]) => sql.includes('INSERT OR IGNORE INTO event_log'))
     expect(logInsert).toBeDefined()
-    expect(logInsert[1]).toContain(event.event_id)
+    expect(logInsert![1]).toContain(event.event_id)
   })
 })
 
@@ -216,11 +216,11 @@ describe('applyRemoteEvents — update path (no conflict)', () => {
     await applyRemoteEvents([event], 'peer', db)
 
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const updateCall = executeCalls.find(([sql]: [string]) =>
+    const updateCall = executeCalls.find(([sql]) =>
       sql.includes('UPDATE avatars SET') && sql.includes('WHERE entity_id')
     )
     expect(updateCall).toBeDefined()
-    expect(updateCall[1]).toContain('eid-alex')
+    expect(updateCall![1]).toContain('eid-alex')
   })
 
   it('applies UPDATE when local has no events for that entity', async () => {
@@ -236,7 +236,7 @@ describe('applyRemoteEvents — update path (no conflict)', () => {
     await applyRemoteEvents([event], 'peer', db)
 
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const updateCall = executeCalls.find(([sql]: [string]) => sql.includes('UPDATE folders SET'))
+    const updateCall = executeCalls.find(([sql]) => sql.includes('UPDATE folders SET'))
     expect(updateCall).toBeDefined()
   })
 
@@ -253,12 +253,12 @@ describe('applyRemoteEvents — update path (no conflict)', () => {
     await applyRemoteEvents([event], 'peer', db)
 
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const updateCall = executeCalls.find(([sql]: [string]) => sql.includes('UPDATE avatars SET'))
+    const updateCall = executeCalls.find(([sql]) => sql.includes('UPDATE avatars SET'))
     expect(updateCall).toBeDefined()
     // SET clause should only have 'color', not DROP TABLE or _avatar_eid
-    expect(updateCall[0]).not.toContain('DROP TABLE')
-    expect(updateCall[0]).not.toContain('_avatar_eid')
-    expect(updateCall[0]).toContain('color')
+    expect(updateCall![0]).not.toContain('DROP TABLE')
+    expect(updateCall![0]).not.toContain('_avatar_eid')
+    expect(updateCall![0]).toContain('color')
   })
 })
 
@@ -282,13 +282,13 @@ describe('applyRemoteEvents — update path (LWW conflict)', () => {
     await applyRemoteEvents([event], 'peer-device', db)
 
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const conflictInsert = executeCalls.find(([sql]: [string]) => sql.includes('INSERT INTO sync_conflicts'))
+    const conflictInsert = executeCalls.find(([sql]) => sql.includes('INSERT INTO sync_conflicts'))
     expect(conflictInsert).toBeDefined()
-    expect(conflictInsert[1]).toContain('eid-alex')
-    expect(conflictInsert[1]).toContain('my-device-id')   // device_id_a (us)
-    expect(conflictInsert[1]).toContain('peer-device')     // device_id_b (them)
-    expect(conflictInsert[1]).toContain('local-event-uuid')
-    expect(conflictInsert[1]).toContain(event.event_id)
+    expect(conflictInsert![1]).toContain('eid-alex')
+    expect(conflictInsert![1]).toContain('my-device-id')   // device_id_a (us)
+    expect(conflictInsert![1]).toContain('peer-device')     // device_id_b (them)
+    expect(conflictInsert![1]).toContain('local-event-uuid')
+    expect(conflictInsert![1]).toContain(event.event_id)
   })
 
   it('does NOT apply the UPDATE when there is a conflict', async () => {
@@ -308,7 +308,7 @@ describe('applyRemoteEvents — update path (LWW conflict)', () => {
     await applyRemoteEvents([event], 'peer', db)
 
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const updateCall = executeCalls.find(([sql]: [string]) => sql.includes('UPDATE avatars SET'))
+    const updateCall = executeCalls.find(([sql]) => sql.includes('UPDATE avatars SET'))
     expect(updateCall).toBeUndefined()
   })
 
@@ -329,7 +329,7 @@ describe('applyRemoteEvents — update path (LWW conflict)', () => {
     await applyRemoteEvents([event], 'peer', db)
 
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const conflictInsert = executeCalls.find(([sql]: [string]) => sql.includes('INSERT INTO sync_conflicts'))
+    const conflictInsert = executeCalls.find(([sql]) => sql.includes('INSERT INTO sync_conflicts'))
     expect(conflictInsert).toBeUndefined()
   })
 })
@@ -347,14 +347,14 @@ describe('applyRemoteEvents — delete path', () => {
     await applyRemoteEvents([event], 'peer', db)
 
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const softDelete = executeCalls.find(([sql]: [string]) =>
+    const softDelete = executeCalls.find(([sql]) =>
       sql.includes('UPDATE messages SET deleted = 1')
     )
     expect(softDelete).toBeDefined()
-    expect(softDelete[1]).toEqual(['eid-msg'])
+    expect(softDelete![1]).toEqual(['eid-msg'])
 
     // Must NOT hard-delete messages
-    const hardDelete = executeCalls.find(([sql]: [string]) =>
+    const hardDelete = executeCalls.find(([sql]) =>
       sql.includes('DELETE FROM messages')
     )
     expect(hardDelete).toBeUndefined()
@@ -372,9 +372,9 @@ describe('applyRemoteEvents — delete path', () => {
     await applyRemoteEvents([event], 'peer', db)
 
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const hardDelete = executeCalls.find(([sql]: [string]) => sql.includes('DELETE FROM folders'))
+    const hardDelete = executeCalls.find(([sql]) => sql.includes('DELETE FROM folders'))
     expect(hardDelete).toBeDefined()
-    expect(hardDelete[1]).toEqual(['eid-f'])
+    expect(hardDelete![1]).toEqual(['eid-f'])
   })
 })
 
@@ -396,11 +396,11 @@ describe('applyRemoteEvents — first-sync merge (mock DB)', () => {
     await applyRemoteEvents([event], 'peer', db)
 
     const executeCalls = (db.execute as ReturnType<typeof vi.fn>).mock.calls
-    const adoptCall = executeCalls.find(([sql]: [string]) =>
+    const adoptCall = executeCalls.find(([sql]) =>
       sql.includes('UPDATE avatars SET entity_id = ?')
     )
     expect(adoptCall).toBeDefined()
-    expect(adoptCall[1]).toEqual(['incoming-eid', 7])
+    expect(adoptCall![1]).toEqual(['incoming-eid', 7])
   })
 })
 

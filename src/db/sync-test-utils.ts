@@ -5,6 +5,7 @@
  */
 import Database from 'better-sqlite3'
 import type { NativeDb } from '../native/db'
+import type { SyncEvent } from '../types'
 
 /** Wrap a better-sqlite3 Database in the NativeDb async interface. */
 export function makeNativeDb(sqliteDb: Database.Database): NativeDb {
@@ -259,11 +260,11 @@ export function makeEvent(
     device_counter: number
     entity_type: string
     entity_id: string
-    operation: string
+    operation: SyncEvent['operation']
     payload: Record<string, unknown> | null
     timestamp: number
   }>
-) {
+): SyncEvent {
   return {
     event_id:       overrides.event_id       ?? crypto.randomUUID(),
     device_id:      overrides.device_id      ?? 'device-peer',
