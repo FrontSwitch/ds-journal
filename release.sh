@@ -37,7 +37,7 @@ if git tag | grep -qx "$TAG"; then
   exit 1
 fi
 
-LAST_TAG=$(git tag --sort=-version:refname | head -1)
+LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || true)
 if [[ -n "$LAST_TAG" ]]; then
   COMMIT_COUNT=$(git rev-list "${LAST_TAG}..HEAD" --count)
   if [[ "$COMMIT_COUNT" -eq 0 ]]; then
@@ -165,6 +165,6 @@ echo "All good. When ready, run:"
 echo ""
 echo "  git add package.json src-tauri/tauri.conf.json src-tauri/Cargo.toml"
 echo "  git commit -m 'Release $TAG'"
-echo "  git tag -a $TAG -m "Release $TAG""
+echo "  git tag -a "$TAG" -m "Release $TAG""
 echo "  git push origin main && git push origin $TAG"
 echo ""
